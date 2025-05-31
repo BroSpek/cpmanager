@@ -339,6 +339,12 @@ body {
     50% { opacity: .5; }
 }
 
+/* Style for the main content card holding elements like the dashboard chart */
+.content-card {
+    background-color: var(--card-bg); /* Use the standard card background */
+    /* Tailwind classes like rounded-lg, shadow, p-6 will still apply */
+}
+
 /* Dashboard Stat Card Styling */
 .stat-card {
     background-color: var(--stat-card-bg);
