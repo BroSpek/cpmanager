@@ -4,43 +4,73 @@ let confirmCallback = null;
 const zoneColors = {}; // Used in utils.js, initialized here or in config.js
 const authViaColors = {}; // Used in utils.js, initialized here or in config.js
 
-// Function to apply the current theme (light/dark)
+// Function to apply the current theme (light/dark/system)
 function applyTheme(theme) {
-    if (theme === 'dark') {
+    let actualTheme = theme;
+    if (theme === 'system') {
+        actualTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    if (actualTheme === 'dark') {
         document.body.classList.add('dark-mode');
-        if (themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
-        // Update meta theme-color for dark mode if desired
-        // document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0F172A'); // Example dark bg
     } else {
         document.body.classList.remove('dark-mode');
-        if (themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
-        // Update meta theme-color for light mode
-        // document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1E293B'); // Original nav color or light bg
     }
+
+    // Update theme toggle button icon based on the selected theme preference
+    if (themeToggleBtn) {
+        if (theme === 'light') {
+            themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>'; // Sun icon for light theme
+            themeToggleBtn.setAttribute('aria-label', 'Switch to Dark Mode');
+        } else if (theme === 'dark') {
+            themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>'; // Moon icon for dark theme
+            themeToggleBtn.setAttribute('aria-label', 'Switch to System Preference');
+        } else { // system
+            themeToggleBtn.innerHTML = '<i class="fas fa-mobile-alt"></i>'; // Mobile icon for system preference
+            themeToggleBtn.setAttribute('aria-label', 'Switch to Light Mode');
+        }
+    }
+
+    // Update meta theme-color (optional, based on actual applied theme)
+    // const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    // if (metaThemeColor) {
+    //     if (actualTheme === 'dark') {
+    //         metaThemeColor.setAttribute('content', '#0F172A'); // Example dark bg
+    //     } else {
+    //         metaThemeColor.setAttribute('content', '#FFFFFF'); // Example light bg or nav color
+    //     }
+    // }
 }
 
-// Function to toggle the theme
+// Function to toggle the theme between light, dark, and system
 function toggleTheme() {
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('theme', newTheme);
-    applyTheme(newTheme);
-     // Re-initialize chart if it exists, as its colors might depend on theme
+    const currentThemeSetting = localStorage.getItem('theme') || 'system'; // Default to system
+    let newThemeSetting;
+
+    if (currentThemeSetting === 'light') {
+        newThemeSetting = 'dark';
+    } else if (currentThemeSetting === 'dark') {
+        newThemeSetting = 'system';
+    } else { // system
+        newThemeSetting = 'light';
+    }
+
+    localStorage.setItem('theme', newThemeSetting);
+    applyTheme(newThemeSetting);
+
+    // Re-initialize chart if it exists, as its colors might depend on the effectively applied theme
     if (typeof dataUsageChart !== 'undefined' && dataUsageChart && typeof loadDashboardData === 'function') {
-        console.log("Theme changed, re-loading dashboard data for chart update.");
-        // Destroy existing chart before reloading data to ensure it picks up new canvas/text colors
+        console.log("Theme setting changed, re-loading dashboard data for chart update.");
         if (dataUsageChart) {
             dataUsageChart.destroy();
-            dataUsageChart = null; // Important to nullify after destroy
+            dataUsageChart = null;
         }
-        // Reset original chart data cache as well, so it's recalculated with potentially new colors/styles.
         if (typeof storeOriginalChartData === 'function') {
-             storeOriginalChartData(0,0,0); // Resetting with zeros or an appropriate default.
+            storeOriginalChartData(0, 0, 0); // Resetting with zeros
         }
-        // dashboardApiDataCache might need selective clearing if chart appearance depends on it directly.
-        // For now, just forcing a refresh of dashboard data should be sufficient.
         if (typeof dashboardApiDataCache !== 'undefined') {
-            dashboardApiDataCache.sessions = null; // Force re-fetch of data that might affect chart colors
+            dashboardApiDataCache.sessions = null; // Force re-fetch
+            dashboardApiDataCache.voucherStats = null; // Force re-fetch
         }
         loadDashboardData(true); // Force refresh dashboard data
     }
@@ -48,8 +78,34 @@ function toggleTheme() {
 
 // Function to load the saved theme from localStorage
 function loadTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light'; // Default to light
+    const savedTheme = localStorage.getItem('theme') || 'system'; // Default to system
     applyTheme(savedTheme);
+
+    // Listener for system theme changes if "system" is selected
+    if (savedTheme === 'system') {
+        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        darkModeMediaQuery.addEventListener('change', () => {
+            if (localStorage.getItem('theme') === 'system') {
+                applyTheme('system');
+                // Optionally, refresh chart if visual aspects change significantly
+                if (typeof dataUsageChart !== 'undefined' && dataUsageChart && typeof loadDashboardData === 'function') {
+                    console.log("System theme changed, re-loading dashboard data for chart update.");
+                     if (dataUsageChart) {
+                        dataUsageChart.destroy();
+                        dataUsageChart = null;
+                    }
+                    if (typeof storeOriginalChartData === 'function') {
+                        storeOriginalChartData(0,0,0);
+                    }
+                     if (typeof dashboardApiDataCache !== 'undefined') {
+                        dashboardApiDataCache.sessions = null;
+                        dashboardApiDataCache.voucherStats = null;
+                    }
+                    loadDashboardData(true);
+                }
+            }
+        });
+    }
 }
 
 
@@ -188,7 +244,9 @@ async function saveApiCredentials() {
             await initializeAppLogic(); // This re-evaluates connection and UI state
 
             // Force refresh the active tab's data
-            let currentActiveTabId = 'dashboard';
+            let currentActiveTabId = 'dashboard'; // Default to dashboard
+            const activeTabSetting = localStorage.getItem('theme') === 'system' ? 'system' : (localStorage.getItem('activeHelpdeskTab') || 'dashboard');
+
             try {
                 const savedTab = localStorage.getItem('activeHelpdeskTab');
                 // Assumes tabPanes is global from ui.js
@@ -449,7 +507,9 @@ async function initializeAppLogic() {
         if (typeof disableVoucherActionButtons === 'function') disableVoucherActionButtons(false, true, true); // sensible defaults on load
 
 
-        let initialTab = 'dashboard';
+        let initialTab = 'dashboard'; // Default to dashboard
+        const activeTabSetting = localStorage.getItem('theme') === 'system' ? 'system' : (localStorage.getItem('activeHelpdeskTab') || 'dashboard');
+
         try {
             const savedTab = localStorage.getItem('activeHelpdeskTab');
             if (savedTab && tabPanes && tabPanes[savedTab]) {
