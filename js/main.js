@@ -136,8 +136,7 @@ function setCredentialEntryUIMode(isEntryMode) {
             mainContentScrollAreaElement.style.justifyContent = 'center';
             mainContentScrollAreaElement.style.minHeight = 'calc(100vh)'; // Full viewport height
             mainContentScrollAreaElement.style.padding = '1rem';
-            // Background for this mode should be neutral and not depend on theme that might be hidden
-            mainContentScrollAreaElement.style.backgroundColor = '#f3f4f6'; 
+            mainContentScrollAreaElement.style.backgroundColor = 'var(--bg-color)';
         }
         if (configInputSection) {
             configInputSection.style.maxWidth = '500px';
