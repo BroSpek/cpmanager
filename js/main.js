@@ -4,11 +4,60 @@ let confirmCallback = null;
 const zoneColors = {}; // Used in utils.js, initialized here or in config.js
 const authViaColors = {}; // Used in utils.js, initialized here or in config.js
 
+// Function to apply the current theme (light/dark)
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+        if (themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+        // Update meta theme-color for dark mode if desired
+        // document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0F172A'); // Example dark bg
+    } else {
+        document.body.classList.remove('dark-mode');
+        if (themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+        // Update meta theme-color for light mode
+        // document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1E293B'); // Original nav color or light bg
+    }
+}
+
+// Function to toggle the theme
+function toggleTheme() {
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', newTheme);
+    applyTheme(newTheme);
+     // Re-initialize chart if it exists, as its colors might depend on theme
+    if (typeof dataUsageChart !== 'undefined' && dataUsageChart && typeof loadDashboardData === 'function') {
+        console.log("Theme changed, re-loading dashboard data for chart update.");
+        // Destroy existing chart before reloading data to ensure it picks up new canvas/text colors
+        if (dataUsageChart) {
+            dataUsageChart.destroy();
+            dataUsageChart = null; // Important to nullify after destroy
+        }
+        // Reset original chart data cache as well, so it's recalculated with potentially new colors/styles.
+        if (typeof storeOriginalChartData === 'function') {
+             storeOriginalChartData(0,0,0); // Resetting with zeros or an appropriate default.
+        }
+        // dashboardApiDataCache might need selective clearing if chart appearance depends on it directly.
+        // For now, just forcing a refresh of dashboard data should be sufficient.
+        if (typeof dashboardApiDataCache !== 'undefined') {
+            dashboardApiDataCache.sessions = null; // Force re-fetch of data that might affect chart colors
+        }
+        loadDashboardData(true); // Force refresh dashboard data
+    }
+}
+
+// Function to load the saved theme from localStorage
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light'; // Default to light
+    applyTheme(savedTheme);
+}
+
+
 // Function to control the UI mode for credential entry
 function setCredentialEntryUIMode(isEntryMode) {
     // Assuming these elements are globally accessible constants from ui.js or queried here
     const navElement = document.querySelector('nav');
-    const mainTabsContainerElement = document.getElementById('mainTabs')?.closest('.mb-4.border-b.border-gray-300');
+    const mainTabsContainerElement = document.getElementById('mainTabs')?.closest('.mb-4.border-b'); // Use var from CSS
     const tabContentElement = document.getElementById('tabContent');
     const footerElement = document.querySelector('footer');
     // configInputSection is a const from ui.js
@@ -31,13 +80,17 @@ function setCredentialEntryUIMode(isEntryMode) {
             mainContentScrollAreaElement.style.justifyContent = 'center';
             mainContentScrollAreaElement.style.minHeight = 'calc(100vh)'; // Full viewport height
             mainContentScrollAreaElement.style.padding = '1rem';
-            mainContentScrollAreaElement.style.backgroundColor = '#f3f4f6'; // Neutral background
+            // Background for this mode should be neutral and not depend on theme that might be hidden
+            mainContentScrollAreaElement.style.backgroundColor = '#f3f4f6'; 
         }
         if (configInputSection) {
             configInputSection.style.maxWidth = '500px';
             configInputSection.style.width = '100%';
             configInputSection.style.marginTop = '0'; // Reset margin due to flex centering
             configInputSection.style.marginBottom = 'auto'; // Helps with centering
+             // Ensure the config section itself has a light background if body theme is dark
+            configInputSection.style.backgroundColor = 'var(--config-input-section-bg)'; 
+            configInputSection.style.color = 'var(--config-input-section-text)';
         }
 
     } else {
@@ -60,7 +113,7 @@ function setCredentialEntryUIMode(isEntryMode) {
             mainContentScrollAreaElement.style.justifyContent = '';
             mainContentScrollAreaElement.style.minHeight = '';
             mainContentScrollAreaElement.style.padding = '';
-            mainContentScrollAreaElement.style.backgroundColor = ''; // Revert background
+            mainContentScrollAreaElement.style.backgroundColor = ''; // Revert to themed background
         }
     }
 }
@@ -84,7 +137,7 @@ async function loadAppConfiguration() {
         // Assumes apiStatusFooterText is a global const from ui.js
         if (typeof apiStatusFooterText !== 'undefined' && apiStatusFooterText) {
             apiStatusFooterText.textContent = 'App Config Load Failed!';
-            apiStatusFooterText.className = 'font-semibold text-red-500';
+            apiStatusFooterText.className = 'font-semibold text-red-500 dark:text-red-400';
         }
         showToast(`Critical: Failed to load app configuration. API calls will likely fail. Error: ${error.message}`, 'error', 10000);
         throw error; // Re-throw to be caught by initializeApp
@@ -177,7 +230,7 @@ function clearApiCredentials() {
     // Disable buttons and inputs
     // Assumes saveApiCredsBtn, clearApiCredsBtn are global consts from ui.js
     document.querySelectorAll('button').forEach(el => {
-        if (el !== saveApiCredsBtn && el !== clearApiCredsBtn && !el.id.startsWith('confirm-') && !el.id.startsWith('cancel-')) {
+        if (el !== saveApiCredsBtn && el !== clearApiCredsBtn && !el.id.startsWith('confirm-') && !el.id.startsWith('cancel-') && el !== themeToggleBtn) {
             el.disabled = true;
         }
     });
@@ -190,7 +243,7 @@ function clearApiCredentials() {
     }
     if (apiStatusFooterText) {
         apiStatusFooterText.textContent = 'Credentials Cleared';
-        apiStatusFooterText.className = 'font-semibold text-yellow-500';
+        apiStatusFooterText.className = 'font-semibold text-yellow-500 dark:text-yellow-400';
     }
 
     // Clear UI content
@@ -206,6 +259,9 @@ function clearApiCredentials() {
         dataUsageChart = null;
         if (typeof dashboardApiDataCache !== 'undefined') { // dashboardApiDataCache from dashboard.js
             dashboardApiDataCache = { sessions: null, voucherStats: null };
+        }
+         if (typeof storeOriginalChartData === 'function') { // Reset original chart data
+            storeOriginalChartData(0,0,0);
         }
     }
     if (donutTotalData && typeof placeholderValue !== 'undefined') donutTotalData.textContent = placeholderValue; // placeholderValue from config.js
@@ -223,7 +279,7 @@ async function checkApiStatusAndConfig() {
     if (!OPNsenseConfig.baseUrl) {
         if (apiStatusFooterText) {
             apiStatusFooterText.textContent = 'API Base URL Missing from Config!';
-            apiStatusFooterText.className = 'font-semibold text-red-500';
+            apiStatusFooterText.className = 'font-semibold text-red-500 dark:text-red-400';
         }
         showToast('Critical: API Base URL not loaded from app-config.json. Cannot connect to API.', 'error', 10000);
         setCredentialEntryUIMode(true); // Show credential UI
@@ -231,11 +287,14 @@ async function checkApiStatusAndConfig() {
     }
 
     if (!currentApiKey || !currentApiSecret) {
-        if (apiStatusFooterText) apiStatusFooterText.textContent = 'Credentials Missing!';
+        if (apiStatusFooterText) {
+             apiStatusFooterText.textContent = 'Credentials Missing!';
+             apiStatusFooterText.className = 'font-semibold text-yellow-500 dark:text-yellow-400';
+        }
         setCredentialEntryUIMode(true); // Activate special UI mode
 
         // Disable buttons
-        document.querySelectorAll('button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"])')
+        document.querySelectorAll('button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"]):not(#theme-toggle-btn)')
             .forEach(el => el.disabled = true);
         document.querySelectorAll('input:not(#config-api-key):not(#config-api-secret), select')
             .forEach(el => el.disabled = true);
@@ -253,13 +312,13 @@ async function checkApiStatusAndConfig() {
         if (Array.isArray(initialCheckData)) {
             if (apiStatusFooterText) {
                 apiStatusFooterText.textContent = 'Connected';
-                apiStatusFooterText.className = 'font-semibold text-green-600';
+                apiStatusFooterText.className = 'font-semibold text-green-600 dark:text-green-400';
             }
             return true;
         } else { // Unexpected response format from API check
             if (apiStatusFooterText) {
                 apiStatusFooterText.textContent = 'Connection Problematic';
-                apiStatusFooterText.className = 'font-semibold text-yellow-500';
+                apiStatusFooterText.className = 'font-semibold text-yellow-500 dark:text-yellow-400';
             }
             console.warn("Initial API check (fetchAllZoneData) returned unexpected data format:", initialCheckData);
             showToast('API connection check returned unexpected data. App might not function correctly.', 'warning');
@@ -269,7 +328,7 @@ async function checkApiStatusAndConfig() {
     } catch (error) { // API call failed
         if (apiStatusFooterText) {
             apiStatusFooterText.textContent = 'Connection Failed';
-            apiStatusFooterText.className = 'font-semibold text-red-500';
+            apiStatusFooterText.className = 'font-semibold text-red-500 dark:text-red-400';
         }
         console.error("Initial API check (fetchAllZoneData) failed:", error.message);
         if (error.message.includes("401") || error.message.includes("Unauthorized")) {
@@ -310,6 +369,11 @@ async function handleApplyCpConfiguration() {
 }
 
 function initializeAllEventListeners() {
+    // Theme toggle button
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', toggleTheme);
+    }
+
     // Assumes saveApiCredsBtn, clearApiCredsBtn, applyCpConfigBtn, confirmationModal, confirmCancelBtn, confirmProceedBtn are global from ui.js
     if (saveApiCredsBtn) saveApiCredsBtn.addEventListener('click', saveApiCredentials);
     if (clearApiCredsBtn) clearApiCredsBtn.addEventListener('click', clearApiCredentials);
@@ -368,7 +432,7 @@ async function initializeAppLogic() {
             const isConfigSecret = el.id === 'config-api-secret';
             const isSaveCredsBtn = el === saveApiCredsBtn;
 
-            if (!(isConfigKey || isConfigSecret || isSaveCredsBtn) || el === clearApiCredsBtn) {
+            if (!(isConfigKey || isConfigSecret || isSaveCredsBtn) || el === clearApiCredsBtn || el === themeToggleBtn) {
                 el.disabled = false;
             } else if (isSaveCredsBtn) { // saveApiCredsBtn should be disabled if not in credential entry mode
                 el.disabled = true;
@@ -378,6 +442,7 @@ async function initializeAppLogic() {
             mainTabs.querySelectorAll('.tab-btn').forEach(btn => btn.style.pointerEvents = 'auto');
         }
         if (clearApiCredsBtn) clearApiCredsBtn.disabled = false; // Always enable if creds exist.
+        if (themeToggleBtn) themeToggleBtn.disabled = false; // Always enable theme toggle
 
         if (typeof fetchManagerSessionStatus === 'function') await fetchManagerSessionStatus();
         // disableVoucherActionButtons is from vouchers.js
@@ -399,8 +464,8 @@ async function initializeAppLogic() {
         }
 
     } else { // Not connected
-        // Disable most buttons/inputs, except those in the config section
-        document.querySelectorAll('button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"])')
+        // Disable most buttons/inputs, except those in the config section and theme toggle
+        document.querySelectorAll('button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"]):not(#theme-toggle-btn)')
             .forEach(el => el.disabled = true);
         document.querySelectorAll('input:not(#config-api-key):not(#config-api-secret), select')
             .forEach(el => el.disabled = true);
@@ -410,6 +475,7 @@ async function initializeAppLogic() {
         }
         if (saveApiCredsBtn) saveApiCredsBtn.disabled = false; // Enable save if config section is shown
         if (clearApiCredsBtn) clearApiCredsBtn.disabled = false; // Always enable clear
+        if (themeToggleBtn) themeToggleBtn.disabled = false; // Theme toggle should always be enabled
 
         if (applyCpConfigBtn) applyCpConfigBtn.disabled = true;
 
@@ -419,7 +485,7 @@ async function initializeAppLogic() {
             if (tabPanes) Object.values(tabPanes).forEach(pane => {if(pane) {pane.classList.add('hidden'); pane.classList.remove('active');}});
             dashboardPane.classList.remove('hidden');
             dashboardPane.classList.add('active');
-            dashboardPane.innerHTML = `<div class="text-center p-8 text-red-500"><i class="fas fa-exclamation-triangle fa-3x mb-3"></i><p>Application configuration (app-config.json) failed to load. Cannot connect.</p></div>`;
+            dashboardPane.innerHTML = `<div class="text-center p-8 text-red-500 dark:text-red-400"><i class="fas fa-exclamation-triangle fa-3x mb-3"></i><p>Application configuration (app-config.json) failed to load. Cannot connect.</p></div>`;
         } else if (dashboardPane && OPNsenseConfig.baseUrl && (!currentApiKey || !currentApiSecret)) {
             // If in credential input mode, dashboard is hidden by setCredentialEntryUIMode, so no need to overwrite its content here.
             // The message about missing creds is implicitly handled by the dedicated UI mode.
@@ -429,6 +495,7 @@ async function initializeAppLogic() {
 
 async function initializeApp() {
     // Assumes applyCpConfigBtn, tabPanes are global from ui.js
+    loadTheme(); // Load theme preference early
     try {
         await loadAppConfiguration(); // Must complete before anything else
         loadApiCredentials();
@@ -445,7 +512,7 @@ async function initializeApp() {
                 dashboardPane.classList.remove('hidden');
                 dashboardPane.classList.add('active');
              }
-            dashboardPane.innerHTML = `<div class="text-center p-8 text-red-500"><i class="fas fa-exclamation-triangle fa-3x mb-3"></i><p>Critical Error: Application configuration (app-config.json) failed to load. Cannot connect or function.</p><p class="text-sm mt-2">Details: ${error.message}</p></div>`;
+            dashboardPane.innerHTML = `<div class="text-center p-8 text-red-500 dark:text-red-400"><i class="fas fa-exclamation-triangle fa-3x mb-3"></i><p>Critical Error: Application configuration (app-config.json) failed to load. Cannot connect or function.</p><p class="text-sm mt-2">Details: ${error.message}</p></div>`;
         }
         // Also ensure credential entry mode is active if config load failed, as API calls won't work.
         setCredentialEntryUIMode(true);
