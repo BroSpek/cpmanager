@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1E293B">
+    <meta name="description" content="OPNsense Captive Portal Management Tool">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+    <link rel="icon" type="image/x-icon" href="./icons/favicon.ico">
+    <title>Captive Portal Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body class="font-sans">
+
+    <nav class="bg-slate-800 text-white p-4 shadow-md sticky top-0 z-20 flex-shrink-0">
+        <div class="container mx-auto">
+            <h1 class="text-xl font-semibold"><i class="fas fa-shield-alt mr-2"></i>Captive Portal Manager</h1>
+        </div>
+    </nav>
+
+    <div id="main-content-scroll-area" class="flex-grow overflow-y-auto bg-gray-100">
+        <div class="container mx-auto p-4">
+            <div id="config-input-section" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-md" role="alert">
+                <p class="font-bold mb-2">API Credentials Required</p>
+                <p class="text-sm mb-3">Please enter your OPNsense API Key and Secret. They will be stored in your browser's local storage.</p>
+                <div>
+                    <label for="config-api-key" class="block text-sm font-medium text-gray-700">API Key:</label>
+                    <input type="text" id="config-api-key" class="form-input mt-1 block w-full">
+                </div>
+                <div class="mt-2">
+                    <label for="config-api-secret" class="block text-sm font-medium text-gray-700">API Secret:</label>
+                    <input type="password" id="config-api-secret" class="form-input mt-1 block w-full">
+                </div>
+                <div class="mt-4 flex space-x-4">
+                    <button id="save-api-creds-btn" class="btn btn-success sm-w-auto">Save Credentials</button>
+                    <button id="clear-api-creds-btn" class="btn btn-secondary sm-w-auto">Clear Credentials</button>
+                </div>
+            </div>
+
+            <div class="mb-4 border-b border-gray-300">
+                <ul class="flex -mb-px text-sm font-medium" id="mainTabs">
+                    <li class="flex-1 sm:flex-initial sm:mr-2"> <a href="#" class="tab-btn inline-block w-full text-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700 hover:border-gray-400" data-tab="dashboard">
+                            <i class="fas fa-tachometer-alt sm:mr-2"></i><span class="hidden sm:inline">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="flex-1 sm:flex-initial sm:mr-2">
+                        <a href="#" class="tab-btn inline-block w-full text-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700 hover:border-gray-400" data-tab="sessions">
+                            <i class="fas fa-users sm:mr-2"></i><span class="hidden sm:inline">Sessions</span>
+                        </a>
+                    </li>
+                    <li class="flex-1 sm:flex-initial sm:mr-2">
+                        <a href="#" class="tab-btn inline-block w-full text-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700 hover:border-gray-400" data-tab="vouchers">
+                            <i class="fas fa-ticket-alt sm:mr-2"></i><span class="hidden sm:inline">Vouchers</span>
+                        </a>
+                    </li>
+                    <li class="flex-1 sm:flex-initial"> <a href="#" class="tab-btn inline-block w-full text-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700 hover:border-gray-400" data-tab="info">
+                            <i class="fas fa-layer-group sm:mr-2"></i><span class="hidden sm:inline">Zones</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div id="tabContent" class="bg-white p-4 rounded-lg shadow">
+                <div id="dashboard-content" class="tab-pane">
+                    <h2 class="text-2xl font-semibold flex items-center mb-4"><i class="fas fa-tachometer-alt mr-3 text-blue-600"></i>Overview Dashboard</h2>
+                    <div class="dashboard-hint-box mb-6">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Showing aggregated data for all configured zones.</span>
+                    </div>
+					<div class="grid grid-cols-1 bg-gray-50 rounded-lg shadow p-6 mb-6">
+						<div class="donut-chart-container">
+							<h3 class="text-lg font-semibold mb-2">Data Usage Distribution</h3>
+							<div id="dataUsageCanvasContainer" class="relative">
+								<canvas id="dataUsageCanvas" width="200" height="200"></canvas>
+								<div id="donut-total-data" class="donut-center-text">0 MB</div>
+							</div>
+							<div class="chart-legend mt-4">
+								<div class="legend-item">
+									<span class="legend-color-box bg-blue-500"></span>Client Upload: <span id="upload-legend-value" class="ml-1">0 Bytes</span> <span id="upload-percentage" class="ml-1"></span>
+								</div>
+								<div class="legend-item">
+									<span class="legend-color-box bg-green-500"></span>Client Download: <span id="download-legend-value" class="ml-1">0 Bytes</span> <span id="download-percentage" class="ml-1"></span>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="dashboard-stats-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6"></div>
+                </div>
+
+                <div id="sessions-content" class="tab-pane hidden">
+                    <h2 class="text-2xl font-semibold flex items-center mb-4"><i class="fas fa-users mr-3 text-blue-600"></i>Session Management</h2>
+                    <div class="flex flex-col sm:flex-row gap-3 mb-4 items-center">
+                        <input type="text" id="session-search-input" class="form-input w-full sm:flex-grow" placeholder="Search IP, MAC, User...">
+                        <select id="session-zone-filter-select" class="form-select w-full sm:w-auto bg-white">
+                            <option value="">All Zones</option>
+                        </select>
+                    </div>
+                    <div class="mb-4 flex flex-col sm:flex-row gap-4">
+                         <button id="find-my-session-btn" class="btn btn-info w-full sm:w-auto">
+                            <i class="fas fa-street-view mr-2"></i>Find My Session
+                        </button>
+                        <button id="disconnect-all-sessions-btn" class="btn btn-danger w-full sm:w-auto">
+                            <i class="fas fa-broadcast-tower mr-2"></i>Disconnect All (Filtered)
+                        </button>
+                    </div>
+                    <div id="session-card-container" class="space-y-3">
+                         <div class="skeleton-card"></div>
+                         <div class="skeleton-card"></div>
+                    </div>
+                </div>
+
+                <div id="vouchers-content" class="tab-pane hidden">
+                    <h2 class="text-2xl font-semibold flex items-center mb-4"><i class="fas fa-ticket-alt mr-3 text-blue-600"></i>Voucher Management</h2>
+                    <div id="voucher-normal-actions">
+                        <div class="mb-4">
+                            <label for="voucher-provider-select" class="block text-sm font-medium text-gray-700 mb-1">Voucher Provider:</label>
+                            <select id="voucher-provider-select" class="form-select w-full bg-white">
+                                <option value="">Loading providers...</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-4 mb-4 items-center">
+                            <select id="voucher-group-select" class="form-select w-full sm:flex-grow bg-white">
+                                <option value="">Select a provider first...</option>
+                            </select>
+                             <button id="create-vouchers-btn" class="btn btn-primary w-full sm:w-auto whitespace-nowrap"> <i class="fas fa-plus-circle mr-2"></i>Create New Vouchers
+                            </button>
+                        </div>
+                    </div>
+                    <div id="voucher-card-container" class="space-y-3">
+                        <div class="skeleton-card"></div>
+                    </div>
+                    <div id="voucher-group-actions" class="mt-4 flex flex-col sm:flex-row gap-4">
+                         <button id="drop-expired-vouchers-btn" class="btn btn-warning w-full sm:w-auto"> <i class="fas fa-trash-alt mr-2"></i>Drop Expired Vouchers
+                        </button>
+                        <button id="drop-voucher-group-btn" class="btn btn-danger w-full sm:w-auto"> <i class="fas fa-trash-alt mr-2"></i>Drop Voucher Group
+                        </button>
+                    </div>
+                </div>
+
+                <div id="info-content" class="tab-pane hidden">
+                    <h2 class="text-2xl font-semibold flex items-center mb-4"><i class="fas fa-layer-group mr-3 text-blue-600"></i>Zone Management</h2>
+                    <div class="mb-4 flex flex-col sm:flex-row gap-4">
+                        <button id="apply-cp-config-btn" class="btn btn-success w-full sm:w-auto" title="Apply Captive Portal Configuration"> 
+                            <i class="fas fa-rotate mr-2"></i>Apply Configuration
+                        </button>
+                    </div>
+                    <div id="zone-list-container" class="space-y-3">
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="generateVoucherModal" class="modal modal-inactive fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-20">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-auto">
+            <h3 class="text-xl font-semibold mb-6">Generate Vouchers</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="voucher-count-select" class="block text-sm font-medium text-gray-700">Number of vouchers</label>
+                    <select id="voucher-count-select" class="form-select mt-1 block w-full bg-white">
+                        <option value="1">1</option> <option value="5">5</option> <option value="10" selected>10</option> <option value="25">25</option> <option value="50">50</option> <option value="100">100</option> <option value="250">250</option> <option value="custom">Custom</option>
+                    </select>
+                    <input type="number" id="voucher-count-custom" class="form-input mt-2 block w-full hidden" min="1" value="1">
+                </div>
+                <div>
+                    <label for="voucher-lifetime-select" class="block text-sm font-medium text-gray-700">Validity</label>
+                    <select id="voucher-lifetime-select" class="form-select mt-1 block w-full bg-white">
+                        <option value="240" selected>4 hours</option> <option value="480">8 hours</option> <option value="1440">1 day</option> <option value="2880">2 days</option> <option value="4320">3 days</option> <option value="5760">4 days</option> <option value="7200">5 days</option> <option value="8640">6 days</option> <option value="10080">1 week</option> <option value="20160">2 weeks</option> <option value="custom">Custom (minutes)</option>
+                    </select>
+                    <input type="number" id="voucher-lifetime-custom" placeholder="Minutes (min 1)" class="form-input mt-2 block w-full hidden" min="1">
+                </div>
+                 <div>
+                    <label for="voucher-usage-select" class="block text-sm font-medium text-gray-700">Expires In</label>
+                     <select id="voucher-usage-select" class="form-select mt-1 block w-full bg-white">
+                        <option value="0" selected>Never</option> <option value="6">6 hours</option> <option value="12">12 hours</option> <option value="24">1 day</option> <option value="48">2 days</option> <option value="72">3 days</option> <option value="96">4 days</option> <option value="120">5 days</option> <option value="144">6 days</option> <option value="168">1 week</option> <option value="336">2 weeks</option> <option value="504">3 weeks</option> <option value="720">1 month (30d)</option> <option value="1440">2 months (60d)</option> <option value="2160">3 months (90d)</option> <option value="custom">Custom (hours)</option>
+                    </select>
+                    <input type="number" id="voucher-usage-custom" placeholder="Hours (0 for Never)" class="form-input mt-2 block w-full hidden" min="0">
+                </div>
+                <div class="sm:col-span-2">
+                    <label for="voucher-groupname" class="block text-sm font-medium text-gray-700">Group name</label>
+                    <input type="text" id="voucher-groupname" placeholder="Optional (timestamp if empty)" class="form-input mt-1 block w-full">
+                </div>
+                </div>
+            <div class="mt-8 flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-2 sm:space-y-0">
+                <button id="cancel-generate-voucher-btn" class="btn btn-secondary w-full sm:w-auto">Cancel</button>
+                <button id="submit-generate-voucher-btn" class="btn btn-primary w-full sm:w-auto">Generate</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmationModal" class="modal modal-inactive fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-30"> 
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-auto">
+            <h3 class="text-xl font-semibold mb-4" id="confirmationTitle">Confirm Action</h3>
+            <p id="confirmationMessage" class="text-gray-700 mb-6">Are you sure?</p>
+            <div class="flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-2 sm:space-y-0">
+                <button id="confirm-cancel-btn" class="btn btn-secondary w-full sm:w-auto">Cancel</button>
+                <button id="confirm-proceed-btn" class="btn btn-danger w-full sm:w-auto">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editZoneModal" class="modal modal-inactive fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-20">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-auto">
+            <h3 class="text-xl font-semibold mb-6">Edit Zone: <span id="editZoneModalTitleName" class="font-normal"></span></h3>
+            <form id="editZoneForm" class="space-y-4">
+                <input type="hidden" id="editZoneUuidInput">
+                <div>
+					<label for="zone-edit-enabled" class="block text-sm font-medium text-gray-700 mb-1">Status:</label>
+					<label class="flex items-center cursor-pointer w-full">
+						<div class="relative">
+							<input type="checkbox" id="zone-edit-enabled" class="sr-only peer">
+							<div class="block w-14 h-8 bg-gray-300 rounded-full peer-checked:bg-blue-600 transition-colors"></div>
+							<div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform transform peer-checked:translate-x-full shadow-md"></div>
+						</div>
+						<span id="zone-edit-enabled-text" class="ml-3 text-sm font-medium text-gray-900">Disabled</span>
+					</label>
+				</div>
+                <div>
+                    <label for="zone-edit-description" class="block text-sm font-medium text-gray-700">Description:</label>
+                    <input type="text" id="zone-edit-description" class="form-input mt-1 block w-full">
+                </div>
+                <div>
+                    <label for="zone-edit-allowedAddresses" class="block text-sm font-medium text-gray-700">Allowed Addresses (comma-separated):</label>
+                    <textarea id="zone-edit-allowedAddresses" class="form-input mt-1 block w-full" rows="3" placeholder="192.168.1.2,192.168.1.100-200,10.0.0.0/24"></textarea>
+                </div>
+                <div>
+                    <label for="zone-edit-allowedMACAddresses" class="block text-sm font-medium text-gray-700">Allowed MAC Addresses (comma-separated):</label>
+                    <textarea id="zone-edit-allowedMACAddresses" class="form-input mt-1 block w-full" rows="3" placeholder="00:11:22:aa:bb:cc,aa:bb:cc:dd:ee:ff"></textarea>
+                </div>
+            </form>
+            <div class="mt-8 flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-2 sm:space-y-0">
+                <button id="cancel-edit-zone-btn" class="btn btn-secondary w-full sm:w-auto">Cancel</button>
+                <button id="submit-edit-zone-btn" class="btn btn-primary w-full sm:w-auto">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-notification" class="fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 max-w-xs z-50"> <p id="toast-message"></p>
+    </div>
+
+
+    <footer class="text-center p-4 text-sm text-gray-600 flex-shrink-0 bg-gray-100 border-t border-gray-200">
+        <p id="api-status-footer">API Status: <span class="font-semibold">Initializing...</span></p>
+        <p class="mt-1">OPNsense Captive Portal Management System</p>
+    </footer>
+
+    <script src="./js/config.js"></script>
+    <script src="./js/utils.js"></script>
+    <script src="./js/api.js"></script>
+    <script src="./js/ui.js"></script>
+    <script src="./js/tabs.js"></script>
+    <script src="./js/sessions.js"></script>
+    <script src="./js/vouchers.js"></script>
+    <script src="./js/zones.js"></script>
+    <script src="./js/dashboard.js"></script>
+    <script src="./js/main.js"></script>
+</body>
+</html>

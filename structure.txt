@@ -1,0 +1,22 @@
+/captive-portal-manager/
+├── index.html               # Main HTML file (the skeleton of the app)
+├── app-config.json          # External configuration (e.g., API base URL)
+├── /css/
+│   ├── style.css            # Main custom styles (extracted from <style> tags)
+│   └── tailwind.config.js   # (Optional) If you were to customize Tailwind further
+├── /js/
+│   ├── main.js              # Main application logic, initialization, event listeners
+│   ├── api.js               # Functions related to OPNsense API calls
+│   ├── ui.js                # Functions for DOM manipulation, UI updates, modals, toasts
+│   ├── tabs.js              # Logic for tab navigation and content loading
+│   ├── sessions.js          # Session management specific logic
+│   ├── vouchers.js          # Voucher management specific logic
+│   ├── zones.js             # Zone information and management logic
+│   ├── dashboard.js         # Dashboard specific logic (including chart)
+│   ├── utils.js             # Utility functions (e.g., formatBytes, getZoneColor)
+│   └── config.js            # Application configuration (e.g., OPNsenseConfig object, defaults)
+├── /icons/
+│   ├── icon-192x192.png     # App icon (as referenced in the original HTML)
+│   └── favicon.ico          # Application favicon
+├── manifest.json            # Web App Manifest (as referenced)
+└── sw.js       
