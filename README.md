@@ -17,7 +17,7 @@
 1.  **API Endpoint**: The base URL for the OPNsense API is configured in `app-config.json`.
     ```json
     {
-      "apiBaseUrl": "[https://opnsense.example.com](https://opnsense.example.com)"
+      "apiBaseUrl": "https://opnsense.example.com"
     }
     ```
 2.  **API Credentials**: Upon first launch, the application will prompt for your OPNsense API Key and Secret. These are stored in the browser's local storage.
