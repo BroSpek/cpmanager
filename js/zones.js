@@ -62,7 +62,7 @@ async function loadZoneInfo(forceRefreshDetails = false) { // Added forceRefresh
 
         allConfiguredZones.forEach(zoneSummary => {
             const zoneCard = document.createElement('div');
-            zoneCard.className = 'zone-info-card bg-gray-50 p-3 rounded-lg shadow border border-gray-200 relative';
+            zoneCard.className = 'zone-info-card p-3 rounded-lg shadow border relative';
             zoneCard.setAttribute('role', 'listitem');
             zoneCard.setAttribute('aria-label', `Zone: ${zoneSummary.description || `Zone ID ${zoneSummary.zoneid}`}`);
 
