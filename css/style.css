@@ -72,7 +72,7 @@
     --form-input-focus-border: #3B82F6; /* blue-500 */
     --form-input-focus-ring: rgba(59, 130, 246, 0.4);
 
-    --card-bg: #1E293B; /* slate-800 */
+	--card-bg: #0F172A; /* slate-900 */
     --card-text: #CBD5E1; /* slate-300 */
     --card-border: #334155; /* slate-700 */
     --card-info-label-color: #CBD5E1; /* slate-300 */
@@ -83,7 +83,7 @@
     --modal-text: #E2E8F0; /* slate-200 */
 
     --skeleton-card-bg: #334155; /* bg-slate-700 */
-    --stat-card-bg: #1E293B; /* bg-slate-800 */
+	--stat-card-bg: #0F172A; /* slate-900 */
     --stat-value-color: #60A5FA; /* text-blue-400 */
     --stat-label-color: #94A3B8; /* text-slate-400 */
     --donut-center-text-color: #E2E8F0; /* text-slate-200 */
