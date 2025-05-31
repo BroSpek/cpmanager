@@ -2,7 +2,8 @@
 
 // --- DOM Element Selections (Grouped for clarity) ---
 
-
+// Theme Toggle Button
+const themeToggleBtn = document.getElementById('theme-toggle-btn'); // Added
 
 // Configuration Section Elements
 const configInputSection = document.getElementById('config-input-section');
