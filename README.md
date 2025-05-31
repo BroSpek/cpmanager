@@ -16,31 +16,28 @@
 
 Here's a glimpse of how the Captive Portal Manager looks on mobile devices:
 
-<table>
-  <tr>
-    <td align="center" valign="top">
-      <b>1. Dashboard View</b><br>
-      <img src="img/screenshot_mobile_dashboard.png" alt="Mobile Dashboard View" width="300px">
-    </td>
-    <td align="center" valign="top">
-      <b>2. Active Sessions List</b><br>
-      <img src="img/screenshot_mobile_sessions.png" alt="Mobile Sessions List" width="300px">
-    </td>
-    <td align="center" valign="top">
-      <b>3. Voucher Creation/Management</b><br>
-      <img src="img/screenshot_mobile_vouchers.png" alt="Mobile Voucher Management" width="300px">
-    </td>
-  </tr>
-  <tr>
-    <td align="center" valign="top">
-      <b>4. Zone Information Display</b><br>
-      <img src="img/screenshot_mobile_zones.png" alt="Mobile Zone Information" width="300px">
-    </td>
-    <td align="center" valign="top"> <b>5. API Credential Input Screen</b><br>
-      <img src="img/screenshot_mobile_credentials.png" alt="Mobile API Credential Input" width="300px">
-    </td>
-  </tr>
-</table>
+<div style="display: flex; flex-wrap: wrap; justify-content: space-around; align-items: flex-start;">
+  <div style="text-align: center; margin: 10px; padding: 5px;">
+    <b>1. Dashboard View</b><br>
+    <img src="img/screenshot_mobile_dashboard.png" alt="Mobile Dashboard View" width="300" style="height: auto; border: 1px solid #ddd; border-radius: 4px; box-shadow: 2px 2px 5px #ccc;">
+  </div>
+  <div style="text-align: center; margin: 10px; padding: 5px;">
+    <b>2. Active Sessions List</b><br>
+    <img src="img/screenshot_mobile_sessions.png" alt="Mobile Sessions List" width="300" style="height: auto; border: 1px solid #ddd; border-radius: 4px; box-shadow: 2px 2px 5px #ccc;">
+  </div>
+  <div style="text-align: center; margin: 10px; padding: 5px;">
+    <b>3. Voucher Creation/Management</b><br>
+    <img src="img/screenshot_mobile_vouchers.png" alt="Mobile Voucher Management" width="300" style="height: auto; border: 1px solid #ddd; border-radius: 4px; box-shadow: 2px 2px 5px #ccc;">
+  </div>
+  <div style="text-align: center; margin: 10px; padding: 5px;">
+    <b>4. Zone Information Display</b><br>
+    <img src="img/screenshot_mobile_zones.png" alt="Mobile Zone Information" width="300" style="height: auto; border: 1px solid #ddd; border-radius: 4px; box-shadow: 2px 2px 5px #ccc;">
+  </div>
+  <div style="text-align: center; margin: 10px; padding: 5px;">
+    <b>5. API Credential Input Screen</b><br>
+    <img src="img/screenshot_mobile_credentials.png" alt="Mobile API Credential Input" width="300" style="height: auto; border: 1px solid #ddd; border-radius: 4px; box-shadow: 2px 2px 5px #ccc;">
+  </div>
+</div>
 
 
 ## Configuration
