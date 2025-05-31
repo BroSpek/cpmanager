@@ -59,9 +59,17 @@ Here's a glimpse of how the Captive Portal Manager looks on mobile devices in bo
 
 * An operational OPNsense® firewall.
 * The OPNsense Captive Portal module configured for at least one zone.
-* The OPNsense API enabled, with an API Key and Secret generated that have sufficient permissions for captive portal and voucher management.
+* The OPNsense API enabled, with an API Key and Secret generated that have sufficient permissions for captive portal and voucher management. Navigate your OPNsense > System > Access > Users.
 * Network connectivity from the device running this tool to the OPNsense API endpoint (ensure the `apiBaseUrl` in `app-config.json` is reachable).
 * A modern web browser (e.g., Chrome, Firefox, Safari, Edge) that supports JavaScript, localStorage, and Service Workers for PWA functionality.
+
+## Setup and Usage
+
+1.  Clone or download the repository.
+2.  Modify `app-config.json` to point to your OPNsense API endpoint.
+3.  Open `index.html` in a modern web browser.
+4.  Enter your OPNsense API credentials when prompted.
+5.  Use the navigation tabs (Dashboard, Sessions, Vouchers, Zones) to manage your captive portal.
 
 ## Configuration
 
@@ -73,23 +81,17 @@ Here's a glimpse of how the Captive Portal Manager looks on mobile devices in bo
     ```
 2.  **API Credentials**: Upon first launch, the application will prompt for your OPNsense API Key and Secret. These are stored in the browser's local storage.
 
-## Technologies Used
-
-* HTML
-* Tailwind CSS
-* JavaScript
-* Chart.js (for dashboard data visualization)
-* Font Awesome (for icons)
-* OPNsense API
-
-## Setup and Usage
-
-1.  Clone or download the repository.
-2.  Modify `app-config.json` to point to your OPNsense API endpoint.
-3.  Open `index.html` in a modern web browser.
-4.  Enter your OPNsense API credentials when prompted.
-5.  Use the navigation tabs (Dashboard, Sessions, Vouchers, Zones) to manage your captive portal.
-
 ## Service Worker
 
-The application uses a service worker (`sw.js`) to cache the core application shell (e.g., `index.html`, icons). This allows for faster load times on subsequent visits and provides a basic offline experience.
+The application uses a service worker (`sw.js`) to cache the core application shell (e.g., `index.html`, icons). This allows for faster load times on subsequent visits.
+
+## Technologies Used
+
+## Technologies Used
+
+* <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/HTML5_logo_and_wordmark.svg/20px-HTML5_logo_and_wordmark.svg.png" alt="HTML5 Logo" width="20" height="20" style="vertical-align:middle; margin-right:5px;"> [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML)
+* <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Tailwind_CSS_Logo.svg/20px-Tailwind_CSS_Logo.svg.png" alt="Tailwind CSS Logo" width="20" style="vertical-align:middle; margin-right:5px;"> [Tailwind CSS](https://tailwindcss.com/) (Theming)
+* <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Unofficial_JavaScript_logo_2.svg/20px-Unofficial_JavaScript_logo_2.svg.png" alt="JavaScript Logo" width="20" height="20" style="vertical-align:middle; margin-right:5px;"> [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+* <img src="https://raw.githubusercontent.com/chartjs/Chart.js/refs/heads/master/docs/.vuepress/public/logo.svg" alt="Chart.js Logo" width="20" height="20" style="vertical-align:middle; margin-right:5px;"> [Chart.js](https://www.chartjs.org/) (Dashboard data visualization)
+* <img src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Font_Awesome_logomark_blue.svg" alt="Font Awesome Logo" width="20" height="20" style="vertical-align:middle; margin-right:5px;"> [Font Awesome](https://fontawesome.com/) (Icons)
+* <img src="img/opnsense_icon.svg" alt="OPNsense Logo" width="20" height="20" style="vertical-align:middle; margin-right:5px;"> [OPNsense API](https://docs.opnsense.org/development/api.html) (Interact with OPNsense)
