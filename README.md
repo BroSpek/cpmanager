@@ -65,10 +65,10 @@ Here's a glimpse of how the Captive Portal Manager looks on mobile devices in bo
 
 ## Configuration
 
-1.  **API Endpoint**: The base URL for the OPNsense API is configured in `app-config.json`. Make sure this points to your OPNsense instance (e.g., `http://192.168.1.1` or your specific OPNsense IP/hostname).
+1.  **API Endpoint**: The base URL for the OPNsense API is configured in `app-config.json`. Make sure this points to your OPNsense instance (e.g., `https://192.168.1.1` or your specific OPNsense IP/hostname).
     ```json
     {
-      "apiBaseUrl": "http://192.168.1.1"
+      "apiBaseUrl": "https://192.168.1.1"
     }
     ```
 2.  **API Credentials**: Upon first launch, the application will prompt for your OPNsense API Key and Secret. These are stored in the browser's local storage.
