@@ -12,6 +12,27 @@
 * **Responsive Design**: Utilizes Tailwind CSS for a responsive layout suitable for various screen sizes.
 * **Progressive Web App (PWA)**: Includes a service worker for caching app shell resources (`index.html`, icons) and a manifest file for "add to home screen" functionality.
 
+## Mobile Screenshots
+
+Here's a glimpse of how the Captive Portal Manager looks on mobile devices:
+
+1.  **API Credential Input Screen**
+    ![Mobile API Credential Input](img/screenshot_mobile_credentials.png)
+
+2.  **Dashboard View**
+    ![Mobile Dashboard View](img/screenshot_mobile_dashboard.png)
+
+3.  **Active Sessions List**
+    ![Mobile Sessions List](img/screenshot_mobile_sessions.png)
+
+4.  **Voucher Creation/Management**
+    ![Mobile Voucher Management](img/screenshot_mobile_vouchers.png)
+
+5.  **Zone Information Display**
+    ![Mobile Zone Information](img/screenshot_mobile_zones.png)
+
+
+
 ## Configuration
 
 1.  **API Endpoint**: The base URL for the OPNsense API is configured in `app-config.json`.
