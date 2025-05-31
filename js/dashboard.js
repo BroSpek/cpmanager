@@ -56,7 +56,11 @@ async function loadDashboardData(forceRefresh = false) { // Added forceRefresh
         downloadLegendValue.textContent = placeholderValue;
         uploadPercentageSpan.textContent = '';
         downloadPercentageSpan.textContent = '';
-        // No need to destroy chart here yet, only if data changes later
+        // Destroy existing chart if forcing refresh, so it gets recreated with potentially new theme colors
+        if (forceRefresh && dataUsageChart) {
+            dataUsageChart.destroy();
+            dataUsageChart = null;
+        }
     }
 
 
@@ -152,16 +156,16 @@ async function loadDashboardData(forceRefresh = false) { // Added forceRefresh
         });
 
         // Update data usage donut chart
-        // Only update chart if data has changed or it's a forced refresh
         const currentTotalData = totalClientUploadBytes + totalClientDownloadBytes;
-        if (forceRefresh || totalClientUploadBytes !== originalUploadBytes || totalClientDownloadBytes !== originalDownloadBytes) {
-            console.log("Updating dashboard chart with new data or force refresh.");
+        // Update chart if data has changed, it's a forced refresh, or chart instance doesn't exist yet
+        if (forceRefresh || totalClientUploadBytes !== originalUploadBytes || totalClientDownloadBytes !== originalDownloadBytes || !dataUsageChart) {
+            console.log("Updating dashboard chart with new data, force refresh, or because chart doesn't exist.");
             storeOriginalChartData(totalClientUploadBytes, totalClientDownloadBytes, currentTotalData);
 
             if (donutTotalData) {
                 donutTotalData.innerHTML = `
                     <span style="font-weight: bold; display: block; font-size: 1.2em;">${formatBytes(currentTotalData)}</span>
-                    <span style="font-size: 0.8em; color: #6B7280;">(100.0%)</span>
+                    <span style="font-size: 0.8em;" class="text-gray-500 dark:text-gray-400">(100.0%)</span>
                 `;
             }
             if (uploadLegendValue) uploadLegendValue.textContent = formatBytes(totalClientUploadBytes);
@@ -170,18 +174,26 @@ async function loadDashboardData(forceRefresh = false) { // Added forceRefresh
             if (downloadPercentageSpan) downloadPercentageSpan.textContent = `(${(currentTotalData > 0 ? (totalClientDownloadBytes / currentTotalData) * 100 : 0).toFixed(1)}%)`;
 
             const chartDataValues = [totalClientUploadBytes, totalClientDownloadBytes];
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            const tooltipBgColor = isDarkMode ? '#334155' : '#1F2937'; // slate-700 vs gray-800
+            const tooltipTextColor = isDarkMode ? '#E2E8F0' : '#FFFFFF'; // slate-200 vs white
+            const chartBorderColor = isDarkMode ? '#1E293B' : '#FFFFFF'; // slate-800 vs white
 
-            if (dataUsageChart) { // If chart exists, update it. Otherwise, create it.
+            if (dataUsageChart) { // If chart exists, update it.
                 dataUsageChart.data.datasets[0].data = chartDataValues;
+                dataUsageChart.options.plugins.tooltip.backgroundColor = tooltipBgColor;
+                dataUsageChart.options.plugins.tooltip.titleColor = tooltipTextColor;
+                dataUsageChart.options.plugins.tooltip.bodyColor = tooltipTextColor;
+                dataUsageChart.options.borderColor = chartBorderColor;
                 dataUsageChart.update();
-            } else {
+            } else { // Create it.
                 const chartData = {
                     labels: ['Client Upload', 'Client Download'],
                     datasets: [{
                         data: chartDataValues,
-                        backgroundColor: ['#3B82F6', '#10B981'],
-                        hoverBackgroundColor: ['#2563EB', '#059669'],
-                        borderColor: '#FFFFFF',
+                        backgroundColor: ['#3B82F6', '#10B981'], // blue-500, green-500
+                        hoverBackgroundColor: ['#2563EB', '#059669'], // blue-600, green-600
+                        borderColor: chartBorderColor,
                         borderWidth: 2,
                         hoverBorderWidth: 3,
                         hoverOffset: 8
@@ -200,9 +212,9 @@ async function loadDashboardData(forceRefresh = false) { // Added forceRefresh
                             legend: { display: false },
                             tooltip: {
                                 enabled: true,
-                                backgroundColor: '#1F2937',
-                                titleColor: '#FFFFFF',
-                                bodyColor: '#FFFFFF',
+                                backgroundColor: tooltipBgColor,
+                                titleColor: tooltipTextColor,
+                                bodyColor: tooltipTextColor,
                                 displayColors: false,
                                 callbacks: {
                                     label: function(context) {
@@ -210,7 +222,7 @@ async function loadDashboardData(forceRefresh = false) { // Added forceRefresh
                                         if (label) { label += ': '; }
                                         if (context.parsed !== null) {
                                             label += formatBytes(context.parsed);
-                                            const totalForPercentage = originalTotalBytes; // Use the stored total for tooltip context
+                                            const totalForPercentage = originalTotalBytes; 
                                             if (totalForPercentage > 0) {
                                                 const percentage = (context.parsed / totalForPercentage * 100).toFixed(1);
                                                 label += ` (${percentage}%)`;
@@ -267,13 +279,16 @@ function initializeDashboardEventListeners() {
         item.addEventListener('mouseenter', () => {
             let segmentValue, segmentColor;
             const currentTotalForPercentage = originalTotalBytes;
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            const segmentPercentageColor = isDarkMode ? 'text-slate-400' : 'text-gray-500';
+
 
             if (item.textContent.includes('Client Upload')) {
                 segmentValue = originalUploadBytes;
-                segmentColor = '#3B82F6';
+                segmentColor = '#3B82F6'; // Tailwind blue-500
             } else if (item.textContent.includes('Client Download')) {
                 segmentValue = originalDownloadBytes;
-                segmentColor = '#10B981';
+                segmentColor = '#10B981'; // Tailwind green-500
             }
 
             if (segmentValue !== undefined && donutTotalData) {
@@ -283,16 +298,18 @@ function initializeDashboardEventListeners() {
                 }
                 donutTotalData.innerHTML = `
                     <span style="color: ${segmentColor}; font-weight: bold; display: block; font-size: 1.2em;">${formatBytes(segmentValue)}</span>
-                    <span style="font-size: 0.8em; color: #6B7280;">(${segmentPercentage.toFixed(1)}%)</span>
+                    <span style="font-size: 0.8em;" class="${segmentPercentageColor}">(${segmentPercentage.toFixed(1)}%)</span>
                 `;
             }
         });
 
         item.addEventListener('mouseleave', () => {
             if (donutTotalData) {
+                 const isDarkMode = document.body.classList.contains('dark-mode');
+                 const totalPercentageColor = isDarkMode ? 'text-slate-400' : 'text-gray-500';
                 donutTotalData.innerHTML = `
                     <span style="font-weight: bold; display: block; font-size: 1.2em;">${formatBytes(originalTotalBytes)}</span>
-                    <span style="font-size: 0.8em; color: #6B7280;">(100.0%)</span>
+                    <span style="font-size: 0.8em;" class="${totalPercentageColor}">(100.0%)</span>
                 `;
             }
         });
