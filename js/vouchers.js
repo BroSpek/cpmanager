@@ -271,7 +271,7 @@ function renderVouchers(vouchers, groupName) {
 
     vouchers.forEach((voucher) => {
         const card = document.createElement('div');
-        card.className = 'voucher-card bg-gray-50 p-3 rounded-lg shadow border border-gray-200 relative';
+        card.className = 'voucher-card p-3 rounded-lg shadow border relative';
         card.setAttribute('role', 'listitem');
         card.setAttribute('aria-label', `Voucher ${voucher.username}`);
 
@@ -294,7 +294,7 @@ function renderVouchers(vouchers, groupName) {
                 <div class="info-row"><span class="info-label">Validity</span> <span class="info-value">${formatDuration(voucher.validity, 'seconds')}</span></div>
                 <div class="info-row"><span class="info-label">Start Time</span> <span class="info-value">${formatVoucherTimestamp(voucher.starttime)}</span></div>
                 <div class="info-row"><span class="info-label">End Time</span> <span class="info-value">${formatVoucherTimestamp(voucher.endtime)}</span></div>
-                <div class="info-row"><span class="info-label">Expires At</span><span class="info-value">${voucher.expirytime && voucher.expirytime !== 0 ? formatVoucherTimestamp(voucher.expirytime) : (placeholderValue === '—' ? 'Never' : placeholderValue)}</span></div>
+                <div class="info-row"><span class="info-label">Expires At</span><span class="info-value">${voucher.expirytime && voucher.expirytime !== 0 ? formatVoucherTimestamp(voucher.expirytime) : (placeholderValue === '—' ? 'Never' : placeholderValue)}</span></div>			
                 ${voucher.state !== 'expired' ?
                 `<p class="mt-3">
                     <button class="btn btn-warning w-full" data-action="revoke-voucher" data-voucher="${voucher.username}" data-group="${groupName}">
