@@ -164,7 +164,7 @@ function renderSessions(sessions) {
         }
 
         const card = document.createElement('div');
-        card.className = `session-card bg-gray-50 p-3 rounded-lg shadow border border-gray-200 relative ${isManagerCurrentDeviceSession ? 'ring-2 ring-offset-1 ring-blue-500 shadow-lg' : ''}`;
+        card.className = `session-card p-3 rounded-lg shadow border relative ${isManagerCurrentDeviceSession ? 'ring-2 ring-offset-1 ring-blue-500 shadow-lg' : ''}`;
         // Add ARIA roles and labels for accessibility
         card.setAttribute('role', 'listitem');
         card.setAttribute('aria-label', `Session for IP ${session.ipAddress || 'Unknown IP'}`);
