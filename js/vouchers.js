@@ -105,7 +105,7 @@ function handleProviderSelection(providerId, forceRefreshGroups = false) { // Ad
     if (providerId) {
         localStorage.setItem('selectedVoucherProvider', providerId);
         loadVoucherGroups(providerId, forceRefreshGroups);
-        disableVoucherActionButtons(false, true, true); // Enable create, disable group actions initially
+        // REMOVE: disableVoucherActionButtons(false, true, true); // This line was causing the premature disabling
     } else {
         localStorage.removeItem('selectedVoucherProvider');
         if(voucherGroupSelect) voucherGroupSelect.innerHTML = '<option value="">Select a provider first...</option>';
@@ -174,7 +174,7 @@ function populateVoucherGroupSelect(providerId, groups) {
     if (!voucherGroupSelect) return;
 
     const currentVal = localStorage.getItem(`voucherGroupFilter_${providerId}`) || "";
-    voucherGroupSelect.innerHTML = '<option value="">-- Select a Group --</option>';
+    voucherGroupSelect.innerHTML = '<option value="">-- Select a Group --</option>'; // Reset options
 
     if (groups.length > 0) {
         groups.forEach(group => {
@@ -183,22 +183,37 @@ function populateVoucherGroupSelect(providerId, groups) {
             option.textContent = group;
             voucherGroupSelect.appendChild(option);
         });
+
+        // Attempt to set the value from localStorage if it's a valid option
         if (currentVal && groups.includes(currentVal)) {
             voucherGroupSelect.value = currentVal;
-            // loadVouchersForGroup will be called by the change event listener or subsequent logic
-            disableVoucherActionButtons(false, false, false); // All actions enabled
-        } else {
-            if(voucherCardContainer) showNoDataMessage(voucherCardContainer, "Select a group to see vouchers.", "fas fa-ticket-alt");
-            disableVoucherActionButtons(false, true, true); // Group actions disabled
+        } else if (currentVal && !groups.includes(currentVal)) {
+            // If localStorage has a value not in current group options,
+            // it's effectively an invalid/stale selection.
+            // Ensure the select element reflects no valid group is selected.
+            voucherGroupSelect.value = ""; // Default to "Select a Group"
         }
-    } else { // No groups found
-        voucherGroupSelect.innerHTML = '<option value="">No voucher groups found.</option>';
-        if(voucherCardContainer) showNoDataMessage(voucherCardContainer, `No voucher groups found for provider: <strong>${providerId}</strong>. You can create vouchers to start a new group.`, "fas fa-folder-open");
-        disableVoucherActionButtons(false, true, true); // Only create enabled
+    } else {
+        // No groups for this provider, ensure select is empty.
+        voucherGroupSelect.value = "";
     }
-     // Ensure event listener triggers loading vouchers if a group is now selected
+
+    // After populating and attempting to set the value,
+    // base button state on the FINAL state of voucherGroupSelect.value
     if (voucherGroupSelect.value) {
-        loadVouchersForGroup(providerId, voucherGroupSelect.value);
+        // A group is selected
+        disableVoucherActionButtons(false, false, false); // Create enabled, group actions enabled
+        loadVouchersForGroup(providerId, voucherGroupSelect.value); // Load data for the selected group
+    } else {
+        // No group is selected
+        if(voucherCardContainer) {
+            if (groups.length === 0 && providerId) {
+                showNoDataMessage(voucherCardContainer, `No voucher groups found for provider: <strong>${providerId}</strong>. You can create vouchers to start a new group.`, "fas fa-folder-open");
+            } else {
+                showNoDataMessage(voucherCardContainer, "Select a group to see vouchers.", "fas fa-ticket-alt");
+            }
+        }
+        disableVoucherActionButtons(false, true, true); // Create enabled, group actions disabled
     }
 }
 
