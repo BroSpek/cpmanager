@@ -1,10 +1,70 @@
 // js/main.js
 
-// (Existing code: loadAppConfiguration, registerServiceWorker, credential functions, checkApiStatusAndConfig, etc.)
-// ...
 let confirmCallback = null;
-const zoneColors = {};
-const authViaColors = {};
+const zoneColors = {}; // Used in utils.js, initialized here or in config.js
+const authViaColors = {}; // Used in utils.js, initialized here or in config.js
+
+// Function to control the UI mode for credential entry
+function setCredentialEntryUIMode(isEntryMode) {
+    // Assuming these elements are globally accessible constants from ui.js or queried here
+    const navElement = document.querySelector('nav');
+    const mainTabsContainerElement = document.getElementById('mainTabs')?.closest('.mb-4.border-b.border-gray-300');
+    const tabContentElement = document.getElementById('tabContent');
+    const footerElement = document.querySelector('footer');
+    // configInputSection is a const from ui.js
+    // mainContentScrollArea is an ID from index.html
+    const mainContentScrollAreaElement = document.getElementById('main-content-scroll-area');
+
+    if (isEntryMode) {
+        if (navElement) navElement.style.display = 'none';
+        if (mainTabsContainerElement) mainTabsContainerElement.style.display = 'none';
+        if (tabContentElement) tabContentElement.style.display = 'none';
+        if (footerElement) footerElement.style.display = 'none';
+
+        if (configInputSection) { // Assumes configInputSection is available globally from ui.js
+            configInputSection.classList.remove('hidden');
+        }
+        if (mainContentScrollAreaElement) {
+            mainContentScrollAreaElement.style.display = 'flex';
+            mainContentScrollAreaElement.style.flexDirection = 'column';
+            mainContentScrollAreaElement.style.alignItems = 'center';
+            mainContentScrollAreaElement.style.justifyContent = 'center';
+            mainContentScrollAreaElement.style.minHeight = 'calc(100vh)'; // Full viewport height
+            mainContentScrollAreaElement.style.padding = '1rem';
+            mainContentScrollAreaElement.style.backgroundColor = '#f3f4f6'; // Neutral background
+        }
+        if (configInputSection) {
+            configInputSection.style.maxWidth = '500px';
+            configInputSection.style.width = '100%';
+            configInputSection.style.marginTop = '0'; // Reset margin due to flex centering
+            configInputSection.style.marginBottom = 'auto'; // Helps with centering
+        }
+
+    } else {
+        if (navElement) navElement.style.display = ''; // Revert to stylesheet's display
+        if (mainTabsContainerElement) mainTabsContainerElement.style.display = '';
+        if (tabContentElement) tabContentElement.style.display = '';
+        if (footerElement) footerElement.style.display = '';
+
+        if (configInputSection) {
+            configInputSection.classList.add('hidden');
+            configInputSection.style.maxWidth = '';
+            configInputSection.style.width = '';
+            configInputSection.style.marginTop = '';
+            configInputSection.style.marginBottom = '';
+        }
+        if (mainContentScrollAreaElement) {
+            mainContentScrollAreaElement.style.display = '';
+            mainContentScrollAreaElement.style.flexDirection = '';
+            mainContentScrollAreaElement.style.alignItems = '';
+            mainContentScrollAreaElement.style.justifyContent = '';
+            mainContentScrollAreaElement.style.minHeight = '';
+            mainContentScrollAreaElement.style.padding = '';
+            mainContentScrollAreaElement.style.backgroundColor = ''; // Revert background
+        }
+    }
+}
+
 
 async function loadAppConfiguration() {
     try {
@@ -21,12 +81,13 @@ async function loadAppConfiguration() {
         }
     } catch (error) {
         console.error("Error loading application configuration:", error.message);
-        if (apiStatusFooterText) {
+        // Assumes apiStatusFooterText is a global const from ui.js
+        if (typeof apiStatusFooterText !== 'undefined' && apiStatusFooterText) {
             apiStatusFooterText.textContent = 'App Config Load Failed!';
             apiStatusFooterText.className = 'font-semibold text-red-500';
         }
         showToast(`Critical: Failed to load app configuration. API calls will likely fail. Error: ${error.message}`, 'error', 10000);
-        throw error;
+        throw error; // Re-throw to be caught by initializeApp
     }
 }
 
@@ -52,21 +113,42 @@ function registerServiceWorker() {
 function loadApiCredentials() {
     currentApiKey = localStorage.getItem('opnsenseApiKey') || '';
     currentApiSecret = localStorage.getItem('opnsenseApiSecret') || '';
-    if (configApiKeyInput) configApiKeyInput.value = currentApiKey;
-    if (configApiSecretInput) configApiSecretInput.value = currentApiSecret;
+    // Assumes configApiKeyInput & configApiSecretInput are global consts from ui.js
+    if (typeof configApiKeyInput !== 'undefined' && configApiKeyInput) configApiKeyInput.value = currentApiKey;
+    if (typeof configApiSecretInput !== 'undefined' && configApiSecretInput) configApiSecretInput.value = currentApiSecret;
 }
 
 async function saveApiCredentials() {
+    // Assumes configApiKeyInput, configApiSecretInput, configInputSection are global consts from ui.js
     if (!configApiKeyInput || !configApiSecretInput) return;
+
     currentApiKey = configApiKeyInput.value.trim();
     currentApiSecret = configApiSecretInput.value.trim();
+
     if (currentApiKey && currentApiSecret) {
         try {
             localStorage.setItem('opnsenseApiKey', currentApiKey);
             localStorage.setItem('opnsenseApiSecret', currentApiSecret);
             showToast('API credentials saved to browser local storage.', 'success');
-            if (configInputSection) configInputSection.classList.add('hidden');
-            await initializeAppLogic();
+            // setCredentialEntryUIMode(false) will be called by checkApiStatusAndConfig via initializeAppLogic
+            
+            await initializeAppLogic(); // This re-evaluates connection and UI state
+
+            // Force refresh the active tab's data
+            let currentActiveTabId = 'dashboard';
+            try {
+                const savedTab = localStorage.getItem('activeHelpdeskTab');
+                // Assumes tabPanes is global from ui.js
+                if (savedTab && typeof tabPanes !== 'undefined' && tabPanes[savedTab]) {
+                    currentActiveTabId = savedTab;
+                }
+            } catch(e) { console.warn("localStorage access error for active tab during credential save refresh:", e.message); }
+            
+            if (typeof setActiveTab === 'function') {
+                console.log(`saveApiCredentials: Forcing refresh for tab: ${currentActiveTabId} after saving credentials.`);
+                setActiveTab(currentActiveTabId, true);
+            }
+
         } catch (e) {
             showToast('Failed to save credentials to local storage. Storage might be full or disabled.', 'error');
             console.error("Error saving to localStorage:", e);
@@ -77,6 +159,7 @@ async function saveApiCredentials() {
 }
 
 function clearApiCredentials() {
+    // Assumes configApiKeyInput, configApiSecretInput are global consts from ui.js
     try {
         localStorage.removeItem('opnsenseApiKey');
         localStorage.removeItem('opnsenseApiSecret');
@@ -87,12 +170,21 @@ function clearApiCredentials() {
     currentApiSecret = '';
     if (configApiKeyInput) configApiKeyInput.value = '';
     if (configApiSecretInput) configApiSecretInput.value = '';
+
     showToast('API credentials cleared from local storage.', 'info');
-    if (configInputSection) configInputSection.classList.remove('hidden');
-    document.querySelectorAll('button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"])')
-        .forEach(el => el.disabled = true);
+    setCredentialEntryUIMode(true); // Activate special UI mode
+
+    // Disable buttons and inputs
+    // Assumes saveApiCredsBtn, clearApiCredsBtn are global consts from ui.js
+    document.querySelectorAll('button').forEach(el => {
+        if (el !== saveApiCredsBtn && el !== clearApiCredsBtn && !el.id.startsWith('confirm-') && !el.id.startsWith('cancel-')) {
+            el.disabled = true;
+        }
+    });
     document.querySelectorAll('input:not(#config-api-key):not(#config-api-secret), select')
         .forEach(el => el.disabled = true);
+
+    // Assumes mainTabs, apiStatusFooterText are global consts from ui.js
     if (mainTabs) {
         mainTabs.querySelectorAll('.tab-btn').forEach(btn => btn.style.pointerEvents = 'none');
     }
@@ -100,37 +192,49 @@ function clearApiCredentials() {
         apiStatusFooterText.textContent = 'Credentials Cleared';
         apiStatusFooterText.className = 'font-semibold text-yellow-500';
     }
-    if (sessionCardContainer) clearContainer(sessionCardContainer);
-    if (voucherCardContainer) clearContainer(voucherCardContainer);
-    if (zoneListContainer) clearContainer(zoneListContainer);
-    if (dashboardStatsContainer) clearContainer(dashboardStatsContainer);
-    if (dataUsageChart) { // Clear dashboard chart if it exists
+
+    // Clear UI content
+    // Assumes sessionCardContainer, voucherCardContainer, zoneListContainer, dashboardStatsContainer, donutTotalData are global from ui.js
+    if (sessionCardContainer && typeof clearContainer === 'function') clearContainer(sessionCardContainer);
+    if (voucherCardContainer && typeof clearContainer === 'function') clearContainer(voucherCardContainer);
+    if (zoneListContainer && typeof clearContainer === 'function') clearContainer(zoneListContainer);
+    if (dashboardStatsContainer && typeof clearContainer === 'function') clearContainer(dashboardStatsContainer);
+    
+    // Assumes dataUsageChart is a global variable for the chart instance
+    if (typeof dataUsageChart !== 'undefined' && dataUsageChart) {
         dataUsageChart.destroy();
         dataUsageChart = null;
-        // Also reset dashboard cache
-        if (typeof dashboardApiDataCache !== 'undefined') {
+        if (typeof dashboardApiDataCache !== 'undefined') { // dashboardApiDataCache from dashboard.js
             dashboardApiDataCache = { sessions: null, voucherStats: null };
         }
     }
-    if (donutTotalData) donutTotalData.textContent = placeholderValue;
+    if (donutTotalData && typeof placeholderValue !== 'undefined') donutTotalData.textContent = placeholderValue; // placeholderValue from config.js
 
-    // Reset other caches as well upon clearing credentials
-    if (typeof allSessions !== 'undefined') allSessions = [];
-    if (typeof cachedVoucherProviders !== 'undefined') cachedVoucherProviders = [];
-    if (typeof cachedVoucherGroups !== 'undefined') cachedVoucherGroups = {};
-    if (typeof cachedVouchersData !== 'undefined') cachedVouchersData = {};
-    if (typeof allConfiguredZones !== 'undefined') allConfiguredZones = []; // zones.js cache
+    // Reset data caches
+    if (typeof allSessions !== 'undefined') allSessions = []; // from sessions.js
+    if (typeof cachedVoucherProviders !== 'undefined') cachedVoucherProviders = []; // from vouchers.js
+    if (typeof cachedVoucherGroups !== 'undefined') cachedVoucherGroups = {}; // from vouchers.js
+    if (typeof cachedVouchersData !== 'undefined') cachedVouchersData = {}; // from vouchers.js
+    if (typeof allConfiguredZones !== 'undefined') allConfiguredZones = []; // from zones.js
 }
 
 async function checkApiStatusAndConfig() {
+    // Assumes apiStatusFooterText, configInputSection, mainTabs are global consts from ui.js
     if (!OPNsenseConfig.baseUrl) {
-        if (apiStatusFooterText) apiStatusFooterText.textContent = 'API Base URL Missing from Config!';
+        if (apiStatusFooterText) {
+            apiStatusFooterText.textContent = 'API Base URL Missing from Config!';
+            apiStatusFooterText.className = 'font-semibold text-red-500';
+        }
         showToast('Critical: API Base URL not loaded from app-config.json. Cannot connect to API.', 'error', 10000);
+        setCredentialEntryUIMode(true); // Show credential UI
         return false;
     }
+
     if (!currentApiKey || !currentApiSecret) {
         if (apiStatusFooterText) apiStatusFooterText.textContent = 'Credentials Missing!';
-        if (configInputSection) configInputSection.classList.remove('hidden');
+        setCredentialEntryUIMode(true); // Activate special UI mode
+
+        // Disable buttons
         document.querySelectorAll('button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"])')
             .forEach(el => el.disabled = true);
         document.querySelectorAll('input:not(#config-api-key):not(#config-api-secret), select')
@@ -138,45 +242,48 @@ async function checkApiStatusAndConfig() {
         if(mainTabs) mainTabs.querySelectorAll('.tab-btn').forEach(btn => btn.style.pointerEvents = 'none');
         return false;
     }
-    if (configInputSection) configInputSection.classList.add('hidden');
-    try {
-        // fetchAllZoneData itself has caching, called here to confirm API connectivity and get zone list early
-        await fetchAllZoneData(); // Defaults to forceRefresh = false, uses cache if available
-        const initialCheckData = allConfiguredZones; // Use the (potentially cached) result
 
-        if (Array.isArray(initialCheckData)) { // Check if we got a valid array (even if empty)
+    setCredentialEntryUIMode(false); // Credentials seem present, switch to normal UI before API test
+
+    try {
+        await fetchAllZoneData(); // Test API connection and get zone list (uses cache by default)
+        // allConfiguredZones is from zones.js
+        const initialCheckData = (typeof allConfiguredZones !== 'undefined') ? allConfiguredZones : null;
+
+        if (Array.isArray(initialCheckData)) {
             if (apiStatusFooterText) {
                 apiStatusFooterText.textContent = 'Connected';
                 apiStatusFooterText.className = 'font-semibold text-green-600';
             }
             return true;
-        } else {
+        } else { // Unexpected response format from API check
             if (apiStatusFooterText) {
                 apiStatusFooterText.textContent = 'Connection Problematic';
                 apiStatusFooterText.className = 'font-semibold text-yellow-500';
             }
-            console.warn("Initial API check (via fetchAllZoneData) returned unexpected data format:", initialCheckData);
+            console.warn("Initial API check (fetchAllZoneData) returned unexpected data format:", initialCheckData);
             showToast('API connection check returned unexpected data. App might not function correctly.', 'warning');
+            // Don't revert to credential mode here unless it's an auth error (handled below)
             return false;
         }
-    } catch (error) {
+    } catch (error) { // API call failed
         if (apiStatusFooterText) {
             apiStatusFooterText.textContent = 'Connection Failed';
             apiStatusFooterText.className = 'font-semibold text-red-500';
         }
-        console.error("Initial API check (via fetchAllZoneData) failed:", error.message);
+        console.error("Initial API check (fetchAllZoneData) failed:", error.message);
         if (error.message.includes("401") || error.message.includes("Unauthorized")) {
-            if (configInputSection) configInputSection.classList.remove('hidden');
+            setCredentialEntryUIMode(true); // Auth error, so show credential input
         }
         return false;
     }
 }
-
 /**
  * Handles the click of the global "Apply Captive Portal Configuration" button.
  * Calls the service/reconfigure endpoint.
  */
 async function handleApplyCpConfiguration() {
+    // Assumes applyCpConfigBtn is global from ui.js
     if (!applyCpConfigBtn) return;
 
     const originalButtonText = applyCpConfigBtn.innerHTML;
@@ -185,26 +292,16 @@ async function handleApplyCpConfiguration() {
     showToast('Applying Captive Portal configuration changes...', 'info');
 
     try {
-        const reconfigResult = await callApi('/service/reconfigure', 'POST', {}); // Assuming callApi is globally available
+        const reconfigResult = await callApi('/service/reconfigure', 'POST', {});
         if (reconfigResult && (reconfigResult.status === 'ok' || (reconfigResult.message && reconfigResult.message.toLowerCase().includes('ok')))) {
             showToast('Captive Portal service reconfigured successfully.', 'success');
-            // Optionally, you might want to reload data in the current tab or dashboard with forceRefresh = true
-            const activeTabId = localStorage.getItem('activeHelpdeskTab');
-            if (activeTabId && typeof setActiveTab === 'function') {
-                 // Re-call setActiveTab for the current tab with forceRefreshData = true
-                 // This will trigger the respective load function with forceRefreshData = true
-                 // setActiveTab(activeTabId, true); // Commented out as it might be too aggressive, specific refresh buttons are better
-                 // Or, more targeted:
-                 // if (activeTabId === 'dashboard' && typeof loadDashboardData === 'function') loadDashboardData(true);
-                 // else if (activeTabId === 'info' && typeof loadZoneInfo === 'function') loadZoneInfo(true);
-                 // ... etc.
-            }
         } else {
             const errorDetail = reconfigResult ? (reconfigResult.status || reconfigResult.message || JSON.stringify(reconfigResult)) : 'Unknown response';
             showToast(`Service reconfigure attempt finished. Status: ${errorDetail}`, 'warning');
             console.warn('Reconfigure result not explicitly "ok":', reconfigResult);
         }
     } catch (error) {
+        // Error toast is handled by callApi
         console.error("Error during manual reconfigure call:", error.message);
     } finally {
         applyCpConfigBtn.disabled = false;
@@ -213,17 +310,16 @@ async function handleApplyCpConfiguration() {
 }
 
 function initializeAllEventListeners() {
+    // Assumes saveApiCredsBtn, clearApiCredsBtn, applyCpConfigBtn, confirmationModal, confirmCancelBtn, confirmProceedBtn are global from ui.js
     if (saveApiCredsBtn) saveApiCredsBtn.addEventListener('click', saveApiCredentials);
     if (clearApiCredsBtn) clearApiCredsBtn.addEventListener('click', clearApiCredentials);
-
-    if (applyCpConfigBtn) {
-        applyCpConfigBtn.addEventListener('click', handleApplyCpConfiguration);
-    }
+    if (applyCpConfigBtn) applyCpConfigBtn.addEventListener('click', handleApplyCpConfiguration);
 
     initializeTabs(); // From tabs.js
+
     if (confirmationModal && confirmCancelBtn) {
         confirmCancelBtn.addEventListener('click', () => {
-            hideModal(confirmationModal);
+            hideModal(confirmationModal); // hideModal from ui.js
             confirmCallback = null;
         });
     }
@@ -234,95 +330,115 @@ function initializeAllEventListeners() {
             confirmCallback = null;
         });
     }
+
+    // Generic cancel button handler for modals
     document.querySelectorAll('.modal [id^="cancel-"]').forEach(btn => {
-        if (!btn.dataset.specificHandlerAttached) {
+        // Prevent attaching multiple listeners if this function is called again
+        if (btn.dataset.specificHandlerAttached !== 'true') {
             btn.addEventListener('click', () => {
                 const modal = btn.closest('.modal');
                 if (modal) {
                     hideModal(modal);
+                    // Specific cleanup for editZoneModal if originalFullZoneDataForEdit exists (from zones.js)
                     if (modal.id === 'editZoneModal' && typeof originalFullZoneDataForEdit !== 'undefined') {
                         originalFullZoneDataForEdit = null;
                     }
                 }
             });
+            btn.dataset.specificHandlerAttached = 'true';
         }
     });
-    initializeSessionEventListeners();
-    initializeVoucherEventListeners();
-    initializeZoneEventListeners();
-    initializeDashboardEventListeners();
+
+    initializeSessionEventListeners();    // From sessions.js
+    initializeVoucherEventListeners();  // From vouchers.js
+    initializeZoneEventListeners();     // From zones.js
+    initializeDashboardEventListeners(); // From dashboard.js
 }
 
 async function initializeAppLogic() {
     const connected = await checkApiStatusAndConfig();
+    // Assumes saveApiCredsBtn, clearApiCredsBtn, mainTabs, applyCpConfigBtn are global from ui.js
+    // Assumes tabPanes is global from ui.js
 
     if (connected) {
-        document.querySelectorAll('button:not([id^="confirm-"]):not([id^="cancel-"]), input, select').forEach(el => {
-            if (el.id !== 'config-api-key' && el.id !== 'config-api-secret' && el.id !== 'save-api-creds-btn' && el.id !== 'clear-api-creds-btn') {
+        // Enable all relevant buttons, inputs, selects
+        document.querySelectorAll('button, input, select').forEach(el => {
+            // Check if the element is NOT part of the config input section (unless it's clearApiCredsBtn)
+            const isConfigKey = el.id === 'config-api-key';
+            const isConfigSecret = el.id === 'config-api-secret';
+            const isSaveCredsBtn = el === saveApiCredsBtn;
+
+            if (!(isConfigKey || isConfigSecret || isSaveCredsBtn) || el === clearApiCredsBtn) {
                 el.disabled = false;
+            } else if (isSaveCredsBtn) { // saveApiCredsBtn should be disabled if not in credential entry mode
+                el.disabled = true;
             }
         });
         if (mainTabs) {
             mainTabs.querySelectorAll('.tab-btn').forEach(btn => btn.style.pointerEvents = 'auto');
         }
+        if (clearApiCredsBtn) clearApiCredsBtn.disabled = false; // Always enable if creds exist.
 
-        if (typeof fetchManagerSessionStatus === 'function') await fetchManagerSessionStatus(); // sessions.js
-        if (typeof disableVoucherActionButtons === 'function') disableVoucherActionButtons(true, true, true); // vouchers.js
+        if (typeof fetchManagerSessionStatus === 'function') await fetchManagerSessionStatus();
+        // disableVoucherActionButtons is from vouchers.js
+        if (typeof disableVoucherActionButtons === 'function') disableVoucherActionButtons(false, true, true); // sensible defaults on load
+
 
         let initialTab = 'dashboard';
         try {
             const savedTab = localStorage.getItem('activeHelpdeskTab');
-            if (savedTab && tabPanes[savedTab]) { // tabPanes should be globally available from ui.js or similar
+            if (savedTab && tabPanes && tabPanes[savedTab]) {
                 initialTab = savedTab;
             }
         } catch (e) { console.warn("localStorage access error for active tab:", e.message); }
 
-        if (typeof setActiveTab === 'function') {
-            setActiveTab(initialTab, false); // Call setActiveTab with forceRefreshData = false
+        if (typeof setActiveTab === 'function') { // setActiveTab is from tabs.js
+            setActiveTab(initialTab, false); // Load initial tab, use cache if available
         } else {
             console.error("setActiveTab function is not defined. Tabs will not initialize correctly.");
         }
-    } else {
+
+    } else { // Not connected
+        // Disable most buttons/inputs, except those in the config section
         document.querySelectorAll('button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"])')
             .forEach(el => el.disabled = true);
         document.querySelectorAll('input:not(#config-api-key):not(#config-api-secret), select')
             .forEach(el => el.disabled = true);
+
         if (mainTabs) {
             mainTabs.querySelectorAll('.tab-btn').forEach(btn => btn.style.pointerEvents = 'none');
         }
-        if (!currentApiKey || !currentApiSecret) {
-            if (configInputSection && OPNsenseConfig.baseUrl) configInputSection.classList.remove('hidden');
-        }
+        if (saveApiCredsBtn) saveApiCredsBtn.disabled = false; // Enable save if config section is shown
+        if (clearApiCredsBtn) clearApiCredsBtn.disabled = false; // Always enable clear
+
         if (applyCpConfigBtn) applyCpConfigBtn.disabled = true;
 
-        // Display appropriate message if not connected
+        // Handle dashboard display if not connected
         const dashboardPane = tabPanes ? tabPanes.dashboard : null;
-        if (dashboardPane && OPNsenseConfig.baseUrl) {
-            Object.values(tabPanes).forEach(pane => { if(pane) {pane.classList.add('hidden'); pane.classList.remove('active');}});
-            dashboardPane.classList.remove('hidden');
-            dashboardPane.classList.add('active');
-            dashboardPane.innerHTML = `<div class="text-center p-8 text-red-500"><i class="fas fa-exclamation-triangle fa-3x mb-3"></i><p>Application not connected. Please check API credentials and OPNsense server.</p></div>`;
-        } else if (dashboardPane && !OPNsenseConfig.baseUrl) {
-            Object.values(tabPanes).forEach(pane => {if(pane) {pane.classList.add('hidden'); pane.classList.remove('active');}});
+        if (dashboardPane && !OPNsenseConfig.baseUrl) { // Critical: app-config.json failed
+            if (tabPanes) Object.values(tabPanes).forEach(pane => {if(pane) {pane.classList.add('hidden'); pane.classList.remove('active');}});
             dashboardPane.classList.remove('hidden');
             dashboardPane.classList.add('active');
             dashboardPane.innerHTML = `<div class="text-center p-8 text-red-500"><i class="fas fa-exclamation-triangle fa-3x mb-3"></i><p>Application configuration (app-config.json) failed to load. Cannot connect.</p></div>`;
+        } else if (dashboardPane && OPNsenseConfig.baseUrl && (!currentApiKey || !currentApiSecret)) {
+            // If in credential input mode, dashboard is hidden by setCredentialEntryUIMode, so no need to overwrite its content here.
+            // The message about missing creds is implicitly handled by the dedicated UI mode.
         }
     }
 }
 
 async function initializeApp() {
+    // Assumes applyCpConfigBtn, tabPanes are global from ui.js
     try {
-        await loadAppConfiguration();
+        await loadAppConfiguration(); // Must complete before anything else
         loadApiCredentials();
-        initializeAllEventListeners(); // This now includes initializeTabs()
+        initializeAllEventListeners(); // Setup all static event listeners
         registerServiceWorker();
-        await initializeAppLogic();
-    } catch (error) {
+        await initializeAppLogic(); // Check connection, set initial UI state and load tab
+    } catch (error) { // This catch is mainly for loadAppConfiguration failure
         console.error("Failed to initialize the application due to configuration load error:", error.message);
         if (applyCpConfigBtn) applyCpConfigBtn.disabled = true;
-        // Display a critical error message in the UI if app config fails
-        const dashboardPane = typeof tabPanes !== 'undefined' && tabPanes ? tabPanes.dashboard : document.getElementById('tab-dashboard'); // Fallback ID if tabPanes not ready
+        const dashboardPane = (typeof tabPanes !== 'undefined' && tabPanes) ? tabPanes.dashboard : document.getElementById('dashboard-content');
         if (dashboardPane) {
              if (typeof tabPanes !== 'undefined' && tabPanes) {
                 Object.values(tabPanes).forEach(pane => { if(pane) {pane.classList.add('hidden'); pane.classList.remove('active');}});
@@ -331,6 +447,8 @@ async function initializeApp() {
              }
             dashboardPane.innerHTML = `<div class="text-center p-8 text-red-500"><i class="fas fa-exclamation-triangle fa-3x mb-3"></i><p>Critical Error: Application configuration (app-config.json) failed to load. Cannot connect or function.</p><p class="text-sm mt-2">Details: ${error.message}</p></div>`;
         }
+        // Also ensure credential entry mode is active if config load failed, as API calls won't work.
+        setCredentialEntryUIMode(true);
     }
 }
 
