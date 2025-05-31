@@ -59,7 +59,7 @@ Here's a glimpse of how the Captive Portal Manager looks on mobile devices in bo
 
 * An operational OPNsense® firewall.
 * The OPNsense Captive Portal module configured for at least one zone.
-* The OPNsense API enabled, with an API Key and Secret generated that have sufficient permissions for captive portal and voucher management. Navigate your OPNsense > System > Access > Users.
+* The OPNsense API enabled, with an API Key and Secret generated that have sufficient permissions for captive portal and voucher management. Navigate your `OPNsense > System > Access > Users`.
 * Network connectivity from the device running this tool to the OPNsense API endpoint (ensure the `apiBaseUrl` in `app-config.json` is reachable).
 * A modern web browser (e.g., Chrome, Firefox, Safari, Edge) that supports JavaScript, localStorage, and Service Workers for PWA functionality.
 
@@ -84,8 +84,6 @@ Here's a glimpse of how the Captive Portal Manager looks on mobile devices in bo
 ## Service Worker
 
 The application uses a service worker (`sw.js`) to cache the core application shell (e.g., `index.html`, icons). This allows for faster load times on subsequent visits.
-
-## Technologies Used
 
 ## Technologies Used
 
