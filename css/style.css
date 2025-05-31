@@ -1,4 +1,105 @@
 /* General body and HTML styling for full height and layout */
+:root {
+    --bg-color: #F3F4F6; /* Light mode default: gray-100 */
+    --text-color: #1F2937; /* Light mode default: gray-800 */
+    --bg-secondary-color: #FFFFFF; /* Light mode default: white */
+    --text-secondary-color: #374151; /* Light mode default: gray-700 */
+    --border-color: #E5E7EB; /* Light mode default: gray-200 */
+    --border-secondary-color: #D1D5DB; /* Light mode default: gray-300 */
+    --nav-bg-color: #1E293B; /* slate-800 */
+    --nav-text-color: #FFFFFF;
+    --footer-bg-color: #F3F4F6; /* gray-100 */
+    --footer-text-color: #4B5563; /* gray-600 */
+    --link-hover-color: #374151; /* gray-700 */
+    --link-hover-border-color: #9CA3AF; /* gray-400 */
+    --tab-active-text-color: #2563EB; /* blue-600 */
+    --tab-active-border-color: #2563EB; /* blue-600 */
+
+    --form-input-bg: #FFFFFF;
+    --form-input-text: #1F2937;
+    --form-input-border: #D1D5DB;
+    --form-input-focus-border: #2563EB;
+    --form-input-focus-ring: rgba(59, 130, 246, 0.3);
+
+    --card-bg: #F9FAFB; /* gray-50 */
+    --card-text: #374151; /* gray-700 */
+    --card-border: #E5E7EB; /* gray-200 */
+    --card-info-label-color: #374151; /* text-gray-700 */
+    --card-info-value-color: #4B5563; /* text-gray-600 */
+    --card-info-value-main-color: #1D4ED8; /* text-blue-700 */
+
+    --modal-bg: #FFFFFF;
+    --modal-text: #1F2937;
+    
+    --skeleton-card-bg: #e5e7eb; /* bg-gray-200 */
+    --stat-card-bg: #F9FAFB; /* bg-gray-50 */
+    --stat-value-color: #1D4ED8; /* text-blue-700 */
+    --stat-label-color: #6B7280; /* text-gray-500 */
+    --donut-center-text-color: #1F2937; /* text-gray-800 */
+    --legend-item-text-color: #4B5563; /* text-gray-600 */
+
+    --dashboard-hint-bg: #EFF6FF; /* bg-blue-50 */
+    --dashboard-hint-border: #BFDBFE; /* border-blue-200 */
+    --dashboard-hint-text: #374151; /* text-gray-700 */
+    --dashboard-hint-icon: #3B82F6; /* text-blue-500 */
+
+    --config-input-section-bg: #FEF3C7; /* yellow-100 */
+    --config-input-section-border: #FBBF24; /* yellow-500 */
+    --config-input-section-text: #B45309; /* yellow-700 */
+}
+
+.dark-mode {
+    --bg-color: #0F172A; /* Dark mode default: slate-900 */
+    --text-color: #E2E8F0; /* Dark mode default: slate-200 */
+    --bg-secondary-color: #1E293B; /* Dark mode default: slate-800 */
+    --text-secondary-color: #94A3B8; /* Dark mode default: slate-400 */
+    --border-color: #334155; /* Dark mode default: slate-700 */
+    --border-secondary-color: #475569; /* Dark mode default: slate-600 */
+    /* Keep nav colors same for now, or define dark specific if needed */
+    /* --nav-bg-color: #0F172A; */
+    /* --nav-text-color: #E2E8F0; */
+    --footer-bg-color: #0F172A; /* slate-900 */
+    --footer-text-color: #94A3B8; /* slate-400 */
+    --link-hover-color: #CBD5E1; /* slate-300 */
+    --link-hover-border-color: #64748B; /* slate-500 */
+    /* Tab active colors can remain blue or be adjusted */
+    /* --tab-active-text-color: #3B82F6; */ /* blue-500 for dark? */
+    /* --tab-active-border-color: #3B82F6; */
+
+    --form-input-bg: #1E293B; /* slate-800 or 700 */
+    --form-input-text: #E2E8F0; /* slate-200 */
+    --form-input-border: #475569; /* slate-600 */
+    --form-input-focus-border: #3B82F6; /* blue-500 */
+    --form-input-focus-ring: rgba(59, 130, 246, 0.4);
+
+    --card-bg: #1E293B; /* slate-800 */
+    --card-text: #CBD5E1; /* slate-300 */
+    --card-border: #334155; /* slate-700 */
+    --card-info-label-color: #CBD5E1; /* slate-300 */
+    --card-info-value-color: #94A3B8; /* slate-400 */
+    --card-info-value-main-color: #60A5FA; /* blue-400 */
+
+    --modal-bg: #1E293B; /* slate-800 */
+    --modal-text: #E2E8F0; /* slate-200 */
+
+    --skeleton-card-bg: #334155; /* bg-slate-700 */
+    --stat-card-bg: #1E293B; /* bg-slate-800 */
+    --stat-value-color: #60A5FA; /* text-blue-400 */
+    --stat-label-color: #94A3B8; /* text-slate-400 */
+    --donut-center-text-color: #E2E8F0; /* text-slate-200 */
+    --legend-item-text-color: #94A3B8; /* text-slate-400 */
+
+    --dashboard-hint-bg: #172554; /* bg-sky-900 (adjust from blue-50) */
+    --dashboard-hint-border: #075985; /* border-sky-700 */
+    --dashboard-hint-text: #BAE6FD; /* text-sky-200 */
+    --dashboard-hint-icon: #7DD3FC; /* text-sky-300 */
+    
+    --config-input-section-bg: #374151; /* gray-700, example, adjust as needed */
+    --config-input-section-border: #4B5563; /* gray-600 */
+    --config-input-section-text: #FDE047; /* yellow-300 */
+}
+
+
 html {
     height: 100%;
     overflow: hidden; /* Prevent scroll on html to manage scrolling within #main-content-scroll-area */
@@ -8,8 +109,10 @@ body {
     flex-direction: column;
     height: 100vh; /* Full viewport height */
     overflow: hidden; /* Prevent scroll on body */
-    background-color: #1E293B; /* Default background, though overridden by Tailwind on content areas */
+    background-color: var(--bg-color);
+    color: var(--text-color);
     margin: 0; /* Reset default margin */
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Custom scrollbar styling for the main content scroll area */
@@ -19,6 +122,7 @@ body {
 #main-content-scroll-area {
     -ms-overflow-style: none;  /* Hide scrollbar for IE and Edge */
     scrollbar-width: none;  /* Hide scrollbar for Firefox */
+    background-color: var(--bg-color); /* Ensure scroll area bg matches body */
 }
 
 /* General scrollbar styling (if not hidden or for other elements) */
@@ -27,15 +131,15 @@ body {
     height: 8px;
 }
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--border-color); /* Use themed background */
     border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb {
-    background: #888;
+    background: var(--text-secondary-color); /* Use themed thumb */
     border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: var(--text-color); /* Darker on hover */
 }
 
 /* Tab content visibility */
@@ -58,8 +162,24 @@ body {
 .modal-inactive {
     display: none;
 }
+/* Modal content background and text */
+.modal > div { /* Assuming the direct child is the modal content box */
+    background-color: var(--modal-bg);
+    color: var(--modal-text);
+}
+/* Labels within modals */
+.modal label {
+    color: var(--text-secondary-color);
+}
+.dark-mode .modal label { /* Specific for dark mode if needed */
+    color: var(--text-secondary-color); /* slate-300 or 400 */
+}
+.modal h3 {
+    color: var(--text-color);
+}
 
-/* Custom button styling (base class .btn) */
+
+/* Custom button styling (base class .btn) -  Button colors are generally okay as they define their own bg/text */
 .btn {
     padding: 0.75rem 1.5rem; /* py-3 px-6 */
     font-size: 0.875rem; /* text-sm */
@@ -83,7 +203,7 @@ body {
     }
 }
 
-/* Button color variants */
+/* Button color variants - these should remain as they are specific */
 .btn-primary { background-color: #3B82F6; color: white; } /* bg-blue-500 */
 .btn-primary:hover:not(:disabled) { background-color: #2563EB; } /* hover:bg-blue-600 */
 .btn-secondary { background-color: #6B7280; color: white; } /* bg-gray-500 */
@@ -101,7 +221,9 @@ body {
 /* Form input and select styling */
 .form-input, .form-select {
     padding: 0.625rem 0.75rem; /* py-2.5 px-3 */
-    border: 1px solid #D1D5DB; /* border-gray-300 */
+    border: 1px solid var(--form-input-border);
+    background-color: var(--form-input-bg);
+    color: var(--form-input-text);
     border-radius: 0.375rem; /* rounded-md */
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
     transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -109,9 +231,15 @@ body {
 }
 .form-input:focus, .form-select:focus {
     outline: none;
-    border-color: #2563EB; /* focus:border-blue-600 */
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* focus:ring focus:ring-blue-300 focus:ring-opacity-50 */
+    border-color: var(--form-input-focus-border);
+    box-shadow: 0 0 0 3px var(--form-input-focus-ring);
 }
+/* Options in select */
+.form-select option {
+    background-color: var(--form-input-bg); /* Might not work in all browsers */
+    color: var(--form-input-text);
+}
+
 
 /* Card details content (for expandable sections) */
 .card-details-content {
@@ -141,7 +269,7 @@ body {
     padding: 0.125rem 0.375rem; /* py-0.5 px-1.5 */
     font-size: 0.7rem; /* Smaller text for tags */
     border-radius: 0.25rem; /* rounded-sm */
-    color: white;
+    color: white; /* Most tags have dark bg and white text */
     line-height: 1.2;
     max-width: 100px; /* Prevent very long tags from breaking layout */
     white-space: nowrap;
@@ -171,33 +299,36 @@ body {
 }
 .info-label {
     font-weight: 600; /* font-semibold */
-    color: #374151; /* text-gray-700 */
+    color: var(--card-info-label-color);
     margin-right: 0.75rem; /* mr-3 */
     white-space: nowrap;
     font-size: 0.875rem; /* text-sm */
     flex-shrink: 0; /* Prevent label from shrinking */
 }
 .info-value {
-    color: #4B5563; /* text-gray-600 */
+    color: var(--card-info-value-color);
     text-align: right;
     word-break: break-all; /* Allow long values to wrap */
     font-size: 0.875rem; /* text-sm */
     flex-grow: 1; /* Allow value to take remaining space */
 }
 .info-value.summary-main-value { /* For prominent values in the summary */
-    color: #1D4ED8; /* text-blue-700 */
+    color: var(--card-info-value-main-color);
     font-weight: 600; /* font-semibold */
 }
 
 /* Placeholder text styling */
 .placeholder-text {
-    color: #9CA3AF; /* text-gray-400 */
+    color: #9CA3AF; /* text-gray-400 - this is Tailwind gray-400, might need a variable if different in dark mode */
     font-style: italic;
+}
+.dark-mode .placeholder-text {
+    color: #6B7280; /* Example: Tailwind gray-500 for dark mode */
 }
 
 /* Skeleton card styling for loading states */
 .skeleton-card {
-    background-color: #e5e7eb; /* bg-gray-200 */
+    background-color: var(--skeleton-card-bg);
     border-radius: 0.5rem; /* rounded-lg */
     padding: 1rem; /* p-4 */
     min-height: 80px;
@@ -210,7 +341,7 @@ body {
 
 /* Dashboard Stat Card Styling */
 .stat-card {
-    background-color: #F9FAFB; /* bg-gray-50 */
+    background-color: var(--stat-card-bg);
     padding: 1.5rem; /* p-6 */
     border-radius: 0.5rem; /* rounded-lg */
     box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06); /* shadow-md */
@@ -227,11 +358,11 @@ body {
 .stat-value {
     font-size: 2.25rem; /* text-4xl */
     font-weight: 700; /* font-bold */
-    color: #1D4ED8; /* text-blue-700 */
+    color: var(--stat-value-color);
 }
 .stat-label {
     font-size: 0.875rem; /* text-sm */
-    color: #6B7280; /* text-gray-500 */
+    color: var(--stat-label-color);
     margin-top: 0.25rem; /* mt-1 */
 }
 
@@ -252,7 +383,7 @@ body {
     z-index: 10; /* Ensure it's above the chart */
     font-size: 1.125rem; /* text-lg */
     font-weight: 600; /* font-semibold */
-    color: #1F2937; /* text-gray-800 */
+    color: var(--donut-center-text-color);
 }
 #dataUsageCanvasContainer {
     width: 220px; /* Fixed size for the canvas container */
@@ -292,7 +423,7 @@ body {
     display: flex;
     align-items: center;
     font-size: 0.875rem; /* text-sm */
-    color: #4B5563; /* text-gray-600 */
+    color: var(--legend-item-text-color);
     transition: transform 0.2s ease-out, font-weight 0.2s ease-out;
     cursor: default; /* Or pointer if interactive */
 }
@@ -309,9 +440,9 @@ body {
 
 /* Dashboard Hint Box Styling */
 .dashboard-hint-box {
-    background-color: #EFF6FF; /* bg-blue-50 */
-    border: 1px solid #BFDBFE; /* border-blue-200 */
-    color: #374151; /* text-gray-700 */
+    background-color: var(--dashboard-hint-bg);
+    border: 1px solid var(--dashboard-hint-border);
+    color: var(--dashboard-hint-text);
     padding: 0.75rem; /* p-3 */
     border-radius: 0.375rem; /* rounded-md */
     font-size: 0.875rem; /* text-sm */
@@ -321,12 +452,11 @@ body {
 }
 .dashboard-hint-box i {
     margin-right: 0.5rem; /* mr-2 */
-    color: #3B82F6; /* text-blue-500 */
+    color: var(--dashboard-hint-icon);
     margin-top: 0.125rem; /* Adjust for vertical alignment with text */
 }
 
 /* Zone Edit Toggle Switch (replicates Tailwind toggle but with custom CSS for simplicity here) */
-/* Ensure .sr-only is defined if not using full Tailwind build */
 .sr-only {
     position: absolute;
     width: 1px;
@@ -337,4 +467,89 @@ body {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border-width: 0;
+}
+/* Update toggle background for dark mode via input's peer-checked state if needed, or direct style */
+.dark-mode .relative input[type="checkbox"].peer + .block {
+    background-color: #475569; /* bg-slate-600 for unchecked toggle in dark */
+}
+.dark-mode .relative input[type="checkbox"].peer:checked + .block {
+    background-color: #2563EB; /* bg-blue-600 or 500 for checked toggle in dark */
+}
+
+
+/* Navigation bar theming */
+nav {
+    background-color: var(--nav-bg-color);
+    color: var(--nav-text-color);
+}
+nav #theme-toggle-btn {
+    color: var(--nav-text-color); /* Ensure icon color matches text */
+}
+nav #theme-toggle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Slight hover effect */
+}
+.dark-mode nav #theme-toggle-btn:hover {
+    background-color: rgba(0, 0, 0, 0.2); /* Slight hover effect for dark */
+}
+
+/* Tabs theming */
+#mainTabs .tab-btn {
+    color: var(--text-secondary-color);
+}
+#mainTabs .tab-btn:hover {
+    color: var(--link-hover-color);
+    border-color: var(--link-hover-border-color);
+}
+#mainTabs .tab-btn.active {
+    color: var(--tab-active-text-color);
+    border-color: var(--tab-active-border-color);
+}
+
+/* Main tab content area */
+#tabContent {
+    background-color: var(--bg-secondary-color);
+    color: var(--text-color); /* Text within tab content */
+}
+#tabContent h2 { /* Titles within tabs */
+    color: var(--text-color);
+}
+
+/* Card theming */
+.session-card, .voucher-card, .zone-info-card {
+    background-color: var(--card-bg);
+    border-color: var(--card-border);
+    color: var(--card-text); /* General text inside cards */
+}
+
+/* Footer theming */
+footer {
+    background-color: var(--footer-bg-color);
+    color: var(--footer-text-color);
+    border-top-color: var(--border-color);
+}
+footer #api-status-footer span.text-green-600 { color: #16A34A; } /* Ensure high contrast green */
+.dark-mode footer #api-status-footer span.text-green-600 { color: #4ADE80; } /* Lighter green for dark mode */
+footer #api-status-footer span.text-red-500 { color: #EF4444; }
+.dark-mode footer #api-status-footer span.text-red-500 { color: #F87171; } /* Lighter red */
+footer #api-status-footer span.text-yellow-500 { color: #F59E0B; }
+.dark-mode footer #api-status-footer span.text-yellow-500 { color: #FACC15; } /* Lighter yellow */
+
+
+/* Config Input Section Theming */
+#config-input-section {
+    background-color: var(--config-input-section-bg);
+    border-left-color: var(--config-input-section-border) !important; /* Ensure this overrides Tailwind if direct classes are used */
+    color: var(--config-input-section-text);
+}
+#config-input-section p, #config-input-section label {
+    color: var(--config-input-section-text);
+}
+/* More specific if Tailwind direct classes cause issues: */
+.dark-mode #config-input-section {
+    background-color: var(--config-input-section-bg); /* e.g., dark yellow or neutral dark */
+    border-left-color: var(--config-input-section-border) !important;
+    color: var(--config-input-section-text);
+}
+.dark-mode #config-input-section label {
+     color: var(--config-input-section-text); /* Or slightly lighter text for dark */
 }
