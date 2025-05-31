@@ -86,12 +86,19 @@ async function callApi(endpoint, method = 'GET', body = null) {
             return { status: 'ok_non_json', message: responseText }; // Return the raw text
         }
 
-    } catch (error) {
-        // Catch fetch errors (network issues) or errors thrown from response handling
-        console.error(`Fetch/Process Error for ${method} ${url}:`, error.message);
-        if (typeof showToast === 'function' && !error.message.startsWith('HTTP error!')) { // Avoid double toast for HTTP errors
-            showToast(`Network or processing error: ${error.message}`, 'error');
-        }
-        throw error; // Re-throw the error to be caught by the caller
-    }
+	} catch (error) {
+		// Catch fetch errors (network issues) or errors thrown from response handling
+		console.error(`Fetch/Process Error for ${method} ${url}:`, error.message);
+		if (typeof showToast === 'function' && !error.message.startsWith('HTTP error!')) {
+			let userMessage = "API request failed. This could be a network issue, or the OPNsense server might be unavailable or misconfigured.";
+			// The 'Failed to fetch' message is very common for CORS issues or actual network failures.
+			if (OPNsenseConfig.baseUrl && OPNsenseConfig.baseUrl.startsWith('http') && !OPNsenseConfig.baseUrl.includes(window.location.origin)) {
+				userMessage += " If the app is hosted on a different domain than OPNsense, please check server's CORS configuration.";
+			}
+			userMessage += " More details may be available in the browser's developer console.";
+			showToast(userMessage, 'error', 8000); // Increased duration for more text
+		}
+		throw error; // Re-throw the error to be caught by the caller
+	}
+	
 }
