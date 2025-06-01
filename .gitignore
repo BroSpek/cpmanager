@@ -2,4 +2,7 @@
 img/
 
 # Ignore readme, you can read at https://github.com/BroSpek/cpmanager
-README
+README.md
+
+# Ignore editor settings
+.editorconfig
