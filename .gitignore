@@ -1,12 +1,12 @@
 # Ignore image assets folder
 img/
 
-# Ignore readme, you can read at https://github.com/BroSpek/cpmanager
-README.md
-
 # Ignore editor settings
 .editorconfig
 .prettierrc.json
 
 # Misc files
 structure.txt
+README.md
+app-config.example.json
+app-config.json
