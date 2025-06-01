@@ -507,6 +507,22 @@ function initializeAllEventListeners() {
 		}
 	});
 
+	// Listener for the new notifications toggle button
+	const notificationsToggleBtn = document.getElementById("notifications-toggle-btn"); // Make sure this ID matches your HTML
+	if (notificationsToggleBtn) {
+		notificationsToggleBtn.addEventListener("click", () => {
+			// This assumes sessionPollIntervalId, stopSessionPolling, requestNotificationPermission
+			// are accessible from notifications.js (e.g., they are global or part of an imported module)
+			if (typeof sessionPollIntervalId !== "undefined" && sessionPollIntervalId) {
+				if (typeof stopSessionPolling === "function") stopSessionPolling();
+				if (typeof updateNotificationToggleState === "function") updateNotificationToggleState(false); // from notifications.js
+				if (typeof showToast === "function") showToast("Sign-in notifications disabled.", "info");
+			} else {
+				if (typeof requestNotificationPermission === "function") requestNotificationPermission(); // from notifications.js
+			}
+		});
+	}
+
 	initializeSessionEventListeners(); // From sessions.js
 	initializeVoucherEventListeners(); // From vouchers.js
 	initializeZoneEventListeners(); // From zones.js
@@ -567,6 +583,12 @@ async function initializeAppLogic() {
 			setActiveTab(initialTab, false); // Load initial tab, use cache if available
 		} else {
 			console.error("setActiveTab function is not defined. Tabs will not initialize correctly.");
+		}
+
+		// Initialize notifications feature
+		if (typeof initializeNotifications === "function") {
+			// initializeNotifications is from notifications.js
+			initializeNotifications();
 		}
 	} else {
 		// Not connected

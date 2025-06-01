@@ -72,3 +72,19 @@ self.addEventListener("fetch", (event) => {
 			})
 	);
 });
+
+self.addEventListener("message", (event) => {
+	if (event.data && event.data.type === "SHOW_NOTIFICATION") {
+		const { title, body, icon } = event.data.payload;
+		event.waitUntil(
+			self.registration.showNotification(title, {
+				body: body,
+				icon: icon || "icons/icon-192x192.png",
+				badge: "icons/icon-192x192.png",
+				// Consider adding a tag to prevent multiple identical notifications
+				// if polling is faster than user interaction:
+				// tag: 'new-user-signin-' + Date.now() // or a session-specific ID
+			})
+		);
+	}
+});
