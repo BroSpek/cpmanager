@@ -6,3 +6,6 @@ README.md
 
 # Ignore editor settings
 .editorconfig
+.prettierrc.json
+structure.txt
+.prettierrc.json
