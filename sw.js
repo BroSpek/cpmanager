@@ -1,6 +1,6 @@
 // sw.js - Service Worker for Caching App Shell with Automatic Updates
 
-const CACHE_NAME = "captive-portal-manager-cache-v0.1.2"; // Keep your current versioned CACHE_NAME
+const CACHE_NAME = "captive-portal-manager-cache-v1.0.0"; // Keep your current versioned CACHE_NAME
 const urlsToCache = [
 	"index.html",
 	"icons/icon-192x192.png",
