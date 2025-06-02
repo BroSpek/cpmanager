@@ -503,7 +503,7 @@ body {
 	margin-top: 0.125rem; /* Adjust for vertical alignment with text */
 }
 
-/* Zone Edit Toggle Switch (replicates Tailwind toggle but with custom CSS for simplicity here) */
+/* Zone Edit Toggle Switch */
 .sr-only {
 	position: absolute;
 	width: 1px;
@@ -515,12 +515,21 @@ body {
 	white-space: nowrap;
 	border-width: 0;
 }
-/* Update toggle background for dark mode via input's peer-checked state if needed, or direct style */
-.dark-mode .relative input[type="checkbox"].peer + .block {
+
+/* Default (Light Mode) Toggle Background */
+input[type="checkbox"].peer + .toggle-bg {
+	background-color: var(--border-color); /* gray-200 */
+}
+input[type="checkbox"].peer:checked + .toggle-bg {
+	background-color: var(--tab-active-border-color); /* blue-600 */
+}
+
+/* Dark Mode Toggle Background */
+.dark-mode input[type="checkbox"].peer + .toggle-bg {
 	background-color: #475569; /* bg-slate-600 for unchecked toggle in dark */
 }
-.dark-mode .relative input[type="checkbox"].peer:checked + .block {
-	background-color: #2563eb; /* bg-blue-600 or 500 for checked toggle in dark */
+.dark-mode input[type="checkbox"].peer:checked + .toggle-bg {
+	background-color: #2563eb; /* bg-blue-600 for checked toggle in dark */
 }
 
 /* Navigation bar theming */
