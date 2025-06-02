@@ -92,7 +92,7 @@ self.addEventListener("message", (event) => {
 			self.registration.showNotification(title, {
 				body: body,
 				icon: icon || "icons/icon-192x192.png", // Default icon
-				badge: "icons/icon-192x192.png", // Icon for Android notification bar
+				badge: "icons/badge-icon.png", // Icon for Android notification bar
 				tag: "new-user-signin", // Use a static tag to replace previous general sign-in notifications
 				// data: { url: './index.html#sessions' } // Optional: pass data to notificationclick
 			})
