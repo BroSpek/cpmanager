@@ -135,14 +135,19 @@ function stopSessionPolling() {
 
 /**
  * Updates the UI toggle for notifications based on permission.
- * This is a placeholder for however you manage your UI.
+ * Changes the icon and aria-label.
  * @param {boolean} isEnabled - Whether notifications are currently enabled.
  */
 function updateNotificationToggleState(isEnabled) {
-	const toggleButton = document.getElementById("notifications-toggle-btn"); // Example ID
+	const toggleButton = document.getElementById("notifications-toggle-btn");
 	if (toggleButton) {
-		// Update button text/appearance based on isEnabled
-		toggleButton.textContent = isEnabled ? "Disable Sign-in Notifications" : "Enable Sign-in Notifications";
+		if (isEnabled) {
+			toggleButton.innerHTML = '<i class="fas fa-bell"></i>'; // Bell icon for enabled
+			toggleButton.setAttribute("aria-label", "Disable sign-in notifications");
+		} else {
+			toggleButton.innerHTML = '<i class="fas fa-bell-slash"></i>'; // Bell-slash icon for disabled
+			toggleButton.setAttribute("aria-label", "Enable sign-in notifications");
+		}
 		// Store preference in localStorage
 		try {
 			localStorage.setItem("signInNotificationsEnabled", isEnabled ? "true" : "false");
@@ -157,15 +162,18 @@ function updateNotificationToggleState(isEnabled) {
  */
 function initializeNotifications() {
 	const storedPreference = localStorage.getItem("signInNotificationsEnabled");
+	const permissionGranted = Notification.permission === "granted";
 
-	if (storedPreference === "true" && Notification.permission === "granted") {
+	if (storedPreference === "true" && permissionGranted) {
 		startSessionPolling();
+		updateNotificationToggleState(true); // Update icon to enabled
 	} else if (storedPreference === "true" && Notification.permission !== "denied") {
 		// User had it enabled, but permission might be 'default' now or needs re-confirmation
-		requestNotificationPermission();
+		requestNotificationPermission(); // This will call updateNotificationToggleState based on new permission
+	} else {
+		// Default to disabled state (covers storedPreference === 'false', null, or permission denied)
+		updateNotificationToggleState(false);
 	}
-	// Update UI toggle based on actual permission and stored preference
-	updateNotificationToggleState(storedPreference === "true" && Notification.permission === "granted");
 }
 
 // Make functions available globally if they need to be called from HTML event attributes,

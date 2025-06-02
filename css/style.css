@@ -528,14 +528,30 @@ nav {
 	background-color: var(--nav-bg-color);
 	color: var(--nav-text-color);
 }
-nav #theme-toggle-btn {
+nav #theme-toggle-btn, /* Added comma */
+nav #notifications-toggle-btn {
+	/* Added new selector */
 	color: var(--nav-text-color); /* Ensure icon color matches text */
+	padding: 0.5rem; /* p-2 */
+	border-radius: 0.375rem; /* rounded-md */
 }
-nav #theme-toggle-btn:hover {
+nav #theme-toggle-btn:hover, /* Added comma */
+nav #notifications-toggle-btn:hover {
+	/* Added new selector */
 	background-color: rgba(255, 255, 255, 0.1); /* Slight hover effect */
 }
-.dark-mode nav #theme-toggle-btn:hover {
+.dark-mode nav #theme-toggle-btn:hover, /* Added comma */
+.dark-mode nav #notifications-toggle-btn:hover {
+	/* Added new selector */
 	background-color: rgba(0, 0, 0, 0.2); /* Slight hover effect for dark */
+}
+
+/* Ensure focus styles for accessibility are similar */
+nav #theme-toggle-btn:focus,
+nav #notifications-toggle-btn:focus {
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+	box-shadow: 0 0 0 2px var(--nav-text-color); /* Or a theme-appropriate focus ring color */
 }
 
 /* Tabs theming */
