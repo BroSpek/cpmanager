@@ -18,9 +18,18 @@
 		<nav class="p-4 shadow-md sticky top-0 z-20 flex-shrink-0">
 			<div class="container mx-auto flex justify-between items-center">
 				<h1 class="text-xl font-semibold"><i class="fas fa-shield-alt mr-2"></i>Captive Portal Manager</h1>
-				<button id="theme-toggle-btn" class="p-2 rounded-md focus:outline-none" aria-label="Toggle theme">
-					<i class="fas fa-sun"></i>
-				</button>
+				<div class="flex items-center space-x-2">
+					<button
+						id="notifications-toggle-btn"
+						class="p-2 rounded-md focus:outline-none"
+						aria-label="Toggle notifications"
+					>
+						<i class="fas fa-bell-slash"></i>
+					</button>
+					<button id="theme-toggle-btn" class="p-2 rounded-md focus:outline-none" aria-label="Toggle theme">
+						<i class="fas fa-sun"></i>
+					</button>
+				</div>
 			</div>
 		</nav>
 
@@ -408,6 +417,7 @@
 		<script src="./js/vouchers.js"></script>
 		<script src="./js/zones.js"></script>
 		<script src="./js/dashboard.js"></script>
+		<script src="./js/notifications.js"></script>
 		<script src="./js/main.js"></script>
 	</body>
 </html>
