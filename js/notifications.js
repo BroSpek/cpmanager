@@ -4,7 +4,10 @@
 let previousSessionIds = new Set();
 let isFirstPoll = true;
 let sessionPollIntervalId = null;
-const POLLING_INTERVAL = 30000; // 30 seconds - adjust as needed
+const POLLING_INTERVAL = 30000; // 30 seconds
+const POLLING_INTERVAL_HIDDEN_TAB = 300000; // 5 minutes when tab is hidden
+let consecutivePollErrors = 0;
+const MAX_POLL_ERRORS_BEFORE_DISABLE = 5; // Disable notifications after this many consecutive errors
 
 // --- Core Functions ---
 
@@ -21,19 +24,19 @@ async function requestNotificationPermission() {
 	const permission = await Notification.requestPermission();
 	if (permission === "granted") {
 		showToast("Sign-in notifications enabled!", "success");
-		// Ensure API credentials are set before starting polling
 		if (currentApiKey && currentApiSecret) {
-			// currentApiKey, currentApiSecret from config.js/main.js
 			startSessionPolling();
+			consecutivePollErrors = 0; // Reset error count on permission grant
+			updateNotificationToggleState(true, false); // Update UI, not in error state
 		} else {
 			showToast("API credentials not set. Cannot start polling for notifications.", "warning");
+			updateNotificationToggleState(false, false); // Update UI, not in error state
 		}
 	} else {
 		showToast("Sign-in notifications permission denied or dismissed.", "warning");
-		stopSessionPolling(); // Stop polling if permission is not granted
+		stopSessionPolling();
+		updateNotificationToggleState(false, false); // Update UI, not in error state
 	}
-	// Update UI toggle if you have one
-	updateNotificationToggleState(permission === "granted");
 }
 
 /**
@@ -42,22 +45,27 @@ async function requestNotificationPermission() {
 async function checkForNewSessionsAndNotify() {
 	if (Notification.permission !== "granted") {
 		console.log("Notification permission not granted. Skipping session check.");
-		stopSessionPolling(); // Ensure polling is stopped if permission revoked mid-way
+		stopSessionPolling();
+		updateNotificationToggleState(false, false); // Ensure UI reflects disabled state
 		return;
 	}
 
 	try {
-		// callApi is from api.js
-		const data = await callApi("/session/search");
+		const data = await callApi("/session/search"); // callApi is from api.js
 
 		if (data && Array.isArray(data.rows)) {
+			consecutivePollErrors = 0; // Reset error count on successful API call
+			if (document.getElementById("notifications-toggle-btn")?.dataset.errorState === "true") {
+				updateNotificationToggleState(true, false); // Clear error state from icon if it was set
+			}
+
 			const currentSessionIds = new Set(data.rows.map((session) => session.sessionId));
 
 			if (isFirstPoll) {
 				previousSessionIds = currentSessionIds;
 				isFirstPoll = false;
 				console.log("Initial session list captured for notification baseline.");
-				return; // Don't notify on the very first successful poll
+				return;
 			}
 
 			const newSessions = data.rows.filter((session) => !previousSessionIds.has(session.sessionId));
@@ -69,7 +77,7 @@ async function checkForNewSessionsAndNotify() {
 					const zoneDesc = getZoneDescription(session.zoneid) || `Zone ${session.zoneid}`;
 					const title = "New Captive Portal Sign-in";
 					const body = `User ${session.userName || session.ipAddress} connected to ${zoneDesc}.`;
-					const icon = "icons/icon-192x192.png"; // Ensure this path is correct
+					const icon = "icons/icon-192x192.png";
 
 					if (navigator.serviceWorker.controller) {
 						navigator.serviceWorker.controller.postMessage({
@@ -77,25 +85,40 @@ async function checkForNewSessionsAndNotify() {
 							payload: { title, body, icon },
 						});
 					} else {
-						console.warn(
-							"Service worker not controlling. Fallback to direct notification (if possible and desired)."
-						);
-						// Optionally, show a direct notification if SW is not available
-						// new Notification(title, { body, icon });
+						console.warn("Service worker not controlling. Fallback to direct notification (if possible).");
+						// new Notification(title, { body, icon }); // Direct notification as fallback (optional)
 					}
 				});
 			}
-			previousSessionIds = new Set(currentSessionIds); // Update baseline with a new Set
+			previousSessionIds = new Set(currentSessionIds);
+		} else {
+			// Handle cases where data.rows is not an array but API call might have been "ok" (e.g., empty response)
+			console.warn(
+				"checkForNewSessionsAndNotify: API response for sessions was not an array or data was unexpected.",
+				data
+			);
+			// Don't increment error count here unless callApi itself threw an error (handled below)
 		}
 	} catch (error) {
 		console.error("Error polling for new sessions:", error.message);
-		// Consider stopping polling on certain errors or notifying user of polling failure
-		// showToast('Failed to poll for new sessions. Notifications may be interrupted.', 'error');
+		consecutivePollErrors++;
+		if (consecutivePollErrors >= MAX_POLL_ERRORS_BEFORE_DISABLE) {
+			showToast(
+				`Disabling notifications due to ${MAX_POLL_ERRORS_BEFORE_DISABLE} consecutive API errors. Please check connection/config.`,
+				"error",
+				8000
+			);
+			stopSessionPolling();
+			updateNotificationToggleState(false, true); // Update UI to error state
+		} else {
+			// Optionally, show a less severe toast for intermittent errors
+			// showToast('Failed to poll for new sessions. Retrying...', 'warning');
+		}
 	}
 }
 
 /**
- * Starts the periodic polling for new sessions.
+ * Starts the periodic polling for new sessions. Adjusts interval based on tab visibility.
  */
 function startSessionPolling() {
 	if (sessionPollIntervalId) {
@@ -104,19 +127,22 @@ function startSessionPolling() {
 	}
 	if (Notification.permission !== "granted") {
 		console.log("Cannot start polling: Notification permission not granted.");
-		requestNotificationPermission(); // Prompt if not explicitly denied, or guide user.
+		// requestNotificationPermission(); // This could be called, or rely on user to re-enable
 		return;
 	}
 
 	console.log("Starting session polling for new sign-in notifications...");
-	isFirstPoll = true; // Reset for a fresh baseline on start
+	isFirstPoll = true;
 	previousSessionIds.clear();
+	consecutivePollErrors = 0; // Reset error count when starting
 
-	// Fetch immediately once then set interval
+	const currentInterval = document.hidden ? POLLING_INTERVAL_HIDDEN_TAB : POLLING_INTERVAL;
+
 	checkForNewSessionsAndNotify().finally(() => {
-		// Ensure interval starts after the first check, regardless of its outcome (unless permission changes)
-		if (Notification.permission === "granted") {
-			sessionPollIntervalId = setInterval(checkForNewSessionsAndNotify, POLLING_INTERVAL);
+		if (Notification.permission === "granted" && !sessionPollIntervalId) {
+			// Check again in case permission changed
+			sessionPollIntervalId = setInterval(checkForNewSessionsAndNotify, currentInterval);
+			console.log(`Polling interval set to ${currentInterval / 1000} seconds.`);
 		}
 	});
 }
@@ -130,29 +156,69 @@ function stopSessionPolling() {
 		sessionPollIntervalId = null;
 		console.log("Session polling stopped.");
 	}
-	// UI toggle state should be updated by caller or requestNotificationPermission
+	// The caller should manage UI updates (like toggle button state)
 }
 
 /**
- * Updates the UI toggle for notifications based on permission.
- * Changes the icon and aria-label.
- * @param {boolean} isEnabled - Whether notifications are currently enabled.
+ * Updates the UI toggle for notifications based on permission and error state.
+ * @param {boolean} isEnabled - Whether notifications are currently functionally enabled.
+ * @param {boolean} [isErrorState=false] - Whether to show an error icon.
  */
-function updateNotificationToggleState(isEnabled) {
+function updateNotificationToggleState(isEnabled, isErrorState = false) {
 	const toggleButton = document.getElementById("notifications-toggle-btn");
 	if (toggleButton) {
-		if (isEnabled) {
-			toggleButton.innerHTML = '<i class="fas fa-bell"></i>'; // Bell icon for enabled
+		if (isErrorState) {
+			toggleButton.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i>'; // Error icon
+			toggleButton.setAttribute("aria-label", "Notifications disabled due to errors. Click to re-try.");
+			toggleButton.dataset.errorState = "true";
+		} else if (isEnabled) {
+			toggleButton.innerHTML = '<i class="fas fa-bell"></i>';
 			toggleButton.setAttribute("aria-label", "Disable sign-in notifications");
+			toggleButton.dataset.errorState = "false";
 		} else {
-			toggleButton.innerHTML = '<i class="fas fa-bell-slash"></i>'; // Bell-slash icon for disabled
+			toggleButton.innerHTML = '<i class="fas fa-bell-slash"></i>';
 			toggleButton.setAttribute("aria-label", "Enable sign-in notifications");
+			toggleButton.dataset.errorState = "false";
 		}
-		// Store preference in localStorage
+		// Store functional preference (ignoring error state for storage)
 		try {
-			localStorage.setItem("signInNotificationsEnabled", isEnabled ? "true" : "false");
+			localStorage.setItem("signInNotificationsEnabled", isEnabled && !isErrorState ? "true" : "false");
 		} catch (e) {
 			console.warn("Could not save notification preference to localStorage:", e.message);
+		}
+	}
+}
+
+/**
+ * Handles changes in page visibility to adjust polling interval.
+ */
+function handleVisibilityChange() {
+	if (!sessionPollIntervalId && localStorage.getItem("signInNotificationsEnabled") !== "true") {
+		// If polling is already stopped or notifications are not meant to be enabled, do nothing.
+		return;
+	}
+
+	// Clear existing interval before setting a new one
+	if (sessionPollIntervalId) {
+		clearInterval(sessionPollIntervalId);
+		sessionPollIntervalId = null; // Important to allow re-creation
+	}
+
+	if (document.hidden) {
+		console.log("Tab hidden. Switching to background polling interval.");
+		if (Notification.permission === "granted") {
+			// Only poll if permission still granted
+			sessionPollIntervalId = setInterval(checkForNewSessionsAndNotify, POLLING_INTERVAL_HIDDEN_TAB);
+			console.log(`Polling interval set to ${POLLING_INTERVAL_HIDDEN_TAB / 1000} seconds (background).`);
+		}
+	} else {
+		console.log("Tab visible. Switching to foreground polling interval.");
+		// If returning to visibility and notifications were enabled, restart with normal interval
+		if (localStorage.getItem("signInNotificationsEnabled") === "true" && Notification.permission === "granted") {
+			// Reset isFirstPoll to get a fresh baseline if desired, or maintain continuity
+			// isFirstPoll = true; // Uncomment if you want a fresh baseline on tab focus
+			// previousSessionIds.clear(); // Uncomment if you want a fresh baseline on tab focus
+			startSessionPolling(); // This will use the default POLLING_INTERVAL
 		}
 	}
 }
@@ -166,16 +232,15 @@ function initializeNotifications() {
 
 	if (storedPreference === "true" && permissionGranted) {
 		startSessionPolling();
-		updateNotificationToggleState(true); // Update icon to enabled
-	} else if (storedPreference === "true" && Notification.permission !== "denied") {
-		// User had it enabled, but permission might be 'default' now or needs re-confirmation
-		requestNotificationPermission(); // This will call updateNotificationToggleState based on new permission
+		updateNotificationToggleState(true, false);
+	} else if (storedPreference === "true" && Notification.permission === "default") {
+		// User had it enabled, but permission might be 'default' now (e.g. after browser reset)
+		requestNotificationPermission(); // This will call updateNotificationToggleState
 	} else {
-		// Default to disabled state (covers storedPreference === 'false', null, or permission denied)
-		updateNotificationToggleState(false);
+		// Default to disabled state (covers storedPreference 'false', null, or permission 'denied')
+		updateNotificationToggleState(false, false);
 	}
-}
 
-// Make functions available globally if they need to be called from HTML event attributes,
-// or manage event listeners centrally in main.js
-// window.requestNotificationPermission = requestNotificationPermission;
+	// Add visibility change listener
+	document.addEventListener("visibilitychange", handleVisibilityChange);
+}

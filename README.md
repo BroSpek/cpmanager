@@ -12,6 +12,21 @@
 * **Theme Switching**: Supports light, dark, and system preference themes for an adaptable user interface.
 * **Responsive Design**: Utilizes Tailwind CSS for a responsive layout suitable for various screen sizes.
 * **Progressive Web App (PWA)**: Includes a service worker for caching app shell resources (`index.html`, icons) and a manifest file for "add to home screen" functionality.
+* **Push Notifications**: Provides local notifications for new user sign-ins on your configured captive portal zones.
+
+## Push Notifications
+
+The Captive Portal Manager now supports local push notifications for new user sign-ins on your configured captive portal zones.
+
+* **Functionality**: When a new user authenticates through the captive portal, you can receive a desktop notification. Clicking the notification will open the application and navigate to the "Sessions" tab.
+* **Enabling/Disabling**:
+    * Click the <i class="fas fa-bell-slash"></i> (bell-slash) icon in the top navigation bar to enable notifications. Your browser will prompt you for permission.
+    * If enabled, the icon will change to <i class="fas fa-bell"></i> (bell). Click it again to disable notifications.
+    * If notifications encounter repeated errors (e.g., API connectivity issues), the icon may change to <i class="fas fa-exclamation-triangle text-red-500"></i> (error triangle) and notifications will be temporarily disabled. Clicking it will attempt to re-enable them.
+* **Requirements**:
+    * Your browser must support push notifications.
+    * You must grant notification permission to the application when prompted.
+* **Technology**: This feature utilizes a Service Worker to enable notifications even if the application tab is not actively focused and to handle notification interactions.
 
 ## Mobile Screenshots
 
@@ -61,7 +76,7 @@ Here's a glimpse of how the Captive Portal Manager looks on mobile devices in bo
 * The OPNsense Captive Portal module configured for at least one zone.
 * The OPNsense API enabled, with an API Key and Secret generated that have sufficient permissions for captive portal and voucher management. Navigate your `OPNsense > System > Access > Users`.
 * Network connectivity from the device running this tool to the OPNsense API endpoint (ensure the `apiBaseUrl` in `app-config.json` is reachable).
-* A modern web browser (e.g., Chrome, Firefox, Safari, Edge) that supports JavaScript, localStorage, and Service Workers for PWA functionality.
+* A modern web browser (e.g., Chrome, Firefox, Safari, Edge) that supports JavaScript, localStorage, Service Workers for PWA functionality, and Push Notifications.
 
 ## Setup and Usage
 
@@ -70,6 +85,7 @@ Here's a glimpse of how the Captive Portal Manager looks on mobile devices in bo
 3.  Open `index.html` in a modern web browser.
 4.  Enter your OPNsense API credentials when prompted.
 5.  Use the navigation tabs (Dashboard, Sessions, Vouchers, Zones) to manage your captive portal.
+6.  To enable push notifications, click the bell icon in the navigation bar and grant permission when prompted by your browser.
 
 ## Configuration
 
@@ -83,7 +99,10 @@ Here's a glimpse of how the Captive Portal Manager looks on mobile devices in bo
 
 ## Service Worker
 
-The application uses a service worker (`sw.js`) to cache the core application shell (e.g., `index.html`, icons). This allows for faster load times on subsequent visits.
+The application uses a service worker (`sw.js`):
+* To cache the core application shell (e.g., `index.html`, icons) for faster load times on subsequent visits and potential offline access to the basic UI.
+* To handle incoming push messages and display desktop notifications for new user sign-ins.
+* To manage notification click events, allowing users to open or focus the application when a notification is interacted with.
 
 ## Technologies Used
 
