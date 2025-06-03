@@ -81,7 +81,7 @@ Here's a glimpse of how the Captive Portal Manager looks on mobile devices in bo
 ## Setup and Usage
 
 1.  Clone or download the repository.
-2.  **(Optional for initial setup):** Rename `app-config.example.json` to `app-config.json` and set `apiBaseUrl` to your OPNsense API endpoint URL (example: `https://192.168.1.1`). This file is loaded first, but subsequent changes made in the app's UI will be saved to local storage and take precedence.
+2.  **(Optional for initial setup):** Copy `app-config.example.json` to `app-config.json` and set `apiBaseUrl` to your OPNsense API endpoint URL (example: `https://192.168.1.1`). This file is loaded first, but subsequent changes made in the app's UI will be saved to local storage and take precedence.
     ```json
     {
       "apiBaseUrl": "https://192.168.1.1"
