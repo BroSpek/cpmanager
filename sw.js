@@ -87,13 +87,18 @@ self.addEventListener("fetch", (event) => {
 
 self.addEventListener("message", (event) => {
 	if (event.data && event.data.type === "SHOW_NOTIFICATION") {
-		const { title, body, icon } = event.data.payload;
+		//
+		// MODIFIED: Destructure the new 'id' from the payload
+		const { title, body, icon, id } = event.data.payload; //
 		event.waitUntil(
 			self.registration.showNotification(title, {
-				body: body,
+				//
+				body: body, //
 				icon: icon || "icons/icon-192x192.png", // Default icon
 				badge: "icons/badge-icon.png", // Icon for Android notification bar
-				tag: "new-user-signin", // Use a static tag to replace previous general sign-in notifications
+				// MODIFIED: Use the 'id' from the payload to create a unique tag.
+				// Fallback to timestamp if 'id' is not provided for some reason.
+				tag: `new-user-signin-${id || new Date().getTime()}`,
 				// data: { url: './index.html#sessions' } // Optional: pass data to notificationclick
 			})
 		);
@@ -104,15 +109,18 @@ self.addEventListener("notificationclick", (event) => {
 	event.notification.close(); // Always close the notification
 
 	// Define the URL to open, navigating to the sessions tab
-	// self.location.origin provides the base URL of the service worker's scope
-	const urlToOpen = new URL("./index.html#sessions", self.location.origin).href;
+	// Use self.registration.scope as the base URL.
+	// It represents the service worker's registration scope,
+	// ensuring the path is correct whether in root or a subfolder.
+	const urlToOpen = new URL("index.html#sessions", self.registration.scope).href;
 
 	event.waitUntil(
 		clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
 			// Check if there's already a window/tab open for the app
 			for (const client of clientList) {
 				// Ensure the client URL is part of your app and it can be focused
-				if (client.url.startsWith(self.location.origin) && "focus" in client) {
+				// Compare against self.registration.scope to ensure we're dealing with the PWA's scope
+				if (client.url.startsWith(self.registration.scope) && "focus" in client) {
 					// Navigate the existing client to the target URL (with hash)
 					client.navigate(urlToOpen);
 					return client.focus(); // Focus the existing window
