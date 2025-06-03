@@ -1,7 +1,7 @@
 // js/vouchers.js
 
 let currentVouchers = []; // Stores vouchers for the currently selected group (for rendering)
-let lastGeneratedVouchers = []; // Stores the last batch of generated vouchers for CSV download
+let lastGeneratedVouchers = []; // Stores the last batch of generated vouchers for PDF download
 
 // Caching variables
 let cachedVoucherProviders = [];
@@ -40,7 +40,12 @@ async function loadVoucherProviders(forceRefresh = false) {
 			cachedVoucherProviders = []; // Reset cache on error/unexpected format
 			voucherProviderSelect.innerHTML = '<option value="">Error loading (or no providers).</option>';
 			if (providers && !Array.isArray(providers)) {
-				console.error("Error loading voucher providers: Unexpected format", providers);
+				console.error(
+					"Error loading voucher providers: Unexpected format",
+					providers,
+					"API response:",
+					providers
+				);
 				showToast("Could not load voucher providers: unexpected format.", "error");
 			} else if (!providers) {
 				// Covers null or undefined response
@@ -215,7 +220,7 @@ function populateVoucherGroupSelect(providerId, groups) {
 	// base button state on the FINAL state of voucherGroupSelect.value
 	if (voucherGroupSelect.value) {
 		// A group is selected
-		disableVoucherActionButtons(false, false, false); // Create enabled, group actions enabled
+		disableVoucherActionButtons(false, false, false); // All actions enabled
 		loadVouchersForGroup(providerId, voucherGroupSelect.value); // Load data for the selected group
 	} else {
 		// No group is selected
@@ -230,7 +235,7 @@ function populateVoucherGroupSelect(providerId, groups) {
 				showNoDataMessage(voucherCardContainer, "Select a group to see vouchers.", "fas fa-ticket-alt");
 			}
 		}
-		disableVoucherActionButtons(false, true, true); // Create enabled, group actions disabled
+		disableVoucherActionButtons(false, true, true); // Group actions disabled
 	}
 }
 
@@ -414,10 +419,15 @@ function openGenerateVoucherModal() {
 		voucherLifetimeCustom.classList.add("hidden");
 		voucherLifetimeCustom.value = "";
 	}
-	if (voucherUsageSelect) voucherUsageSelect.value = "0"; // Default usage (Never expires)
+	if (voucherUsageSelect) voucherUsageSelect.classList.add("hidden"); // Default usage (Never expires)
 	if (voucherUsageCustom) {
 		voucherUsageCustom.classList.add("hidden");
 		voucherUsageCustom.value = "";
+	}
+	// Set default output format to 'card'
+	const cardOutputRadio = document.querySelector('input[name="voucher-output-format"][value="card"]');
+	if (cardOutputRadio) {
+		cardOutputRadio.checked = true;
 	}
 
 	generateVoucherModal.classList.remove("modal-inactive");
@@ -427,6 +437,7 @@ function openGenerateVoucherModal() {
 
 /**
  * Handles the submission of the generate voucher form.
+ * Now generates a PDF instead of CSV.
  */
 async function handleSubmitGenerateVoucher() {
 	if (!voucherProviderSelect || !submitGenerateVoucherBtn) return;
@@ -492,17 +503,38 @@ async function handleSubmitGenerateVoucher() {
 	try {
 		const result = await callApi(`/voucher/generate_vouchers/${selectedProvider}`, "POST", payload);
 		if (result && Array.isArray(result) && result.length > 0 && result[0].username) {
-			// Check if result is an array of vouchers
 			lastGeneratedVouchers = result;
-			showToast(
-				`Vouchers generated successfully in group "${groupname}" for provider "${selectedProvider}". CSV downloading...`,
-				"success"
-			);
-			downloadVouchersAsCSV(lastGeneratedVouchers);
+
+			const outputFormat = document.querySelector('input[name="voucher-output-format"]:checked').value;
+			const { jsPDF } = window.jspdf;
+			const doc = new jsPDF({
+				orientation: "portrait",
+				unit: "mm",
+				format: "a4",
+			});
+
+			if (outputFormat === "card") {
+				showToast(`Vouchers generated. Generating Card Style PDF...`, "success");
+				generateVouchersAsCardPDF(lastGeneratedVouchers, groupname, doc); // Adds content to 'doc'
+			} else if (outputFormat === "table") {
+				showToast(`Vouchers generated. Generating Table Style PDF...`, "success");
+				generateVouchersAsTablePDF(lastGeneratedVouchers, groupname, doc); // Adds content to 'doc'
+			} else if (outputFormat === "both") {
+				showToast(`Vouchers generated. Generating Card and Table Style PDFs...`, "success");
+				generateVouchersAsCardPDF(lastGeneratedVouchers, groupname, doc); // Adds card content to 'doc'
+				doc.addPage(); // Add a new page for the table
+				generateVouchersAsTablePDF(lastGeneratedVouchers, groupname, doc); // Adds table content to 'doc'
+			}
+
+			// Save the single document after all content has been added
+			const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+			const filename = `${groupname}_${timestamp}_vouchers.pdf`;
+			doc.save(filename);
+			showToast("Vouchers PDF generated successfully!", "success");
+
 			hideModal(generateVoucherModal);
-			// Force refresh groups and then vouchers for the new group
 			await loadVoucherGroups(selectedProvider, true);
-			if (voucherGroupSelect) voucherGroupSelect.value = groupname; // Attempt to select the new group
+			if (voucherGroupSelect) voucherGroupSelect.value = groupname;
 			await loadVouchersForGroup(selectedProvider, groupname, true);
 		} else if (
 			result &&
@@ -511,10 +543,10 @@ async function handleSubmitGenerateVoucher() {
 			result.message.toLowerCase().includes("created")
 		) {
 			showToast(
-				`Vouchers generated for group "${groupname}". (API Text OK). No CSV data from this response.`,
+				`Vouchers generated for group "${groupname}". (API Text OK). No detailed voucher data for PDF.`,
 				"success"
 			);
-			lastGeneratedVouchers = [];
+			lastGeneratedVouchers = []; // No specific voucher data to PDF
 			hideModal(generateVoucherModal);
 			await loadVoucherGroups(selectedProvider, true);
 			if (voucherGroupSelect) voucherGroupSelect.value = groupname;
@@ -531,6 +563,8 @@ async function handleSubmitGenerateVoucher() {
 		}
 	} catch (error) {
 		lastGeneratedVouchers = [];
+		console.error("Error during voucher generation or PDF creation:", error);
+		showToast("An error occurred during voucher generation or PDF creation.", "error");
 	} finally {
 		submitGenerateVoucherBtn.disabled = false;
 		submitGenerateVoucherBtn.innerHTML = "Generate";
@@ -538,46 +572,166 @@ async function handleSubmitGenerateVoucher() {
 }
 
 /**
- * Triggers a CSV download for the provided voucher data.
- * @param {Array<object>} vouchers - Array of voucher objects to include in the CSV.
+ * Generates a PDF from the provided voucher data using jsPDF.
+ * This function creates a "card" style layout for vouchers.
+ * @param {Array<object>} vouchers - Array of voucher objects to include in the PDF.
+ * @param {string} groupName - The name of the group these vouchers belong to.
+ * @param {object} doc - The jsPDF document instance to add content to.
  */
-function downloadVouchersAsCSV(vouchers) {
-	if (!vouchers || vouchers.length === 0) {
-		showToast("No voucher data to download.", "warning");
-		return;
-	}
-	const headers = "username,password,vouchergroup,expirytime_seconds,validity_seconds";
-	const csvRows = [headers];
+function generateVouchersAsCardPDF(vouchers, groupName, doc) {
+	// Renamed function
+	const pageHeight = doc.internal.pageSize.height; // 297 mm for A4 portrait
+	const pageWidth = doc.internal.pageSize.width; // 210 mm for A4 portrait
+	const margin = 10; // mm, margin on all sides of the page
 
-	vouchers.forEach((voucher) => {
-		const row = [
-			`"${voucher.username || ""}"`,
-			`"${voucher.password || ""}"`,
-			`"${voucher.vouchergroup || ""}"`,
-			voucher.expirytime,
-			voucher.validity,
-		].join(",");
-		csvRows.push(row);
+	// Define layout for 3 columns x 6 rows
+	const vouchersPerRow = 3;
+	const vouchersPerColumn = 6; // Desired 6 rows
+	const horizontalGap = 4; // mm, gap between vouchers horizontally
+	const verticalGap = 4; // mm, gap between vouchers vertically
+
+	// Calculate usable area for vouchers within margins
+	const printableWidth = pageWidth - 2 * margin; // 190 mm
+	// Deduct space for title at the top of each page for card style
+	const titleHeight = 15; // Estimated height for title + padding
+	const printableHeightPerVoucherArea = pageHeight - 2 * margin - titleHeight;
+
+	// Recalculate voucher dimensions based on new gaps and title space
+	const voucherWidth = (printableWidth - (vouchersPerRow - 1) * horizontalGap) / vouchersPerRow; // (190 - 2*4) / 3 = 182 / 3 = 60.66 mm
+	const voucherHeight = (printableHeightPerVoucherArea - (vouchersPerColumn - 1) * verticalGap) / vouchersPerColumn; // (277 - 15 - 5*4) / 6 = (262 - 20) / 6 = 242 / 6 = 40.33 mm
+
+	let currentY = margin; // Starting Y position for content on a new page
+
+	// Add title to the first page (or new page if docInstance exists)
+	// This check is now always true because we pass the doc from handleSubmitGenerateVoucher
+	doc.setFontSize(20);
+	doc.setFont("helvetica", "bold");
+	doc.text(`Vouchers for Group: ${groupName} (Card Style)`, pageWidth / 2, currentY + 5, { align: "center" });
+	currentY += titleHeight; // Move down after title
+
+	vouchers.forEach((voucher, index) => {
+		const vouchersPerPage = vouchersPerRow * vouchersPerColumn;
+		const voucherIndexOnPage = index % vouchersPerPage;
+
+		// Add new page if current voucher is the first on a new page (after the initial page setup)
+		if (index > 0 && voucherIndexOnPage === 0) {
+			doc.addPage();
+			currentY = margin; // Reset Y for new page
+			doc.setFontSize(20);
+			doc.setFont("helvetica", "bold");
+			doc.text(`Vouchers for Group: ${groupName} (Card Style - Cont.)`, pageWidth / 2, currentY + 5, {
+				align: "center",
+			});
+			currentY += titleHeight;
+		}
+
+		const colIndex = voucherIndexOnPage % vouchersPerRow;
+		const rowIndex = Math.floor(voucherIndexOnPage / vouchersPerRow);
+
+		const voucherAbsX = margin + colIndex * (voucherWidth + horizontalGap);
+		const voucherAbsY = currentY + rowIndex * (voucherHeight + verticalGap);
+
+		// Draw voucher card border (slightly rounded corners)
+		doc.setDrawColor(200); // Light gray border
+		doc.roundedRect(voucherAbsX, voucherAbsY, voucherWidth, voucherHeight, 2, 2, "S"); // 'S' for stroke
+
+		// Voucher Code Label
+		doc.setFontSize(8); // Smaller font for label
+		doc.setFont("helvetica", "bold");
+		doc.setTextColor(55, 65, 81); // Tailwind gray-700 equivalent
+		doc.text("Voucher Code", voucherAbsX + voucherWidth / 2, voucherAbsY + 6, { align: "center" });
+
+		// Actual Voucher Code
+		doc.setFontSize(16); // Adjusted font size for the code
+		doc.setTextColor(29, 78, 216); // Tailwind blue-700 equivalent
+		doc.text(voucher.username || placeholderValue, voucherAbsX + voucherWidth / 2, voucherAbsY + 16, {
+			align: "center",
+		});
+
+		// Password (if exists)
+		let detailLineY = voucherAbsY + 22; // Starting Y offset for details
+		if (voucher.password) {
+			doc.setFontSize(7); // Smaller font for password
+			doc.setTextColor(75, 85, 99); // Tailwind gray-600 equivalent
+			doc.text(`Password: ${voucher.password}`, voucherAbsX + voucherWidth / 2, detailLineY, { align: "center" });
+			detailLineY += 4; // Increment Y for next line
+		}
+
+		// Details (Validity, Expires, Group)
+		doc.setFontSize(6); // Even smaller font for details
+		doc.setTextColor(107, 114, 128); // Tailwind gray-500 equivalent
+		doc.text(
+			`Validity: ${formatDuration(voucher.validity, "seconds")}`,
+			voucherAbsX + voucherWidth / 2,
+			detailLineY + 3,
+			{ align: "center" }
+		);
+		doc.text(
+			`Expires: ${
+				voucher.expirytime && voucher.expirytime !== 0 ? formatVoucherTimestamp(voucher.expirytime) : "Never"
+			}`,
+			voucherAbsX + voucherWidth / 2,
+			detailLineY + 6,
+			{ align: "center" }
+		);
+		doc.text(
+			`Group: ${voucher.vouchergroup || placeholderValue}`,
+			voucherAbsX + voucherWidth / 2,
+			detailLineY + 9,
+			{ align: "center" }
+		);
 	});
+}
 
-	const csvString = csvRows.join("\n");
-	const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
-	const link = document.createElement("a");
+/**
+ * Generates a PDF with voucher data presented in a table format.
+ * @param {Array<object>} vouchers - Array of voucher objects.
+ * @param {string} groupName - The name of the group.
+ * @param {object} doc - The jsPDF document instance to add content to.
+ */
+function generateVouchersAsTablePDF(vouchers, groupName, doc) {
+	const startY = 20; // Starting Y position for the table content
 
-	if (link.download !== undefined) {
-		const url = URL.createObjectURL(blob);
-		const groupName = vouchers[0].vouchergroup || "vouchers";
-		const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-		link.setAttribute("href", url);
-		link.setAttribute("download", `${groupName}_${timestamp}.csv`);
-		link.style.visibility = "hidden";
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
-		URL.revokeObjectURL(url);
-	} else {
-		showToast("CSV download not supported by your browser.", "error");
-	}
+	doc.setFontSize(18);
+	doc.setFont("helvetica", "bold");
+	doc.text(`Voucher Table for Group: ${groupName}`, doc.internal.pageSize.width / 2, startY, { align: "center" });
+
+	const tableHeaders = [["Voucher Code", "Password", "Validity", "Expires", "Group"]];
+
+	const tableData = vouchers.map((v) => [
+		v.username || placeholderValue,
+		v.password || placeholderValue,
+		formatDuration(v.validity, "seconds"),
+		v.expirytime && v.expirytime !== 0 ? formatVoucherTimestamp(v.expirytime) : "Never",
+		v.vouchergroup || placeholderValue,
+	]);
+
+	doc.autoTable({
+		startY: startY + 10,
+		head: tableHeaders,
+		body: tableData,
+		theme: "striped", // 'striped', 'grid', 'plain'
+		headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255] }, // Blue header
+		styles: {
+			fontSize: 8,
+			cellPadding: 2,
+			valign: "middle",
+			halign: "center",
+		},
+		columnStyles: {
+			0: { cellWidth: 30 }, // Voucher Code
+			1: { cellWidth: 25 }, // Password
+			2: { cellWidth: 25 }, // Validity
+			3: { cellWidth: 40 }, // Expires
+			4: { cellWidth: "auto" }, // Group
+		},
+		didDrawPage: function (data) {
+			// Footer for page numbers
+			let str = "Page " + doc.internal.getNumberOfPages();
+			doc.setFontSize(8);
+			doc.text(str, doc.internal.pageSize.width - data.settings.margin.right, doc.internal.pageSize.height - 5);
+		},
+	});
 }
 
 /**

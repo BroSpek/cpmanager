@@ -625,3 +625,55 @@ footer #api-status-footer span.text-yellow-500 {
 .dark-mode #config-input-section label {
 	color: var(--config-input-section-text); /* Or slightly lighter text for dark */
 }
+
+/* Print-specific styles */
+@media print {
+	body {
+		background-color: #fff !important; /* Force white background for printing */
+		color: #000 !important; /* Force black text for printing */
+		-webkit-print-color-adjust: exact; /* For background colors and images */
+		print-color-adjust: exact;
+	}
+
+	/* Hide elements not needed in print */
+	nav,
+	footer,
+	#mainTabs,
+	#config-input-section,
+	#session-field-container,
+	#session-action-btn,
+	#voucher-field-container,
+	#voucher-action-btn,
+	#voucher-group-actions,
+	#zone-action-container,
+	#toast-notification,
+	.modal {
+		display: none !important;
+	}
+
+	/* Show only the content for PDF generation */
+	#main-content-scroll-area {
+		overflow: visible !important;
+		height: auto !important;
+		min-height: auto !important;
+		padding: 0 !important;
+		margin: 0 !important;
+		display: block !important;
+		background-color: #fff !important;
+	}
+
+	.container.mx-auto.p-4 {
+		padding: 0 !important;
+		margin: 0 !important;
+		width: 100% !important;
+		max-width: none !important;
+	}
+
+	#tabContent {
+		padding: 0 !important;
+		margin: 0 !important;
+		box-shadow: none !important;
+		background-color: #fff !important;
+		color: #000 !important;
+	}
+}
