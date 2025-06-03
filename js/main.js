@@ -627,18 +627,26 @@ async function initializeAppLogic() {
 		if (typeof disableVoucherActionButtons === "function") disableVoucherActionButtons(false, true, true); // sensible defaults on load
 
 		let initialTab = "dashboard"; // Default to dashboard
-		const activeTabSetting =
-			localStorage.getItem("theme") === "system"
-				? "system"
-				: localStorage.getItem("activeHelpdeskTab") || "dashboard";
 
-		try {
-			const savedTab = localStorage.getItem("activeHelpdeskTab");
-			if (savedTab && tabPanes && tabPanes[savedTab]) {
-				initialTab = savedTab;
+		// Check URL hash first for navigation from notifications
+		const hashTab = window.location.hash.substring(1); // Remove '#'
+		if (hashTab && tabPanes && tabPanes[hashTab]) {
+			initialTab = hashTab;
+			// Clear the hash from the URL to prevent re-triggering on subsequent loads/refreshes
+			// and to not persist notification navigation state if user navigates manually.
+			if (window.history.replaceState) {
+				window.history.replaceState(null, null, window.location.pathname + window.location.search);
 			}
-		} catch (e) {
-			console.warn("localStorage access error for active tab:", e.message);
+		} else {
+			// If no valid hash, try localStorage
+			try {
+				const savedTab = localStorage.getItem("activeHelpdeskTab");
+				if (savedTab && tabPanes && tabPanes[savedTab]) {
+					initialTab = savedTab;
+				}
+			} catch (e) {
+				console.warn("localStorage access error for active tab:", e.message);
+			}
 		}
 
 		if (typeof setActiveTab === "function") {
