@@ -82,7 +82,7 @@ async function checkForNewSessionsAndNotify() {
 					if (navigator.serviceWorker.controller) {
 						navigator.serviceWorker.controller.postMessage({
 							type: "SHOW_NOTIFICATION",
-							payload: { title, body, icon },
+							payload: { title, body, icon, id: session.sessionId }, // Add a unique identifier, e.g., session.sessionId
 						});
 					} else {
 						console.warn("Service worker not controlling. Fallback to direct notification (if possible).");

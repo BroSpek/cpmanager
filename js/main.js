@@ -465,40 +465,43 @@ async function handleApplyCpConfiguration() {
 function initializeAllEventListeners() {
 	// Theme toggle button
 	if (themeToggleBtn) {
-		themeToggleBtn.addEventListener("click", toggleTheme);
+		// themeToggleBtn from ui.js
+		themeToggleBtn.addEventListener("click", toggleTheme); // toggleTheme from main.js
 	}
 
-	// Assumes saveApiCredsBtn, clearApiCredsBtn, applyCpConfigBtn, confirmationModal, confirmCancelBtn, confirmProceedBtn are global from ui.js
+	// API Credentials Buttons
 	if (saveApiCredsBtn) saveApiCredsBtn.addEventListener("click", saveApiCredentials);
 	if (clearApiCredsBtn) clearApiCredsBtn.addEventListener("click", clearApiCredentials);
+
+	// Apply CP Config Button
 	if (applyCpConfigBtn) applyCpConfigBtn.addEventListener("click", handleApplyCpConfiguration);
 
 	initializeTabs(); // From tabs.js
 
+	// Confirmation Modal Buttons
 	if (confirmationModal && confirmCancelBtn) {
 		confirmCancelBtn.addEventListener("click", () => {
 			hideModal(confirmationModal); // hideModal from ui.js
-			confirmCallback = null;
+			confirmCallback = null; // confirmCallback from main.js
 		});
 	}
 	if (confirmationModal && confirmProceedBtn) {
 		confirmProceedBtn.addEventListener("click", () => {
 			if (confirmCallback) confirmCallback();
-			hideModal(confirmationModal);
-			confirmCallback = null;
+			hideModal(confirmationModal); // hideModal from ui.js
+			confirmCallback = null; // confirmCallback from main.js
 		});
 	}
 
 	// Generic cancel button handler for modals
 	document.querySelectorAll('.modal [id^="cancel-"]').forEach((btn) => {
-		// Prevent attaching multiple listeners if this function is called again
 		if (btn.dataset.specificHandlerAttached !== "true") {
 			btn.addEventListener("click", () => {
 				const modal = btn.closest(".modal");
 				if (modal) {
 					hideModal(modal);
-					// Specific cleanup for editZoneModal if originalFullZoneDataForEdit exists (from zones.js)
 					if (modal.id === "editZoneModal" && typeof originalFullZoneDataForEdit !== "undefined") {
+						// originalFullZoneDataForEdit from zones.js
 						originalFullZoneDataForEdit = null;
 					}
 				}
@@ -507,21 +510,27 @@ function initializeAllEventListeners() {
 		}
 	});
 
-	// Listener for the new notifications toggle button
+	// Listener for the notifications toggle button
 	const notificationsToggleBtn = document.getElementById("notifications-toggle-btn"); // Make sure this ID matches your HTML
 	if (notificationsToggleBtn) {
 		notificationsToggleBtn.addEventListener("click", () => {
-			// This assumes sessionPollIntervalId, stopSessionPolling, requestNotificationPermission
-			// are accessible from notifications.js (e.g., they are global or part of an imported module)
 			if (typeof sessionPollIntervalId !== "undefined" && sessionPollIntervalId) {
-				if (typeof stopSessionPolling === "function") stopSessionPolling();
-				if (typeof updateNotificationToggleState === "function") updateNotificationToggleState(false); // from notifications.js
-				if (typeof showToast === "function") showToast("Sign-in notifications disabled.", "info");
+				// sessionPollIntervalId from notifications.js
+				if (typeof stopSessionPolling === "function") stopSessionPolling(); // stopSessionPolling from notifications.js
+				if (typeof updateNotificationToggleState === "function") updateNotificationToggleState(false); // updateNotificationToggleState from notifications.js
+				if (typeof showToast === "function") showToast("Sign-in notifications disabled.", "info"); // showToast from ui.js
 			} else {
-				if (typeof requestNotificationPermission === "function") requestNotificationPermission(); // from notifications.js
+				if (typeof requestNotificationPermission === "function") requestNotificationPermission(); // requestNotificationPermission from notifications.js
 			}
 		});
 	}
+
+	// START: New listener for the Test Notification button
+	const testNotificationBtn = document.getElementById("test-notification-btn");
+	if (testNotificationBtn) {
+		testNotificationBtn.addEventListener("click", handleSendTestNotification);
+	}
+	// END: New listener
 
 	initializeSessionEventListeners(); // From sessions.js
 	initializeVoucherEventListeners(); // From vouchers.js
@@ -630,6 +639,50 @@ async function initializeAppLogic() {
 			// The message about missing creds is implicitly handled by the dedicated UI mode.
 		}
 	}
+}
+
+/**
+ * Handles sending a test notification.
+ */
+async function handleSendTestNotification() {
+	if (!("Notification" in window)) {
+		showToast("This browser does not support desktop notifications.", "error"); // showToast is from ui.js
+		return;
+	}
+
+	if (!navigator.serviceWorker.controller) {
+		showToast("Service worker is not active. Cannot send notification.", "warning");
+		return;
+	}
+
+	let permission = Notification.permission;
+
+	if (permission === "default") {
+		// requestNotificationPermission is from notifications.js and handles its own toasts/UI updates
+		await requestNotificationPermission();
+		permission = Notification.permission; // Re-check permission after request
+	}
+
+	if (permission === "granted") {
+		const testPayload = {
+			title: "Test Notification",
+			body: "If you see this, notifications are working!",
+			icon: "icons/icon-192x192.png", // As used in sw.js
+			// Use a unique ID for the tag to ensure it's a new notification and doesn't replace others unexpectedly
+			id: `test-${new Date().getTime()}`,
+		};
+
+		navigator.serviceWorker.controller.postMessage({
+			// Assumes service worker is active and controlling
+			type: "SHOW_NOTIFICATION",
+			payload: testPayload,
+		});
+		showToast("Test notification sent!", "success");
+	} else if (permission === "denied") {
+		showToast("Notification permission has been denied. Please enable it in your browser settings.", "error", 7000);
+	}
+	// If permission is still 'default' after the request attempt,
+	// requestNotificationPermission() would have already shown a relevant toast.
 }
 
 async function initializeApp() {
