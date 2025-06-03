@@ -7,6 +7,7 @@ const themeToggleBtn = document.getElementById("theme-toggle-btn"); // Added
 
 // Configuration Section Elements
 const configInputSection = document.getElementById("config-input-section");
+const configApiBaseUrlInput = document.getElementById("config-api-base-url"); // NEW
 const configApiKeyInput = document.getElementById("config-api-key");
 const configApiSecretInput = document.getElementById("config-api-secret");
 const saveApiCredsBtn = document.getElementById("save-api-creds-btn");
