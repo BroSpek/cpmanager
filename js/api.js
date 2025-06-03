@@ -10,6 +10,16 @@
  * @throws {Error} Throws an error if the API call fails or returns an error status.
  */
 async function callApi(endpoint, method = "GET", body = null) {
+	// Add check for baseUrl
+	if (!OPNsenseConfig.baseUrl) {
+		const errorMessage = "OPNsense API Base URL is not configured. Cannot make API call.";
+		console.error(errorMessage, "Endpoint:", endpoint);
+		if (typeof showToast === "function") {
+			showToast("API Base URL not set. Please configure in settings.", "error", 8000);
+		}
+		throw new Error(errorMessage);
+	}
+
 	const url = `${OPNsenseConfig.baseUrl}/api/captiveportal${endpoint}`;
 	const headers = new Headers();
 

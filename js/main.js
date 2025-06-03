@@ -182,28 +182,36 @@ async function loadAppConfiguration() {
 	try {
 		const response = await fetch("./app-config.json");
 		if (!response.ok) {
-			throw new Error(`Failed to fetch app-config.json: ${response.status} ${response.statusText}`);
+			// If app-config.json isn't found or is empty, we can still proceed,
+			// but the baseUrl will need to be provided by the user.
+			console.warn(
+				`Failed to fetch app-config.json: ${response.status} ${response.statusText}. Will rely on user input for API Base URL.`
+			);
+			OPNsenseConfig.baseUrl = ""; // Explicitly set to empty string if file not found/parseable
+			return; // Do not throw, allow app to proceed to credential prompt
 		}
 		const appConfigData = await response.json();
 		if (appConfigData.apiBaseUrl) {
 			OPNsenseConfig.baseUrl = appConfigData.apiBaseUrl;
 			console.log("Application configuration loaded. API Base URL set to:", OPNsenseConfig.baseUrl);
 		} else {
-			throw new Error("apiBaseUrl not found in app-config.json");
+			console.warn("apiBaseUrl not found in app-config.json. Will rely on user input for API Base URL.");
+			OPNsenseConfig.baseUrl = ""; // Set to empty if key is missing in the JSON
 		}
 	} catch (error) {
-		console.error("Error loading application configuration:", error.message);
-		// Assumes apiStatusFooterText is a global const from ui.js
+		console.error("Error loading application configuration (JSON parse error or network issue):", error.message);
+		// This is a more critical error if the file exists but is malformed.
+		// Still, setting to empty string and allowing user input is a fallback.
+		OPNsenseConfig.baseUrl = "";
 		if (typeof apiStatusFooterText !== "undefined" && apiStatusFooterText) {
 			apiStatusFooterText.textContent = "App Config Load Failed!";
 			apiStatusFooterText.className = "font-semibold text-red-500 dark:text-red-400";
 		}
 		showToast(
-			`Critical: Failed to load app configuration. API calls will likely fail. Error: ${error.message}`,
-			"error",
+			`Warning: App configuration file failed to load. Please enter API Base URL manually. Error: ${error.message}`,
+			"warning",
 			10000
 		);
-		throw error; // Re-throw to be caught by initializeApp
 	}
 }
 
@@ -230,24 +238,47 @@ function registerServiceWorker() {
 function loadApiCredentials() {
 	currentApiKey = localStorage.getItem("opnsenseApiKey") || "";
 	currentApiSecret = localStorage.getItem("opnsenseApiSecret") || "";
-	// Assumes configApiKeyInput & configApiSecretInput are global consts from ui.js
+	// Load API Base URL from local storage, if available
+	OPNsenseConfig.baseUrl = localStorage.getItem("opnsenseApiBaseUrl") || OPNsenseConfig.baseUrl || ""; // Prioritize stored, then existing, then empty
+
+	// Assumes configApiKeyInput, configApiSecretInput, configApiBaseUrlInput are global consts from ui.js
 	if (typeof configApiKeyInput !== "undefined" && configApiKeyInput) configApiKeyInput.value = currentApiKey;
 	if (typeof configApiSecretInput !== "undefined" && configApiSecretInput)
 		configApiSecretInput.value = currentApiSecret;
+	if (typeof configApiBaseUrlInput !== "undefined" && configApiBaseUrlInput)
+		configApiBaseUrlInput.value = OPNsenseConfig.baseUrl;
 }
 
 async function saveApiCredentials() {
-	// Assumes configApiKeyInput, configApiSecretInput, configInputSection are global consts from ui.js
-	if (!configApiKeyInput || !configApiSecretInput) return;
+	// Assumes configApiKeyInput, configApiSecretInput, configApiBaseUrlInput are global consts from ui.js
+	if (!configApiKeyInput || !configApiSecretInput || !configApiBaseUrlInput) return; // Added configApiBaseUrlInput
 
 	currentApiKey = configApiKeyInput.value.trim();
 	currentApiSecret = configApiSecretInput.value.trim();
+	OPNsenseConfig.baseUrl = configApiBaseUrlInput.value.trim(); // Get from input
+
+	if (!OPNsenseConfig.baseUrl) {
+		// Validate Base URL
+		showToast("OPNsense API Base URL cannot be empty.", "error");
+		return;
+	}
+	// Basic URL validation
+	try {
+		new URL(OPNsenseConfig.baseUrl);
+	} catch (e) {
+		showToast(
+			"Invalid OPNsense API Base URL format. Please enter a valid URL (e.g., https://192.168.1.1).",
+			"error"
+		);
+		return;
+	}
 
 	if (currentApiKey && currentApiSecret) {
 		try {
 			localStorage.setItem("opnsenseApiKey", currentApiKey);
 			localStorage.setItem("opnsenseApiSecret", currentApiSecret);
-			showToast("API credentials saved to browser local storage.", "success");
+			localStorage.setItem("opnsenseApiBaseUrl", OPNsenseConfig.baseUrl); // Save Base URL
+			showToast("API credentials and Base URL saved to browser local storage.", "success");
 			// setCredentialEntryUIMode(false) will be called by checkApiStatusAndConfig via initializeAppLogic
 
 			await initializeAppLogic(); // This re-evaluates connection and UI state
@@ -285,17 +316,20 @@ async function saveApiCredentials() {
 }
 
 function clearApiCredentials() {
-	// Assumes configApiKeyInput, configApiSecretInput are global consts from ui.js
+	// Assumes configApiKeyInput, configApiSecretInput, configApiBaseUrlInput are global consts from ui.js
 	try {
 		localStorage.removeItem("opnsenseApiKey");
 		localStorage.removeItem("opnsenseApiSecret");
+		localStorage.removeItem("opnsenseApiBaseUrl"); // Clear Base URL
 	} catch (e) {
 		console.error("Error clearing localStorage:", e);
 	}
 	currentApiKey = "";
 	currentApiSecret = "";
+	OPNsenseConfig.baseUrl = ""; // Clear the in-memory config as well
 	if (configApiKeyInput) configApiKeyInput.value = "";
 	if (configApiSecretInput) configApiSecretInput.value = "";
+	if (configApiBaseUrlInput) configApiBaseUrlInput.value = ""; // Clear Base URL input
 
 	showToast("API credentials cleared from local storage.", "info");
 	setCredentialEntryUIMode(true); // Activate special UI mode
@@ -314,7 +348,7 @@ function clearApiCredentials() {
 		}
 	});
 	document
-		.querySelectorAll("input:not(#config-api-key):not(#config-api-secret), select")
+		.querySelectorAll("input:not(#config-api-key):not(#config-api-secret):not(#config-api-base-url), select") // Added config-api-base-url
 		.forEach((el) => (el.disabled = true));
 
 	// Assumes mainTabs, apiStatusFooterText are global consts from ui.js
@@ -360,11 +394,21 @@ async function checkApiStatusAndConfig() {
 	// Assumes apiStatusFooterText, configInputSection, mainTabs are global consts from ui.js
 	if (!OPNsenseConfig.baseUrl) {
 		if (apiStatusFooterText) {
-			apiStatusFooterText.textContent = "API Base URL Missing from Config!";
+			apiStatusFooterText.textContent = "API Base URL Missing!";
 			apiStatusFooterText.className = "font-semibold text-red-500 dark:text-red-400";
 		}
-		showToast("Critical: API Base URL not loaded from app-config.json. Cannot connect to API.", "error", 10000);
+		showToast("Critical: OPNsense API Base URL is missing. Please configure it.", "error", 10000);
 		setCredentialEntryUIMode(true); // Show credential UI
+		// Also disable everything except credential inputs and theme toggle
+		document
+			.querySelectorAll(
+				'button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"]):not(#theme-toggle-btn)'
+			)
+			.forEach((el) => (el.disabled = true));
+		document
+			.querySelectorAll("input:not(#config-api-key):not(#config-api-secret):not(#config-api-base-url), select")
+			.forEach((el) => (el.disabled = true));
+		if (mainTabs) mainTabs.querySelectorAll(".tab-btn").forEach((btn) => (btn.style.pointerEvents = "none"));
 		return false;
 	}
 
@@ -382,7 +426,7 @@ async function checkApiStatusAndConfig() {
 			)
 			.forEach((el) => (el.disabled = true));
 		document
-			.querySelectorAll("input:not(#config-api-key):not(#config-api-secret), select")
+			.querySelectorAll("input:not(#config-api-key):not(#config-api-secret):not(#config-api-base-url), select")
 			.forEach((el) => (el.disabled = true));
 		if (mainTabs) mainTabs.querySelectorAll(".tab-btn").forEach((btn) => (btn.style.pointerEvents = "none"));
 		return false;
@@ -421,6 +465,15 @@ async function checkApiStatusAndConfig() {
 		console.error("Initial API check (fetchAllZoneData) failed:", error.message);
 		if (error.message.includes("401") || error.message.includes("Unauthorized")) {
 			setCredentialEntryUIMode(true); // Auth error, so show credential input
+			showToast("API authentication failed. Please check your API Key and Secret.", "error", 10000); // Specific error message
+		} else if (error.message.includes("Failed to fetch")) {
+			// This typically means network error, CORS, or incorrect URL
+			showToast(
+				"Cannot reach OPNsense API. Please check your Base URL, network, and CORS settings.",
+				"error",
+				10000
+			);
+			setCredentialEntryUIMode(true); // Assume it's a URL issue or a network one that needs user attention to URL.
 		}
 		return false;
 	}
@@ -547,12 +600,13 @@ async function initializeAppLogic() {
 		// Enable all relevant buttons, inputs, selects
 		document.querySelectorAll("button, input, select").forEach((el) => {
 			// Check if the element is NOT part of the config input section (unless it's clearApiCredsBtn)
+			const isConfigBaseUrl = el.id === "config-api-base-url"; // NEW
 			const isConfigKey = el.id === "config-api-key";
 			const isConfigSecret = el.id === "config-api-secret";
 			const isSaveCredsBtn = el === saveApiCredsBtn;
 
 			if (
-				!(isConfigKey || isConfigSecret || isSaveCredsBtn) ||
+				!(isConfigKey || isConfigSecret || isConfigBaseUrl || isSaveCredsBtn) || // NEW
 				el === clearApiCredsBtn ||
 				el === themeToggleBtn
 			) {
@@ -608,7 +662,7 @@ async function initializeAppLogic() {
 			)
 			.forEach((el) => (el.disabled = true));
 		document
-			.querySelectorAll("input:not(#config-api-key):not(#config-api-secret), select")
+			.querySelectorAll("input:not(#config-api-key):not(#config-api-secret):not(#config-api-base-url), select") // Added config-api-base-url
 			.forEach((el) => (el.disabled = true));
 
 		if (mainTabs) {
