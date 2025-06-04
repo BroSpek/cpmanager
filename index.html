@@ -46,34 +46,49 @@
 		<div id="main-content-scroll-area" class="flex-grow overflow-y-auto">
 			<div class="container mx-auto p-4">
 				<div id="config-input-section" class="hidden p-4 mb-4 rounded-md" role="alert">
-					<p class="font-bold mb-2">API Credentials Required</p>
-					<p class="text-sm mb-3">
-						Please enter your OPNsense API Key and Secret. They will be stored in your browser's local
-						storage.
-					</p>
-					<div>
-						<label for="config-api-base-url" class="block text-sm font-medium"
-							>OPNsense API Base URL:</label
-						>
-						<input
-							type="text"
-							id="config-api-base-url"
-							class="form-input mt-1 block w-full"
-							placeholder="e.g., https://192.168.1.1"
-						/>
-					</div>
-					<div class="mt-2">
-						<label for="config-api-key" class="block text-sm font-medium">API Key:</label>
-						<input type="text" id="config-api-key" class="form-input mt-1 block w-full" />
-					</div>
-					<div class="mt-2">
-						<label for="config-api-secret" class="block text-sm font-medium">API Secret:</label>
-						<input type="password" id="config-api-secret" class="form-input mt-1 block w-full" />
-					</div>
-					<div class="mt-4 flex space-x-4">
-						<button id="save-api-creds-btn" class="btn btn-success sm-w-auto">Save Credentials</button>
-						<button id="clear-api-creds-btn" class="btn btn-secondary sm-w-auto">Clear Credentials</button>
-					</div>
+					<form id="api-credentials-form">
+						<p class="font-bold mb-2">API Credentials Required</p>
+						<p class="text-sm mb-3">
+							Please enter your OPNsense API Key and Secret. They will be stored in your browser's local
+							storage.
+						</p>
+						<div>
+							<label for="config-api-base-url" class="block text-sm font-medium"
+								>OPNsense API Base URL:</label
+							>
+							<input
+								type="text"
+								id="config-api-base-url"
+								class="form-input mt-1 block w-full"
+								placeholder="e.g., https://192.168.1.1"
+								autocomplete="api-url"
+							/>
+						</div>
+						<div class="mt-2">
+							<label for="config-api-key" class="block text-sm font-medium">API Key:</label>
+							<input
+								type="text"
+								id="config-api-key"
+								class="form-input mt-1 block w-full"
+								autocomplete="username"
+							/>
+						</div>
+						<div class="mt-2">
+							<label for="config-api-secret" class="block text-sm font-medium">API Secret:</label>
+							<input
+								type="password"
+								id="config-api-secret"
+								class="form-input mt-1 block w-full"
+								autocomplete="current-password"
+							/>
+						</div>
+						<div class="mt-4 flex space-x-4">
+							<button id="save-api-creds-btn" class="btn btn-success sm-w-auto">Save Credentials</button>
+							<button id="clear-api-creds-btn" class="btn btn-secondary sm-w-auto">
+								Clear Credentials
+							</button>
+						</div>
+					</form>
 				</div>
 
 				<div class="mb-4 border-b">
