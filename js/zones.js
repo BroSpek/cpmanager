@@ -13,12 +13,9 @@
 				CPManager.state.zones.allConfigured.length > 0 &&
 				CPManager.state.zones.allConfigured[0].description !== undefined
 			) {
-				// Data already exists and seems populated (has description), skip re-fetch unless forced
-				console.log("Using cached allConfiguredZones data.");
 				return;
 			}
 			try {
-				console.log(forceRefresh ? "Forcing refresh of allConfiguredZones." : "Fetching allConfiguredZones.");
 				const data = await CPManager.api.callApi("/settings/search_zones"); // Endpoint for zone summaries
 				if (data && Array.isArray(data.rows)) {
 					CPManager.state.zones.allConfigured = data.rows;
@@ -26,16 +23,32 @@
 					CPManager.state.zones.allConfigured = []; // Reset if data is not as expected
 					console.warn("No zones found or unexpected data format from /settings/search_zones.", data);
 				}
-				if (CPManager.state.zones.allConfigured.length === 0 && !(data && Array.isArray(data.rows))) {
-					// Check if it was an API issue vs actually no zones
-					// Avoid toast if API returned empty array, which is valid
-				} else if (CPManager.state.zones.allConfigured.length === 0) {
-					console.warn("No captive portal zones found during fetchAllZoneData.");
-				}
 			} catch (error) {
 				console.error("Failed to fetch all zone data for descriptions:", error.message);
-				// CPManager.ui.showToast("Could not load zone summary data.", "warning"); // Toast might be redundant if callApi handles it
 				CPManager.state.zones.allConfigured = []; // Reset on error
+			}
+		},
+
+		/**
+		 * Fetches custom captive portal templates from the API.
+		 * Stores them in CPManager.state.zones.customTemplates.
+		 * @param {boolean} [forceRefresh=false] - If true, forces a re-fetch.
+		 */
+		fetchCustomTemplates: async function (forceRefresh = false) {
+			if (!forceRefresh && CPManager.state.zones.customTemplates.length > 0) {
+				return;
+			}
+			try {
+				const data = await CPManager.api.callApi("/service/search_templates");
+				if (data && Array.isArray(data.rows)) {
+					CPManager.state.zones.customTemplates = data.rows;
+				} else {
+					CPManager.state.zones.customTemplates = [];
+					console.warn("No custom templates found or unexpected data format.", data);
+				}
+			} catch (error) {
+				console.error("Failed to fetch custom templates:", error.message);
+				CPManager.state.zones.customTemplates = [];
 			}
 		},
 
@@ -46,7 +59,6 @@
 		loadZoneInfo: async function (forceRefreshDetails = false) {
 			if (!CPManager.elements.zoneListContainer) return;
 
-			// Show skeleton loaders only if forcing a full refresh or if no zones are currently displayed
 			const needsSkeleton =
 				forceRefreshDetails ||
 				CPManager.elements.zoneListContainer.querySelectorAll(".zone-info-card").length === 0;
@@ -55,11 +67,10 @@
 			}
 
 			try {
-				// Fetch zone summary data. fetchAllZoneData has its own internal cache check.
-				// Pass forceRefreshDetails to it if we need to bypass its cache.
 				await CPManager.zones.fetchAllZoneData(forceRefreshDetails);
+				await CPManager.zones.fetchCustomTemplates(forceRefreshDetails);
 
-				CPManager.ui.clearContainer(CPManager.elements.zoneListContainer); // Clear previous cards before rendering
+				CPManager.ui.clearContainer(CPManager.elements.zoneListContainer);
 
 				if (
 					!Array.isArray(CPManager.state.zones.allConfigured) ||
@@ -148,7 +159,6 @@
 			summaryElement.setAttribute("aria-expanded", String(isNowExpanded));
 			detailsContainer.setAttribute("aria-hidden", String(!isNowExpanded));
 
-			// Load details only if newly expanded and not already loaded (or if it previously failed)
 			if (
 				isNowExpanded &&
 				(detailsContainer.innerHTML.includes("Loading details...") ||
@@ -168,14 +178,13 @@
 						return `<div class="info-row"><span class="info-label">${label}</span> <span class="info-value">${displayValue}</span></div>`;
 					};
 
-					// Display UUID clearly from summary data if available, then full from details
 					detailsHtml += createInfoRowDiv("UUID", uuid);
 
 					if (zoneDetailsResponse && zoneDetailsResponse.zone) {
 						const zoneData = zoneDetailsResponse.zone;
 						for (const [key, value] of Object.entries(zoneData)) {
 							if (key === "uuid" || key === "description" || key === "enabled" || key === "zoneid")
-								continue; // Already in summary/tag or handled above
+								continue;
 
 							const readableKey =
 								CPManager.config.zoneFieldMappings[key] ||
@@ -186,6 +195,27 @@
 								displayValue = value
 									? CPManager.utils.formatDuration(parseInt(value), "minutes")
 									: CPManager.config.placeholderValue;
+							} else if (key === "template") {
+								let selectedTemplateIdentifier = "";
+								if (typeof value === "object" && value !== null) {
+									for (const templateKey in value) {
+										if (
+											value[templateKey] &&
+											(value[templateKey].selected === 1 || value[templateKey].selected === "1")
+										) {
+											selectedTemplateIdentifier = templateKey;
+											break;
+										}
+									}
+								}
+								const templateInfo = CPManager.state.zones.customTemplates.find(
+									(t) => t.uuid === selectedTemplateIdentifier
+								);
+								displayValue = templateInfo
+									? templateInfo.name
+									: selectedTemplateIdentifier
+									? `UUID: ${selectedTemplateIdentifier.substring(0, 8)}...`
+									: "Default";
 							} else if (
 								[
 									"disableRules",
@@ -211,7 +241,6 @@
 							}
 
 							if (typeof displayValue === "string" && displayValue.length > 150) {
-								// Check type before using .length
 								displayValue = displayValue.substring(0, 150) + "...";
 							}
 							detailsHtml += createInfoRowDiv(
@@ -238,20 +267,30 @@
 			}
 		},
 
-		/**
-		 * Fetches zone data and opens the edit zone modal.
-		 * @param {string} uuid - The UUID of the zone to edit.
-		 */
 		fetchAndOpenEditZoneModal: async function (uuid) {
 			if (!CPManager.elements.editZoneModal) {
-				console.error("Edit Zone Modal element not found.");
+				console.error("Edit Zone Modal element (CPManager.elements.editZoneModal) not found.");
 				return;
 			}
 			try {
-				const response = await CPManager.api.callApi(`/settings/get_zone/${uuid}`); // This fetches fresh data for editing
+				await CPManager.zones.fetchCustomTemplates();
+
+				const response = await CPManager.api.callApi(`/settings/get_zone/${uuid}`);
 				if (response && response.zone) {
-					CPManager.state.zones.originalFullDataForEdit = response; // Store for potential reference, though not used for building payload anymore
+					CPManager.state.zones.originalFullDataForEdit = response;
 					CPManager.zones.populateEditZoneModal(response.zone, uuid);
+
+					if (CPManager.elements.submitEditZoneBtn) {
+						CPManager.elements.submitEditZoneBtn.disabled = false;
+					} else {
+						console.error(
+							"CPManager.elements.submitEditZoneBtn not found when trying to enable it in fetchAndOpenEditZoneModal."
+						);
+					}
+					if (CPManager.elements.cancelEditZoneBtn) {
+						CPManager.elements.cancelEditZoneBtn.disabled = false;
+					}
+
 					CPManager.elements.editZoneModal.classList.remove("modal-inactive");
 					CPManager.elements.editZoneModal.classList.add("modal-active");
 					if (CPManager.elements.zoneEditDescriptionInput)
@@ -261,43 +300,36 @@
 					CPManager.state.zones.originalFullDataForEdit = null;
 				}
 			} catch (error) {
-				// CPManager.ui.showToast(`Error fetching zone details for editing: ${error.message}`, 'error'); // callApi usually handles toast
 				CPManager.state.zones.originalFullDataForEdit = null;
+				console.error("Error in fetchAndOpenEditZoneModal:", error);
 			}
 		},
 
-		/**
-		 * Populates the edit zone modal with data for the given zone.
-		 * @param {object} zoneData - The detailed data for the zone.
-		 * @param {string} uuid - The UUID of the zone.
-		 */
 		populateEditZoneModal: function (zoneData, uuid) {
-			if (
-				!CPManager.elements.editZoneUuidInput ||
-				!CPManager.elements.editZoneModalTitleName ||
-				!CPManager.elements.zoneEditDescriptionInput ||
-				!CPManager.elements.zoneEditEnabledCheckbox ||
-				!CPManager.elements.zoneEditEnabledText ||
-				!CPManager.elements.zoneEditAllowedAddressesTextarea ||
-				!CPManager.elements.zoneEditAllowedMACAddressesTextarea
-			) {
-				console.error("One or more edit zone modal form elements are missing.");
-				CPManager.ui.showToast("Cannot populate edit zone dialog: form elements missing.", "error");
-				return;
+			const requiredElements = [
+				"editZoneUuidInput",
+				"editZoneModalTitleName",
+				"zoneEditDescriptionInput",
+				"zoneEditEnabledCheckbox",
+				"zoneEditEnabledText",
+				"zoneEditAllowedAddressesTextarea",
+				"zoneEditAllowedMACAddressesTextarea",
+				"zoneEditHardTimeoutInput",
+				"zoneEditIdleTimeoutInput",
+				"zoneEditConcurrentLoginsCheckbox",
+				"zoneEditConcurrentLoginsText",
+				"zoneEditTemplateSelect",
+			];
+			for (const elId of requiredElements) {
+				if (!CPManager.elements[elId]) {
+					console.error(`Edit Zone Modal element missing: ${elId}`);
+					CPManager.ui.showToast("Cannot populate edit zone dialog: form elements missing.", "error");
+					return;
+				}
 			}
 
-			/**
-			 * Helper function to format field values for textareas.
-			 * Converts OPNsense-style selectable objects to a comma-separated string of their 'value' properties.
-			 * If the input is already a string, it's returned as is.
-			 * Other object types will result in an empty string to avoid "[objectObject]".
-			 * @param {*} fieldValue - The value from zoneData.
-			 * @returns {string} A string suitable for textarea population.
-			 */
 			const formatForTextarea = (fieldValue) => {
 				if (typeof fieldValue === "object" && fieldValue !== null && !Array.isArray(fieldValue)) {
-					// Check if it's likely an OPNsense-style selectable object
-					// (i.e., its own properties are objects containing 'value' and 'selected')
 					const isOpnSelectableObject = Object.values(fieldValue).some(
 						(item) =>
 							typeof item === "object" &&
@@ -309,14 +341,12 @@
 					if (isOpnSelectableObject) {
 						const selectedValues = [];
 						for (const key in fieldValue) {
-							// Check if the item is an object and has 'selected' and 'value' properties
 							if (
 								typeof fieldValue[key] === "object" &&
 								fieldValue[key] !== null &&
 								fieldValue[key].hasOwnProperty("selected") &&
 								fieldValue[key].hasOwnProperty("value")
 							) {
-								// Consider an item selected if its 'selected' property is 1, '1', or true
 								if (
 									fieldValue[key].selected === 1 ||
 									fieldValue[key].selected === "1" ||
@@ -326,25 +356,14 @@
 								}
 							}
 						}
-						return selectedValues.join(","); // Comma-separated, no space (as per API expectation for lists)
+						return selectedValues.join(",");
 					} else {
-						// If it's an object but not the expected OPNsense selectable format,
-						// log it and return empty to prevent "[objectObject]".
-						console.warn(
-							"Encountered an unexpected object type for textarea,_was_not_OPNsense_selectable:",
-							fieldValue
-						);
 						return "";
 					}
 				}
 				if (typeof fieldValue === "string") {
-					// If it's already a string, use it directly.
-					// The API expects comma-separated, so if the string from GET is different,
-					// this might need further transformation based on actual GET response format.
-					// For now, assuming if it's a string, it's either correct or the user will fix it.
 					return fieldValue;
 				}
-				// For null, undefined, arrays, or other unexpected types, return an empty string.
 				return "";
 			};
 
@@ -361,32 +380,75 @@
 			CPManager.elements.zoneEditAllowedMACAddressesTextarea.value = formatForTextarea(
 				zoneData.allowedMACAddresses
 			);
+
+			CPManager.elements.zoneEditHardTimeoutInput.value = zoneData.hardtimeout || "";
+			CPManager.elements.zoneEditIdleTimeoutInput.value = zoneData.idletimeout || "";
+
+			const concurrentLoginsAllowed = zoneData.concurrentlogins === "1";
+			CPManager.elements.zoneEditConcurrentLoginsCheckbox.checked = concurrentLoginsAllowed;
+			CPManager.elements.zoneEditConcurrentLoginsText.textContent = concurrentLoginsAllowed
+				? "Allowed"
+				: "Disallowed";
+
+			const templateSelect = CPManager.elements.zoneEditTemplateSelect;
+			templateSelect.innerHTML = '<option value="">-- Default --</option>';
+
+			CPManager.state.zones.customTemplates.forEach((template) => {
+				const option = document.createElement("option");
+				option.value = template.uuid;
+				option.textContent = template.name;
+				templateSelect.appendChild(option);
+			});
+
+			let selectedTemplateIdentifierFromZoneData = "";
+			if (typeof zoneData.template === "object" && zoneData.template !== null) {
+				for (const templateKey in zoneData.template) {
+					if (
+						zoneData.template[templateKey] &&
+						(zoneData.template[templateKey].selected === 1 ||
+							zoneData.template[templateKey].selected === "1")
+					) {
+						selectedTemplateIdentifierFromZoneData = templateKey;
+						break;
+					}
+				}
+			} else if (typeof zoneData.template === "string" && zoneData.template) {
+				selectedTemplateIdentifierFromZoneData = zoneData.template;
+			}
+
+			if (
+				selectedTemplateIdentifierFromZoneData &&
+				CPManager.state.zones.customTemplates.some((t) => t.uuid === selectedTemplateIdentifierFromZoneData)
+			) {
+				templateSelect.value = selectedTemplateIdentifierFromZoneData;
+			} else {
+				templateSelect.value = "";
+			}
 		},
 
-		/**
-		 * Saves the edited zone settings via an API call.
-		 * Sends only the 4 editable fields.
-		 */
 		saveZoneSettings: async function () {
 			if (!CPManager.elements.editZoneUuidInput || !CPManager.elements.submitEditZoneBtn) {
 				CPManager.ui.showToast("Zone UUID is missing or save button not found. Cannot save.", "error");
+				console.error("Missing UUID input or submit button in saveZoneSettings.");
 				return;
 			}
 			const uuid = CPManager.elements.editZoneUuidInput.value;
 
-			// These are the only settings being actively managed by your current edit modal
-			const zoneSettingsActuallyEdited = {
+			const zoneSettingsToUpdate = {
 				description: CPManager.elements.zoneEditDescriptionInput.value.trim(),
 				enabled: CPManager.elements.zoneEditEnabledCheckbox.checked ? "1" : "0",
 				allowedAddresses: CPManager.elements.zoneEditAllowedAddressesTextarea.value.replace(/\s+/g, ""),
 				allowedMACAddresses: CPManager.elements.zoneEditAllowedMACAddressesTextarea.value
 					.replace(/\s+/g, "")
 					.toLowerCase(),
+				hardtimeout: CPManager.elements.zoneEditHardTimeoutInput.value.trim() || "0",
+				idletimeout: CPManager.elements.zoneEditIdleTimeoutInput.value.trim() || "0",
+				concurrentlogins: CPManager.elements.zoneEditConcurrentLoginsCheckbox.checked ? "1" : "0",
+				template: CPManager.elements.zoneEditTemplateSelect.value || "",
 			};
 
-			// Construct the payload with ONLY the settings edited in this modal.
 			const finalApiPayload = {
-				zone: zoneSettingsActuallyEdited,
+				zone: zoneSettingsToUpdate,
 			};
 
 			CPManager.elements.submitEditZoneBtn.disabled = true;
@@ -397,15 +459,13 @@
 
 				if (result && result.result === "saved") {
 					CPManager.ui.showToast(
-						`Zone settings updated for "${
-							zoneSettingsActuallyEdited.description || uuid.substring(0, 8)
-						}".`,
+						`Zone settings updated for "${zoneSettingsToUpdate.description || uuid.substring(0, 8)}".`,
 						"success"
 					);
 					CPManager.ui.hideModal(CPManager.elements.editZoneModal);
-					CPManager.state.zones.originalFullDataForEdit = null; // Clear original data cache
+					CPManager.state.zones.originalFullDataForEdit = null;
 
-					await CPManager.zones.loadZoneInfo(true); // Force refresh of zone summaries and re-render the zone list
+					await CPManager.zones.loadZoneInfo(true);
 
 					CPManager.ui.showToast("Applying changes by reconfiguring service...", "info", 7000);
 					const reconfigResult = await CPManager.api.callApi("/service/reconfigure", "POST", {});
@@ -439,18 +499,17 @@
 				}
 			} catch (error) {
 				console.error("Error during saveZoneSettings:", error.message);
-				// Assuming callApi handles toast for network/request errors
 			} finally {
-				CPManager.elements.submitEditZoneBtn.disabled = false;
-				CPManager.elements.submitEditZoneBtn.innerHTML = "Save Changes";
+				if (CPManager.elements.submitEditZoneBtn) {
+					CPManager.elements.submitEditZoneBtn.disabled = false;
+					CPManager.elements.submitEditZoneBtn.innerHTML = "Save Changes";
+				} else {
+					console.error("submitEditZoneBtn is null in finally block of saveZoneSettings. Cannot re-enable.");
+				}
 			}
 		},
 
-		/**
-		 * Initializes event listeners for the zone information tab.
-		 */
 		initializeZoneEventListeners: function () {
-			// console.log('Zones: Initializing event listeners for zones module.'); // Removed for cleanup
 			if (CPManager.elements.zoneListContainer) {
 				CPManager.elements.zoneListContainer.addEventListener("click", async (e) => {
 					const editButton = e.target.closest('[data-action="edit-zone"]');
@@ -467,18 +526,54 @@
 			}
 
 			if (CPManager.elements.submitEditZoneBtn) {
-				CPManager.elements.submitEditZoneBtn.addEventListener("click", CPManager.zones.saveZoneSettings);
+				if (!CPManager.elements.submitEditZoneBtn.dataset.listenerAttached) {
+					CPManager.elements.submitEditZoneBtn.addEventListener("click", function () {
+						// This log is critical to see if the listener itself is firing
+						console.log("Save Changes button clicked (via initialized listener).");
+						CPManager.zones.saveZoneSettings();
+					});
+					CPManager.elements.submitEditZoneBtn.dataset.listenerAttached = "true";
+				}
+			} else {
+				console.error(
+					"Submit Edit Zone Button (CPManager.elements.submitEditZoneBtn) not found during initializeZoneEventListeners."
+				);
 			}
+
 			if (CPManager.elements.cancelEditZoneBtn) {
-				CPManager.elements.cancelEditZoneBtn.addEventListener("click", () => {
-					CPManager.ui.hideModal(CPManager.elements.editZoneModal);
-					CPManager.state.zones.originalFullDataForEdit = null; // Clear original data cache
-				});
+				if (!CPManager.elements.cancelEditZoneBtn.dataset.listenerAttached) {
+					CPManager.elements.cancelEditZoneBtn.addEventListener("click", () => {
+						CPManager.ui.hideModal(CPManager.elements.editZoneModal);
+						CPManager.state.zones.originalFullDataForEdit = null;
+					});
+					CPManager.elements.cancelEditZoneBtn.dataset.listenerAttached = "true";
+				}
+			} else {
+				console.error(
+					"Cancel Edit Zone Button (CPManager.elements.cancelEditZoneBtn) not found during initializeZoneEventListeners."
+				);
 			}
+
 			if (CPManager.elements.zoneEditEnabledCheckbox && CPManager.elements.zoneEditEnabledText) {
-				CPManager.elements.zoneEditEnabledCheckbox.addEventListener("change", function () {
-					CPManager.elements.zoneEditEnabledText.textContent = this.checked ? "Enabled" : "Disabled";
-				});
+				if (!CPManager.elements.zoneEditEnabledCheckbox.dataset.listenerAttached) {
+					CPManager.elements.zoneEditEnabledCheckbox.addEventListener("change", function () {
+						CPManager.elements.zoneEditEnabledText.textContent = this.checked ? "Enabled" : "Disabled";
+					});
+					CPManager.elements.zoneEditEnabledCheckbox.dataset.listenerAttached = "true";
+				}
+			}
+			if (
+				CPManager.elements.zoneEditConcurrentLoginsCheckbox &&
+				CPManager.elements.zoneEditConcurrentLoginsText
+			) {
+				if (!CPManager.elements.zoneEditConcurrentLoginsCheckbox.dataset.listenerAttached) {
+					CPManager.elements.zoneEditConcurrentLoginsCheckbox.addEventListener("change", function () {
+						CPManager.elements.zoneEditConcurrentLoginsText.textContent = this.checked
+							? "Allowed"
+							: "Disallowed";
+					});
+					CPManager.elements.zoneEditConcurrentLoginsCheckbox.dataset.listenerAttached = "true";
+				}
 			}
 		},
 	};

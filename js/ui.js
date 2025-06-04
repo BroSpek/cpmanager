@@ -62,6 +62,13 @@
 		zoneEditEnabledText: document.getElementById("zone-edit-enabled-text"),
 		zoneEditAllowedAddressesTextarea: document.getElementById("zone-edit-allowedAddresses"),
 		zoneEditAllowedMACAddressesTextarea: document.getElementById("zone-edit-allowedMACAddresses"),
+		// New fields for Edit Zone Modal
+		zoneEditHardTimeoutInput: document.getElementById("zone-edit-hardtimeout"),
+		zoneEditIdleTimeoutInput: document.getElementById("zone-edit-idletimeout"),
+		zoneEditConcurrentLoginsCheckbox: document.getElementById("zone-edit-concurrentlogins"),
+		zoneEditConcurrentLoginsText: document.getElementById("zone-edit-concurrentlogins-text"),
+		zoneEditTemplateSelect: document.getElementById("zone-edit-template"),
+
 		cancelEditZoneBtn: document.getElementById("cancel-edit-zone-btn"),
 		submitEditZoneBtn: document.getElementById("submit-edit-zone-btn"),
 		applyCpConfigBtn: document.getElementById("apply-cp-config-btn"),

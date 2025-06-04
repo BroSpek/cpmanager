@@ -626,6 +626,33 @@ footer #api-status-footer span.text-yellow-500 {
 	color: var(--config-input-section-text); /* Or slightly lighter text for dark */
 }
 
+/* Toast Notification Styling */
+#toast-notification {
+	position: fixed;
+	bottom: 1.25rem; /* bottom-5 */
+	right: 1.25rem; /* right-5 */
+	color: white;
+	padding-top: 0.75rem; /* py-3 */
+	padding-bottom: 0.75rem; /* py-3 */
+	padding-left: 1.25rem; /* px-5 */
+	padding-right: 1.25rem; /* px-5 */
+	border-radius: 0.5rem; /* rounded-lg */
+	box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+	opacity: 0;
+	transition-property: opacity;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 300ms;
+	max-width: 20rem; /* max-w-xs */
+	z-index: 50; /* Ensure it's above most content */
+	/* Default to pointer-events: none when hidden */
+	pointer-events: none;
+}
+
+#toast-notification.opacity-100 {
+	opacity: 1;
+	pointer-events: auto; /* Allow clicks when visible */
+}
+
 /* Print-specific styles */
 @media print {
 	body {
