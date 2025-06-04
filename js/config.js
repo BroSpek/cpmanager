@@ -1,77 +1,104 @@
 // js/config.js
 
-/**
- * Configuration object for the OPNsense Captive Portal Manager.
- * baseUrl will be loaded from app-config.json.
- */
-const OPNsenseConfig = {
-	baseUrl: null, // Will be populated from app-config.json
-	// Add other global configurations here if needed
-	// e.g., defaultTimeout: 5000,
+// Initialize the global CPManager object if it doesn't exist
+// This line ensures window.CPManager is available before other scripts try to access it.
+window.CPManager = window.CPManager || {};
+
+// --- Configuration Object ---
+// Directly attach config to the global CPManager object
+CPManager.config = {
+	baseUrl: null, // Will be populated from app-config.json or localStorage
+	placeholderValue: "—",
+	predefinedColors: [
+		"bg-pink-500",
+		"bg-purple-500",
+		"bg-indigo-500",
+		"bg-teal-500",
+		"bg-lime-500",
+		"bg-amber-500",
+		"bg-orange-500",
+		"bg-cyan-500",
+		"bg-red-600",
+		"bg-green-600",
+		"bg-blue-600",
+		"bg-yellow-600",
+	],
+	authViaMapping: {
+		"---ip---": "IP",
+		"---mac---": "MAC",
+		"Local Database": "Local DB",
+		Voucher: "Voucher",
+		"": "Anon",
+	},
+	zoneFieldMappings: {
+		enabled: "Enabled",
+		zoneid: "Zone ID",
+		interfaces: "Interfaces",
+		disableRules: "Disable Auto Rules",
+		authservers: "Auth Servers",
+		alwaysSendAccountingReqs: "RADIUS Accounting",
+		authEnforceGroup: "Enforce Group",
+		idletimeout: "Idle Timeout",
+		hardtimeout: "Hard Timeout",
+		concurrentlogins: "Concurrent Logins",
+		certificate: "SSL Certificate",
+		servername: "HTTPS Server Name",
+		allowedAddresses: "Allowed IPs",
+		allowedMACAddresses: "Allowed MACs",
+		extendedPreAuthData: "Extended Pre-Auth Data",
+		template: "Login Page Template",
+		description: "Description",
+		uuid: "UUID",
+	},
 };
 
-// (Keep other existing constants like placeholderValue, predefinedColors, authViaMapping, zoneFieldMappings)
-// ...
+// --- State Variables ---
+// Directly attach state to the global CPManager object
+CPManager.state = {
+	currentApiKey: "",
+	currentApiSecret: "",
+	confirmCallback: null, // Used by the confirmation modal in CPManager.ui
 
-/**
- * Placeholder value for display when actual data is missing or not applicable.
- */
-const placeholderValue = "—";
+	// For color assignment in CPManager.utils
+	zoneColors: {},
+	authViaColors: {},
+	zoneColorIndex: 0,
+	authViaColorIndex: Math.floor(CPManager.config.predefinedColors.length / 2), // Start from a different part of the array
 
-/**
- * Predefined colors for dynamically assigning to zones or other categorized items
- * to maintain visual consistency.
- */
-const predefinedColors = [
-	"bg-pink-500",
-	"bg-purple-500",
-	"bg-indigo-500",
-	"bg-teal-500",
-	"bg-lime-500",
-	"bg-amber-500",
-	"bg-orange-500",
-	"bg-cyan-500",
-	"bg-red-600",
-	"bg-green-600",
-	"bg-blue-600",
-	"bg-yellow-600",
-];
-
-/**
- * Mapping for human-readable authentication methods.
- */
-const authViaMapping = {
-	"---ip---": "IP",
-	"---mac---": "MAC",
-	"Local Database": "Local DB",
-	Voucher: "Voucher",
-	"": "Anon",
+	// Module-specific state will be initialized in their respective files under this namespace
+	sessions: {
+		all: [], // Stores all fetched sessions to allow client-side filtering
+		managerDetails: null, // Stores details of the current device's session
+	},
+	vouchers: {
+		current: [], // Stores vouchers for the currently selected group (for rendering)
+		lastGenerated: [], // Stores the last batch of generated vouchers for PDF download
+		cachedProviders: [],
+		cachedGroups: {}, // Key: providerId, Value: array of group names
+		cachedData: {}, // Key: `${providerId}_${groupName}`, Value: array of voucher objects
+	},
+	zones: {
+		allConfigured: [], // Stores all configured zones (summary data)
+		originalFullDataForEdit: null, // Stores the full data of the zone being edited
+	},
+	dashboard: {
+		chartInstance: null, // Holds the Chart.js instance for the data usage donut chart
+		originalUploadBytes: 0,
+		originalDownloadBytes: 0,
+		originalTotalBytes: 0,
+		apiDataCache: {
+			sessions: null, // To store rows from /session/search
+			voucherStats: null, // To store { totalVouchers, activeVouchers }
+			// totalZones is derived from allConfiguredZones which has its own cache mechanism
+		},
+	},
+	notifications: {
+		previousSessionIds: new Set(),
+		isFirstPoll: true,
+		sessionPollIntervalId: null,
+		POLLING_INTERVAL: 30000, // 30 seconds
+		POLLING_INTERVAL_HIDDEN_TAB: 300000, // 5 minutes when tab is hidden
+		consecutivePollErrors: 0,
+		MAX_POLL_ERRORS_BEFORE_DISABLE: 5, // Disable notifications after this many consecutive errors
+	},
 };
-
-/**
- * Field mappings for displaying OPNsense zone settings in a user-friendly way.
- */
-const zoneFieldMappings = {
-	enabled: "Enabled",
-	zoneid: "Zone ID",
-	interfaces: "Interfaces",
-	disableRules: "Disable Auto Rules",
-	authservers: "Auth Servers",
-	alwaysSendAccountingReqs: "RADIUS Accounting",
-	authEnforceGroup: "Enforce Group",
-	idletimeout: "Idle Timeout",
-	hardtimeout: "Hard Timeout",
-	concurrentlogins: "Concurrent Logins",
-	certificate: "SSL Certificate",
-	servername: "HTTPS Server Name",
-	allowedAddresses: "Allowed IPs",
-	allowedMACAddresses: "Allowed MACs",
-	extendedPreAuthData: "Extended Pre-Auth Data",
-	template: "Login Page Template",
-	description: "Description",
-	uuid: "UUID",
-};
-
-// Note: currentApiKey and currentApiSecret are still managed in main.js via localStorage
-let currentApiKey = "";
-let currentApiSecret = "";
