@@ -3,19 +3,146 @@
 (function (CPManager) {
 	CPManager.vouchers = {
 		/**
+		 * Displays a hint about voucher usage based on zone configurations.
+		 * Lists providers and the zones they are linked to, with correct pluralization.
+		 */
+		displayVoucherUsageHint: async function () {
+			if (!CPManager.elements.voucherHintBox) return;
+
+			CPManager.elements.voucherHintBox.innerHTML =
+				'<div><i class="fas fa-spinner fa-spin mr-2"></i><span>Loading zone authentication info...</span></div>';
+			CPManager.elements.voucherHintBox.className = "hint-box hint-box-info"; // Default to info while loading
+			CPManager.elements.voucherHintBox.classList.remove("hidden");
+
+			try {
+				// Ensure zone summaries and voucher providers are loaded
+				if (CPManager.state.zones.allConfigured.length === 0) {
+					await CPManager.zones.fetchAllZoneData();
+				}
+				if (CPManager.state.vouchers.cachedProviders.length === 0) {
+					console.log("Voucher providers not cached for hint, attempting to load...");
+					await CPManager.vouchers.loadVoucherProviders(false);
+				}
+
+				const configuredVoucherProviders = CPManager.state.vouchers.cachedProviders;
+				const providerToZonesMap = {}; // Key: providerName, Value: Set of zoneName strings
+
+				if (CPManager.state.zones.allConfigured.length > 0) {
+					for (const zoneSummary of CPManager.state.zones.allConfigured) {
+						if (!zoneSummary.uuid) continue;
+						try {
+							const zoneDetailsResponse = await CPManager.api.callApi(
+								`/settings/get_zone/${zoneSummary.uuid}`
+							);
+							if (
+								zoneDetailsResponse &&
+								zoneDetailsResponse.zone &&
+								zoneDetailsResponse.zone.authservers
+							) {
+								const authServersField = zoneDetailsResponse.zone.authservers;
+								let selectedAuthServers = [];
+
+								if (
+									typeof authServersField === "object" &&
+									authServersField !== null &&
+									!Array.isArray(authServersField)
+								) {
+									const formatted = CPManager.utils.formatOpnsenseSelectable(authServersField);
+									if (formatted) {
+										selectedAuthServers = formatted
+											.split(",")
+											.map((s) => s.trim())
+											.filter((s) => s.length > 0);
+									}
+								} else if (typeof authServersField === "string" && authServersField.trim() !== "") {
+									selectedAuthServers = authServersField
+										.split(",")
+										.map((s) => s.trim())
+										.filter((s) => s.length > 0);
+								} else if (Array.isArray(authServersField)) {
+									selectedAuthServers = authServersField
+										.map((s) => String(s).trim())
+										.filter((s) => s.length > 0);
+								}
+
+								const zoneName = zoneSummary.description || `Zone ${zoneSummary.zoneid}`;
+
+								selectedAuthServers.forEach((serverName) => {
+									if (configuredVoucherProviders.includes(serverName)) {
+										if (!providerToZonesMap[serverName]) {
+											providerToZonesMap[serverName] = new Set();
+										}
+										providerToZonesMap[serverName].add(zoneName);
+									}
+								});
+							}
+						} catch (detailError) {
+							console.warn(
+								`Could not fetch details for zone ${zoneSummary.uuid} for hint: ${detailError.message}`
+							);
+						}
+					}
+				}
+
+				const providersActuallyUsedByZones = Object.keys(providerToZonesMap).filter(
+					(providerName) => providerToZonesMap[providerName].size > 0
+				);
+
+				if (providersActuallyUsedByZones.length === 0) {
+					CPManager.elements.voucherHintBox.className = "hint-box hint-box-warning";
+					CPManager.elements.voucherHintBox.innerHTML = `
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div><strong>Warning:</strong> No captive portal zones are currently configured to use any of the available Voucher authentication servers. Vouchers generated here may not be usable until a zone is configured appropriately in OPNsense (Services > Captive Portal > Administration > Edit Zone > Authentication method) to use one of the listed Voucher Providers.</div>
+                    `;
+				} else {
+					CPManager.elements.voucherHintBox.className = "hint-box hint-box-info";
+					let listItems = providersActuallyUsedByZones
+						.map((providerName) => {
+							const zonesSet = providerToZonesMap[providerName];
+							const zoneCount = zonesSet.size;
+							const zoneNoun = zoneCount === 1 ? "zone" : "zones";
+							const zonesList = Array.from(zonesSet)
+								.map((zn) => `<strong>"${zn}"</strong>`)
+								.join(", ");
+							return `<li>Provider <strong>"${providerName}"</strong> is currently linked to ${zoneCount} ${zoneNoun}: ${zonesList}.</li>`;
+						})
+						.join("");
+					CPManager.elements.voucherHintBox.innerHTML = `
+                        <i class="fas fa-info-circle"></i>
+                        <div>Voucher provider linkage:<ul>${listItems}</ul>Ensure these providers are of type "Vouchers" in OPNsense (System > Access > Servers) and linked to the desired zones.</div>
+                    `;
+				}
+			} catch (error) {
+				console.error("Error displaying voucher usage hint:", error);
+				CPManager.elements.voucherHintBox.className = "hint-box hint-box-warning";
+				CPManager.elements.voucherHintBox.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>Could not determine zone authentication configurations. Please check API connectivity.</div>
+                `;
+			}
+			CPManager.elements.voucherHintBox.classList.remove("hidden");
+		},
+
+		/**
 		 * Loads voucher providers from the API and populates the provider selection dropdown.
 		 * @param {boolean} [forceRefresh=false] - If true, forces a re-fetch even if data exists.
 		 */
 		loadVoucherProviders: async function (forceRefresh = false) {
 			if (!CPManager.elements.voucherProviderSelect) return;
 
+			const displayHintAfterProviders = async () => {
+				if (typeof CPManager.vouchers.displayVoucherUsageHint === "function") {
+					await CPManager.vouchers.displayVoucherUsageHint();
+				}
+			};
+
 			if (!forceRefresh && CPManager.state.vouchers.cachedProviders.length > 0) {
 				console.log("Using cached voucher providers.");
-				CPManager.vouchers.populateVoucherProviderSelect(CPManager.state.vouchers.cachedProviders); // Repopulate select from cache
-				// Trigger selection handler if a provider was auto-selected or restored
+				CPManager.vouchers.populateVoucherProviderSelect(CPManager.state.vouchers.cachedProviders);
 				if (CPManager.elements.voucherProviderSelect.value) {
 					CPManager.vouchers.handleProviderSelection(CPManager.elements.voucherProviderSelect.value);
 				}
+				await displayHintAfterProviders();
 				return;
 			}
 
@@ -26,14 +153,15 @@
 			if (CPManager.elements.voucherCardContainer)
 				CPManager.ui.clearContainer(CPManager.elements.voucherCardContainer);
 			CPManager.ui.disableVoucherActionButtons(true, true, true);
+			if (CPManager.elements.voucherHintBox) CPManager.elements.voucherHintBox.classList.add("hidden");
 
 			try {
 				const providers = await CPManager.api.callApi("/voucher/list_providers");
 				if (providers && Array.isArray(providers)) {
-					CPManager.state.vouchers.cachedProviders = providers; // Cache the fetched providers
+					CPManager.state.vouchers.cachedProviders = providers;
 					CPManager.vouchers.populateVoucherProviderSelect(providers);
 				} else {
-					CPManager.state.vouchers.cachedProviders = []; // Reset cache on error/unexpected format
+					CPManager.state.vouchers.cachedProviders = [];
 					console.error(
 						"Error loading voucher providers: Unexpected format",
 						providers,
@@ -43,11 +171,12 @@
 					CPManager.ui.showToast("Could not load voucher providers: unexpected format.", "error");
 				}
 			} catch (error) {
-				CPManager.state.vouchers.cachedProviders = []; // Reset cache on exception
+				CPManager.state.vouchers.cachedProviders = [];
 				CPManager.elements.voucherProviderSelect.innerHTML =
 					'<option value="">Error loading providers.</option>';
 				console.error("Exception in loadVoucherProviders:", error);
-				// Error toast is handled by callApi
+			} finally {
+				await displayHintAfterProviders();
 			}
 		},
 
@@ -81,16 +210,14 @@
 			});
 
 			if (providers.length === 1 && !providerToSelect) {
-				// Auto-select if only one provider AND no saved preference
 				CPManager.elements.voucherProviderSelect.value = providers[0];
 				localStorage.setItem("selectedVoucherProvider", providers[0]);
 				CPManager.vouchers.handleProviderSelection(providers[0]);
 			} else if (providerToSelect) {
-				// Restore last selected provider
 				CPManager.elements.voucherProviderSelect.value = providerToSelect;
 				CPManager.vouchers.handleProviderSelection(providerToSelect);
 			} else {
-				CPManager.ui.disableVoucherActionButtons(true, true, true); // No provider selected yet
+				CPManager.ui.disableVoucherActionButtons(true, true, true);
 			}
 		},
 
@@ -142,12 +269,11 @@
 					providerId,
 					CPManager.state.vouchers.cachedGroups[cacheKey]
 				);
-				// Trigger selection if a group was auto-selected or restored
 				if (CPManager.elements.voucherGroupSelect.value) {
 					await CPManager.vouchers.loadVouchersForGroup(
 						providerId,
 						CPManager.elements.voucherGroupSelect.value
-					); // await here
+					);
 				}
 				return;
 			}
@@ -158,18 +284,17 @@
 				(!CPManager.state.vouchers.cachedData[`${providerId}_${CPManager.elements.voucherGroupSelect.value}`] ||
 					forceRefresh)
 			) {
-				// only show skeleton if vouchers also need loading
 				CPManager.ui.showSkeletonLoaders(CPManager.elements.voucherCardContainer, 1);
 			}
-			CPManager.ui.disableVoucherActionButtons(false, true, true); // Create enabled, group actions disabled
+			CPManager.ui.disableVoucherActionButtons(false, true, true);
 
 			try {
 				const groups = await CPManager.api.callApi(`/voucher/list_voucher_groups/${providerId}`);
 				if (groups && Array.isArray(groups)) {
-					CPManager.state.vouchers.cachedGroups[cacheKey] = groups; // Cache the fetched groups
+					CPManager.state.vouchers.cachedGroups[cacheKey] = groups;
 					CPManager.vouchers.populateVoucherGroupSelect(providerId, groups);
 				} else {
-					CPManager.state.vouchers.cachedGroups[cacheKey] = []; // Reset cache for this provider on error/unexpected format
+					CPManager.state.vouchers.cachedGroups[cacheKey] = [];
 					console.error(
 						`Error loading voucher groups for provider ${providerId}: API response is not an array or is undefined.`,
 						groups
@@ -185,7 +310,7 @@
 					CPManager.ui.disableVoucherActionButtons(false, true, true);
 				}
 			} catch (error) {
-				CPManager.state.vouchers.cachedGroups[cacheKey] = []; // Reset cache on exception
+				CPManager.state.vouchers.cachedGroups[cacheKey] = [];
 				CPManager.elements.voucherGroupSelect.innerHTML = '<option value="">Error loading groups.</option>';
 				if (CPManager.elements.voucherCardContainer)
 					CPManager.ui.showNoDataMessage(
@@ -207,7 +332,7 @@
 			if (!CPManager.elements.voucherGroupSelect) return;
 
 			const currentVal = localStorage.getItem(`voucherGroupFilter_${providerId}`) || "";
-			CPManager.elements.voucherGroupSelect.innerHTML = '<option value="">-- Select a Group --</option>'; // Reset options
+			CPManager.elements.voucherGroupSelect.innerHTML = '<option value="">-- Select a Group --</option>';
 
 			if (groups.length > 0) {
 				groups.forEach((group) => {
@@ -217,28 +342,19 @@
 					CPManager.elements.voucherGroupSelect.appendChild(option);
 				});
 
-				// Attempt to set the value from localStorage if it's a valid option
 				if (currentVal && groups.includes(currentVal)) {
 					CPManager.elements.voucherGroupSelect.value = currentVal;
 				} else if (currentVal && !groups.includes(currentVal)) {
-					// If localStorage has a value not in current group options,
-					// it's effectively an invalid/stale selection.
-					// Ensure the select element reflects no valid group is selected.
-					CPManager.elements.voucherGroupSelect.value = ""; // Default to "Select a Group"
+					CPManager.elements.voucherGroupSelect.value = "";
 				}
 			} else {
-				// No groups for this provider, ensure select is empty.
 				CPManager.elements.voucherGroupSelect.value = "";
 			}
 
-			// After populating and attempting to set the value,
-			// base button state on the FINAL state of voucherGroupSelect.value
 			if (CPManager.elements.voucherGroupSelect.value) {
-				// A group is selected
-				CPManager.ui.disableVoucherActionButtons(false, false, false); // All actions enabled
-				CPManager.vouchers.loadVouchersForGroup(providerId, CPManager.elements.voucherGroupSelect.value); // Load data for the selected group
+				CPManager.ui.disableVoucherActionButtons(false, false, false);
+				CPManager.vouchers.loadVouchersForGroup(providerId, CPManager.elements.voucherGroupSelect.value);
 			} else {
-				// No group is selected
 				if (CPManager.elements.voucherCardContainer) {
 					if (groups.length === 0 && providerId) {
 						CPManager.ui.showNoDataMessage(
@@ -254,7 +370,7 @@
 						);
 					}
 				}
-				CPManager.ui.disableVoucherActionButtons(false, true, true); // Group actions disabled
+				CPManager.ui.disableVoucherActionButtons(false, true, true);
 			}
 		},
 
@@ -273,7 +389,7 @@
 						"fas fa-info-circle"
 					);
 				CPManager.state.vouchers.current = [];
-				CPManager.vouchers.renderVouchers([], groupName); // Clear display
+				CPManager.vouchers.renderVouchers([], groupName);
 				return;
 			}
 
@@ -297,7 +413,7 @@
 			try {
 				const vouchers = await CPManager.api.callApi(`/voucher/list_vouchers/${providerId}/${groupName}`);
 				if (vouchers && Array.isArray(vouchers)) {
-					CPManager.state.vouchers.cachedData[cacheKey] = vouchers; // Cache the fetched vouchers
+					CPManager.state.vouchers.cachedData[cacheKey] = vouchers;
 					CPManager.state.vouchers.current = vouchers;
 					CPManager.vouchers.renderVouchers(CPManager.state.vouchers.current, groupName);
 					if (vouchers.length === 0) {
@@ -308,9 +424,9 @@
 						);
 					}
 				} else {
-					CPManager.state.vouchers.cachedData[cacheKey] = []; // Reset cache for this group on error
+					CPManager.state.vouchers.cachedData[cacheKey] = [];
 					CPManager.state.vouchers.current = [];
-					CPManager.vouchers.renderVouchers([], groupName); // Clear display
+					CPManager.vouchers.renderVouchers([], groupName);
 					console.error(
 						`Error loading vouchers for group ${groupName} (Provider: ${providerId}): API response is not an array or is undefined.`,
 						vouchers
@@ -322,9 +438,9 @@
 					);
 				}
 			} catch (error) {
-				CPManager.state.vouchers.cachedData[cacheKey] = []; // Reset cache on exception
+				CPManager.state.vouchers.cachedData[cacheKey] = [];
 				CPManager.state.vouchers.current = [];
-				CPManager.vouchers.renderVouchers([], groupName); // Clear display
+				CPManager.vouchers.renderVouchers([], groupName);
 				CPManager.ui.showNoDataMessage(
 					CPManager.elements.voucherCardContainer,
 					"Error loading vouchers.",
@@ -344,7 +460,6 @@
 			CPManager.ui.clearContainer(CPManager.elements.voucherCardContainer);
 
 			if (!vouchers || !Array.isArray(vouchers) || vouchers.length === 0) {
-				// Message is handled by caller (loadVouchersForGroup or populateVoucherGroupSelect) if no vouchers
 				return;
 			}
 
@@ -354,11 +469,11 @@
 				card.setAttribute("role", "listitem");
 				card.setAttribute("aria-label", `Voucher ${voucher.username}`);
 
-				let stateTagColor = "bg-red-500"; // Default for 'expired' or unknown
+				let stateTagColor = "bg-red-500";
 				if (voucher.state === "valid") {
 					stateTagColor = "bg-green-500";
 				} else if (voucher.state === "unused") {
-					stateTagColor = "bg-sky-500"; // Using sky blue for unused
+					stateTagColor = "bg-sky-500";
 				}
 
 				card.innerHTML = `
@@ -414,7 +529,6 @@
 						detailsContent.setAttribute("aria-hidden", !detailsContent.classList.contains("expanded"));
 					});
 					summaryElement.addEventListener("keydown", (e) => {
-						// Keyboard accessibility
 						if (e.key === "Enter" || e.key === " ") {
 							e.preventDefault();
 							CPManager.ui.toggleCardDetails(card, CPManager.elements.voucherCardContainer);
@@ -437,24 +551,22 @@
 				return;
 			}
 
-			// Reset form fields to defaults
-			if (CPManager.elements.voucherGroupNameInput) CPManager.elements.voucherGroupNameInput.value = ""; // Clear group name
-			if (CPManager.elements.voucherCountSelect) CPManager.elements.voucherCountSelect.value = "10"; // Default count
+			if (CPManager.elements.voucherGroupNameInput) CPManager.elements.voucherGroupNameInput.value = "";
+			if (CPManager.elements.voucherCountSelect) CPManager.elements.voucherCountSelect.value = "10";
 			if (CPManager.elements.voucherCountCustom) {
 				CPManager.elements.voucherCountCustom.classList.add("hidden");
 				CPManager.elements.voucherCountCustom.value = "1";
 			}
-			if (CPManager.elements.voucherLifetimeSelect) CPManager.elements.voucherLifetimeSelect.value = "240"; // Default lifetime (4 hours in minutes)
+			if (CPManager.elements.voucherLifetimeSelect) CPManager.elements.voucherLifetimeSelect.value = "240";
 			if (CPManager.elements.voucherLifetimeCustom) {
 				CPManager.elements.voucherLifetimeCustom.classList.add("hidden");
 				CPManager.elements.voucherLifetimeCustom.value = "";
 			}
-			if (CPManager.elements.voucherUsageSelect) CPManager.elements.voucherUsageSelect.value = "0"; // Default usage (Never expires)
+			if (CPManager.elements.voucherUsageSelect) CPManager.elements.voucherUsageSelect.value = "0";
 			if (CPManager.elements.voucherUsageCustom) {
 				CPManager.elements.voucherUsageCustom.classList.add("hidden");
 				CPManager.elements.voucherUsageCustom.value = "";
 			}
-			// Set default output format to 'card'
 			const cardOutputRadio = document.querySelector('input[name="voucher-output-format"][value="card"]');
 			if (cardOutputRadio) {
 				cardOutputRadio.checked = true;
@@ -496,10 +608,10 @@
 				}
 				lifetimeInSeconds = customMinutes * 60;
 			} else {
-				lifetimeInSeconds = parseInt(CPManager.elements.voucherLifetimeSelect.value) * 60; // Value is already in minutes
+				lifetimeInSeconds = parseInt(CPManager.elements.voucherLifetimeSelect.value) * 60;
 			}
 
-			let usageInSeconds; // OPNsense API expects 'expirytime' in seconds from generation
+			let usageInSeconds;
 			if (CPManager.elements.voucherUsageSelect.value === "custom") {
 				const customHours = parseInt(CPManager.elements.voucherUsageCustom.value);
 				if (isNaN(customHours) || customHours < 0) {
@@ -524,8 +636,8 @@
 
 			const payload = {
 				count: String(count),
-				validity: String(lifetimeInSeconds), // How long the voucher is valid once activated (in seconds)
-				expirytime: String(usageInSeconds), // How long until the UNUSED voucher expires (in seconds from generation, 0 for never)
+				validity: String(lifetimeInSeconds),
+				expirytime: String(usageInSeconds),
 				vouchergroup: groupname,
 			};
 
@@ -556,14 +668,14 @@
 							CPManager.state.vouchers.lastGenerated,
 							groupname,
 							doc
-						); // Adds content to 'doc'
+						);
 					} else if (outputFormat === "table") {
 						CPManager.ui.showToast(`Vouchers generated. Generating Table Style PDF...`, "success");
 						CPManager.vouchers.generateVouchersAsTablePDF(
 							CPManager.state.vouchers.lastGenerated,
 							groupname,
 							doc
-						); // Adds content to 'doc'
+						);
 					} else if (outputFormat === "both") {
 						CPManager.ui.showToast(
 							`Vouchers generated. Generating Card and Table Style PDFs...`,
@@ -573,16 +685,15 @@
 							CPManager.state.vouchers.lastGenerated,
 							groupname,
 							doc
-						); // Adds card content to 'doc'
-						doc.addPage(); // Add a new page for the table
+						);
+						doc.addPage();
 						CPManager.vouchers.generateVouchersAsTablePDF(
 							CPManager.state.vouchers.lastGenerated,
 							groupname,
 							doc
-						); // Adds table content to 'doc'
+						);
 					}
 
-					// Save the single document after all content has been added
 					const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 					const filename = `${groupname}_${timestamp}_vouchers.pdf`;
 					doc.save(filename);
@@ -602,7 +713,7 @@
 						`Vouchers generated for group "${groupname}". (API Text OK). No detailed voucher data for PDF.`,
 						"success"
 					);
-					CPManager.state.vouchers.lastGenerated = []; // No specific voucher data to PDF
+					CPManager.state.vouchers.lastGenerated = [];
 					CPManager.ui.hideModal(CPManager.elements.generateVoucherModal);
 					await CPManager.vouchers.loadVoucherGroups(selectedProvider, true);
 					if (CPManager.elements.voucherGroupSelect) CPManager.elements.voucherGroupSelect.value = groupname;
@@ -637,44 +748,37 @@
 		 * @param {object} doc - The jsPDF document instance to add content to.
 		 */
 		generateVouchersAsCardPDF: function (vouchers, groupName, doc) {
-			const pageHeight = doc.internal.pageSize.height; // 297 mm for A4 portrait
-			const pageWidth = doc.internal.pageSize.width; // 210 mm for A4 portrait
-			const margin = 10; // mm, margin on all sides of the page
+			const pageHeight = doc.internal.pageSize.height;
+			const pageWidth = doc.internal.pageSize.width;
+			const margin = 10;
 
-			// Define layout for 3 columns x 6 rows
 			const vouchersPerRow = 3;
-			const vouchersPerColumn = 6; // Desired 6 rows
-			const horizontalGap = 4; // mm, gap between vouchers horizontally
-			const verticalGap = 4; // mm, gap between vouchers vertically
+			const vouchersPerColumn = 6;
+			const horizontalGap = 4;
+			const verticalGap = 4;
 
-			// Calculate usable area for vouchers within margins
-			const printableWidth = pageWidth - 2 * margin; // 190 mm
-			// Deduct space for title at the top of each page for card style
-			const titleHeight = 15; // Estimated height for title + padding
+			const printableWidth = pageWidth - 2 * margin;
+			const titleHeight = 15;
 			const printableHeightPerVoucherArea = pageHeight - 2 * margin - titleHeight;
 
-			// Recalculate voucher dimensions based on new gaps and title space
-			const voucherWidth = (printableWidth - (vouchersPerRow - 1) * horizontalGap) / vouchersPerRow; // (190 - 2*4) / 3 = 182 / 3 = 60.66 mm
+			const voucherWidth = (printableWidth - (vouchersPerRow - 1) * horizontalGap) / vouchersPerRow;
 			const voucherHeight =
-				(printableHeightPerVoucherArea - (vouchersPerColumn - 1) * verticalGap) / vouchersPerColumn; // (277 - 15 - 5*4) / 6 = (262 - 20) / 6 = 242 / 6 = 40.33 mm
+				(printableHeightPerVoucherArea - (vouchersPerColumn - 1) * verticalGap) / vouchersPerColumn;
 
-			let currentY = margin; // Starting Y position for content on a new page
+			let currentY = margin;
 
-			// Add title to the first page (or new page if docInstance exists)
-			// This check is now always true because we pass the doc from handleSubmitGenerateVoucher
 			doc.setFontSize(20);
 			doc.setFont("helvetica", "bold");
 			doc.text(`Vouchers for Group: ${groupName} (Card Style)`, pageWidth / 2, currentY + 5, { align: "center" });
-			currentY += titleHeight; // Move down after title
+			currentY += titleHeight;
 
 			vouchers.forEach((voucher, index) => {
 				const vouchersPerPage = vouchersPerRow * vouchersPerColumn;
 				const voucherIndexOnPage = index % vouchersPerPage;
 
-				// Add new page if current voucher is the first on a new page (after the initial page setup)
 				if (index > 0 && voucherIndexOnPage === 0) {
 					doc.addPage();
-					currentY = margin; // Reset Y for new page
+					currentY = margin;
 					doc.setFontSize(20);
 					doc.setFont("helvetica", "bold");
 					doc.text(`Vouchers for Group: ${groupName} (Card Style - Cont.)`, pageWidth / 2, currentY + 5, {
@@ -689,19 +793,16 @@
 				const voucherAbsX = margin + colIndex * (voucherWidth + horizontalGap);
 				const voucherAbsY = currentY + rowIndex * (voucherHeight + verticalGap);
 
-				// Draw voucher card border (slightly rounded corners)
-				doc.setDrawColor(200); // Light gray border
-				doc.roundedRect(voucherAbsX, voucherAbsY, voucherWidth, voucherHeight, 2, 2, "S"); // 'S' for stroke
+				doc.setDrawColor(200);
+				doc.roundedRect(voucherAbsX, voucherAbsY, voucherWidth, voucherHeight, 2, 2, "S");
 
-				// Voucher Code Label
-				doc.setFontSize(8); // Smaller font for label
+				doc.setFontSize(8);
 				doc.setFont("helvetica", "bold");
-				doc.setTextColor(55, 65, 81); // Tailwind gray-700 equivalent
+				doc.setTextColor(55, 65, 81);
 				doc.text("Voucher Code", voucherAbsX + voucherWidth / 2, voucherAbsY + 6, { align: "center" });
 
-				// Actual Voucher Code
-				doc.setFontSize(16); // Adjusted font size for the code
-				doc.setTextColor(29, 78, 216); // Tailwind blue-700 equivalent
+				doc.setFontSize(16);
+				doc.setTextColor(29, 78, 216);
 				doc.text(
 					voucher.username || CPManager.config.placeholderValue,
 					voucherAbsX + voucherWidth / 2,
@@ -711,20 +812,18 @@
 					}
 				);
 
-				// Password (if exists)
-				let detailLineY = voucherAbsY + 22; // Starting Y offset for details
+				let detailLineY = voucherAbsY + 22;
 				if (voucher.password) {
-					doc.setFontSize(7); // Smaller font for password
-					doc.setTextColor(75, 85, 99); // Tailwind gray-600 equivalent
+					doc.setFontSize(7);
+					doc.setTextColor(75, 85, 99);
 					doc.text(`Password: ${voucher.password}`, voucherAbsX + voucherWidth / 2, detailLineY, {
 						align: "center",
 					});
-					detailLineY += 4; // Increment Y for next line
+					detailLineY += 4;
 				}
 
-				// Details (Validity, Expires, Group)
-				doc.setFontSize(6); // Even smaller font for details
-				doc.setTextColor(107, 114, 128); // Tailwind gray-500 equivalent
+				doc.setFontSize(6);
+				doc.setTextColor(107, 114, 128);
 				doc.text(
 					`Validity: ${CPManager.utils.formatDuration(voucher.validity, "seconds")}`,
 					voucherAbsX + voucherWidth / 2,
@@ -757,7 +856,7 @@
 		 * @param {object} doc - The jsPDF document instance to add content to.
 		 */
 		generateVouchersAsTablePDF: function (vouchers, groupName, doc) {
-			const startY = 20; // Starting Y position for the table content
+			const startY = 20;
 
 			doc.setFontSize(18);
 			doc.setFont("helvetica", "bold");
@@ -779,8 +878,8 @@
 				startY: startY + 10,
 				head: tableHeaders,
 				body: tableData,
-				theme: "striped", // 'striped', 'grid', 'plain'
-				headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255] }, // Blue header
+				theme: "striped",
+				headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255] },
 				styles: {
 					fontSize: 8,
 					cellPadding: 2,
@@ -788,14 +887,13 @@
 					halign: "center",
 				},
 				columnStyles: {
-					0: { cellWidth: 30 }, // Voucher Code
-					1: { cellWidth: 25 }, // Password
-					2: { cellWidth: 25 }, // Validity
-					3: { cellWidth: 40 }, // Expires
-					4: { cellWidth: "auto" }, // Group
+					0: { cellWidth: 30 },
+					1: { cellWidth: 25 },
+					2: { cellWidth: 25 },
+					3: { cellWidth: 40 },
+					4: { cellWidth: "auto" },
 				},
 				didDrawPage: function (data) {
-					// Footer for page numbers
 					let str = "Page " + doc.internal.getNumberOfPages();
 					doc.setFontSize(8);
 					doc.text(
@@ -838,7 +936,7 @@
 								"info"
 							);
 						}
-						await CPManager.vouchers.loadVouchersForGroup(providerId, groupName, true); // Force refresh voucher list
+						await CPManager.vouchers.loadVouchersForGroup(providerId, groupName, true);
 					} catch (error) {
 						// Error toast handled by callApi
 					}
@@ -887,7 +985,7 @@
 								"info"
 							);
 						}
-						await CPManager.vouchers.loadVouchersForGroup(selectedProvider, selectedGroup, true); // Force refresh
+						await CPManager.vouchers.loadVouchersForGroup(selectedProvider, selectedGroup, true);
 					} catch (error) {
 						// Error toast handled by callApi
 					}
@@ -926,7 +1024,6 @@
 								`Voucher group "${selectedGroup}" (Provider: ${selectedProvider}) deleted successfully.`,
 								"success"
 							);
-							// Clear relevant caches
 							if (CPManager.state.vouchers.cachedGroups[selectedProvider]) {
 								CPManager.state.vouchers.cachedGroups[selectedProvider] =
 									CPManager.state.vouchers.cachedGroups[selectedProvider].filter(
@@ -935,15 +1032,15 @@
 							}
 							delete CPManager.state.vouchers.cachedData[`${selectedProvider}_${selectedGroup}`];
 
-							await CPManager.vouchers.loadVoucherGroups(selectedProvider, true); // Force refresh group list
+							await CPManager.vouchers.loadVoucherGroups(selectedProvider, true);
 							if (CPManager.elements.voucherCardContainer)
 								CPManager.ui.showNoDataMessage(
 									CPManager.elements.voucherCardContainer,
 									"Select a group to see vouchers.",
 									"fas fa-ticket-alt"
 								);
-							CPManager.state.vouchers.current = []; // Clear current vouchers
-							CPManager.ui.disableVoucherActionButtons(false, true, true); // Update button states
+							CPManager.state.vouchers.current = [];
+							CPManager.ui.disableVoucherActionButtons(false, true, true);
 						} else {
 							CPManager.ui.showToast(
 								`Failed to delete voucher group "${selectedGroup}". API: ${
@@ -963,7 +1060,6 @@
 		 * Initializes event listeners for the vouchers tab.
 		 */
 		initializeVoucherEventListeners: function () {
-			// console.log('Vouchers: Initializing event listeners for vouchers module.'); // Removed for cleanup
 			if (CPManager.elements.voucherProviderSelect) {
 				CPManager.elements.voucherProviderSelect.addEventListener("change", (e) =>
 					CPManager.vouchers.handleProviderSelection(e.target.value)
@@ -977,13 +1073,13 @@
 					const selectedGroup = e.target.value;
 					if (!selectedProvider) {
 						CPManager.ui.showToast("Please select a voucher provider first.", "warning");
-						CPManager.elements.voucherGroupSelect.value = ""; // Reset if provider not selected
+						CPManager.elements.voucherGroupSelect.value = "";
 						return;
 					}
 					localStorage.setItem(`voucherGroupFilter_${selectedProvider}`, selectedGroup);
 					if (selectedGroup) {
-						await CPManager.vouchers.loadVouchersForGroup(selectedProvider, selectedGroup); // Uses cache by default
-						CPManager.ui.disableVoucherActionButtons(false, false, false); // All actions enabled
+						await CPManager.vouchers.loadVouchersForGroup(selectedProvider, selectedGroup);
+						CPManager.ui.disableVoucherActionButtons(false, false, false);
 					} else {
 						if (CPManager.elements.voucherCardContainer)
 							CPManager.ui.showNoDataMessage(
@@ -991,9 +1087,9 @@
 								"Select a group to see vouchers.",
 								"fas fa-ticket-alt"
 							);
-						CPManager.state.vouchers.current = []; // Clear data if no group selected
-						CPManager.vouchers.renderVouchers([], ""); // Clear display
-						CPManager.ui.disableVoucherActionButtons(false, true, true); // Group actions disabled
+						CPManager.state.vouchers.current = [];
+						CPManager.vouchers.renderVouchers([], "");
+						CPManager.ui.disableVoucherActionButtons(false, true, true);
 					}
 				});
 			}
@@ -1005,7 +1101,6 @@
 				);
 			}
 
-			// Voucher Generation Modal Listeners
 			if (CPManager.elements.voucherCountSelect && CPManager.elements.voucherCountCustom) {
 				CPManager.elements.voucherCountSelect.addEventListener("change", (e) => {
 					CPManager.elements.voucherCountCustom.classList.toggle("hidden", e.target.value !== "custom");
@@ -1035,17 +1130,15 @@
 			}
 			if (CPManager.elements.cancelGenerateVoucherBtn) {
 				CPManager.elements.cancelGenerateVoucherBtn.addEventListener("click", () =>
-					// Corrected ID here
 					CPManager.ui.hideModal(CPManager.elements.generateVoucherModal)
 				);
 			}
 
-			// Event delegation for revoke voucher buttons
 			if (CPManager.elements.voucherCardContainer) {
 				CPManager.elements.voucherCardContainer.addEventListener("click", (e) => {
 					const revokeButton = e.target.closest('[data-action="revoke-voucher"]');
 					if (revokeButton) {
-						e.stopPropagation(); // Prevent card expansion
+						e.stopPropagation();
 						const selectedProvider = CPManager.elements.voucherProviderSelect
 							? CPManager.elements.voucherProviderSelect.value
 							: null;

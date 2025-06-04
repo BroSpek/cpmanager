@@ -38,10 +38,26 @@
 	--donut-center-text-color: #1f2937; /* text-gray-800 */
 	--legend-item-text-color: #4b5563; /* text-gray-600 */
 
-	--dashboard-hint-bg: #eff6ff; /* bg-blue-50 */
-	--dashboard-hint-border: #bfdbfe; /* border-blue-200 */
-	--dashboard-hint-text: #374151; /* text-gray-700 */
-	--dashboard-hint-icon: #3b82f6; /* text-blue-500 */
+	/* Global Hint Box Variables - Light Mode */
+	--hint-info-bg: #eff6ff; /* bg-blue-50 */
+	--hint-info-border: #bfdbfe; /* border-blue-200 */
+	--hint-info-text: #374151; /* text-gray-700 */
+	--hint-info-icon: #3b82f6; /* text-blue-500 */
+
+	--hint-warning-bg: #fffbeb; /* bg-yellow-50 */
+	--hint-warning-border: #fde68a; /* border-yellow-200 */
+	--hint-warning-text: #78350f; /* text-yellow-800 */
+	--hint-warning-icon: #f59e0b; /* text-yellow-500 */
+
+	--hint-danger-bg: #fef2f2; /* bg-red-50 */
+	--hint-danger-border: #fecaca; /* border-red-200 */
+	--hint-danger-text: #991b1b; /* text-red-800 */
+	--hint-danger-icon: #ef4444; /* text-red-500 */
+
+	--hint-success-bg: #f0fdf4; /* bg-green-50 */
+	--hint-success-border: #bbf7d0; /* border-green-200 */
+	--hint-success-text: #166534; /* text-green-800 */
+	--hint-success-icon: #22c55e; /* text-green-500 */
 
 	--config-input-section-bg: #fef3c7; /* yellow-100 */
 	--config-input-section-border: #fbbf24; /* yellow-500 */
@@ -55,16 +71,10 @@
 	--text-secondary-color: #94a3b8; /* Dark mode default: slate-400 */
 	--border-color: #334155; /* Dark mode default: slate-700 */
 	--border-secondary-color: #475569; /* Dark mode default: slate-600 */
-	/* Keep nav colors same for now, or define dark specific if needed */
-	/* --nav-bg-color: #0F172A; */
-	/* --nav-text-color: #E2E8F0; */
 	--footer-bg-color: #0f172a; /* slate-900 */
 	--footer-text-color: #94a3b8; /* slate-400 */
 	--link-hover-color: #cbd5e1; /* slate-300 */
 	--link-hover-border-color: #64748b; /* slate-500 */
-	/* Tab active colors can remain blue or be adjusted */
-	/* --tab-active-text-color: #3B82F6; */ /* blue-500 for dark? */
-	/* --tab-active-border-color: #3B82F6; */
 
 	--form-input-bg: #1e293b; /* slate-800 or 700 */
 	--form-input-text: #e2e8f0; /* slate-200 */
@@ -89,10 +99,26 @@
 	--donut-center-text-color: #e2e8f0; /* text-slate-200 */
 	--legend-item-text-color: #94a3b8; /* text-slate-400 */
 
-	--dashboard-hint-bg: #172554; /* bg-sky-900 (adjust from blue-50) */
-	--dashboard-hint-border: #075985; /* border-sky-700 */
-	--dashboard-hint-text: #bae6fd; /* text-sky-200 */
-	--dashboard-hint-icon: #7dd3fc; /* text-sky-300 */
+	/* Global Hint Box Variables - Dark Mode */
+	--hint-info-bg: #172554; /* bg-sky-900 */
+	--hint-info-border: #075985; /* border-sky-700 */
+	--hint-info-text: #bae6fd; /* text-sky-200 */
+	--hint-info-icon: #7dd3fc; /* text-sky-300 */
+
+	--hint-warning-bg: #453800; /* Darker yellow */
+	--hint-warning-border: #785b00;
+	--hint-warning-text: #fef3c7; /* light yellow */
+	--hint-warning-icon: #facc15; /* lighter yellow */
+
+	--hint-danger-bg: #5f1818; /* Darker red */
+	--hint-danger-border: #902c2c;
+	--hint-danger-text: #fecaca; /* light red */
+	--hint-danger-icon: #f87171; /* lighter red */
+
+	--hint-success-bg: #144222; /* Darker green */
+	--hint-success-border: #1d6334;
+	--hint-success-text: #bbf7d0; /* light green */
+	--hint-success-icon: #4ade80; /* lighter green */
 
 	--config-input-section-bg: #374151; /* gray-700, example, adjust as needed */
 	--config-input-section-border: #4b5563; /* gray-600 */
@@ -485,22 +511,78 @@ body {
 	border-radius: 0.125rem; /* rounded-sm */
 }
 
-/* Dashboard Hint Box Styling */
-.dashboard-hint-box {
-	background-color: var(--dashboard-hint-bg);
-	border: 1px solid var(--dashboard-hint-border);
-	color: var(--dashboard-hint-text);
+/* --- Global Hint Box Styling --- */
+.hint-box {
 	padding: 0.75rem; /* p-3 */
 	border-radius: 0.375rem; /* rounded-md */
 	font-size: 0.875rem; /* text-sm */
-	margin-bottom: 1.5rem; /* mb-6 */
+	margin-bottom: 1.5rem; /* mb-6, standardized margin */
 	display: flex;
-	align-items: flex-start; /* Align icon and text nicely */
+	align-items: flex-start;
+	border: 1px solid; /* Border color will be set by modifier */
 }
-.dashboard-hint-box i {
+
+.hint-box i {
+	/* Icon styling */
 	margin-right: 0.5rem; /* mr-2 */
-	color: var(--dashboard-hint-icon);
-	margin-top: 0.125rem; /* Adjust for vertical alignment with text */
+	margin-top: 0.125rem; /* Small top margin for alignment */
+	flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.hint-box > div, /* If content is wrapped in a div for lists etc. */
+.hint-box > span {
+	/* If content is a direct span */
+	flex-grow: 1; /* Allow text content to take remaining space */
+}
+
+.hint-box ul {
+	list-style-type: disc;
+	padding-left: 1.25rem; /* pl-5 */
+	margin-top: 0.25rem; /* mt-1 */
+	margin-bottom: 0;
+}
+.hint-box li {
+	margin-bottom: 0.125rem; /* mb-0.5 */
+}
+
+/* Info Hint Box */
+.hint-box-info {
+	background-color: var(--hint-info-bg);
+	border-color: var(--hint-info-border);
+	color: var(--hint-info-text);
+}
+.hint-box-info i {
+	color: var(--hint-info-icon);
+}
+
+/* Warning Hint Box */
+.hint-box-warning {
+	background-color: var(--hint-warning-bg);
+	border-color: var(--hint-warning-border);
+	color: var(--hint-warning-text);
+}
+.hint-box-warning i {
+	color: var(--hint-warning-icon);
+}
+
+/* Danger Hint Box */
+.hint-box-danger {
+	background-color: var(--hint-danger-bg);
+	border-color: var(--hint-danger-border);
+	color: var(--hint-danger-text);
+}
+.hint-box-danger i {
+	color: var(--hint-danger-icon);
+}
+
+/* Success Hint Box */
+.hint-box-success {
+	background-color: var(--hint-success-bg);
+	border-color: var(--hint-success-border);
+	color: var(--hint-success-text);
+}
+.hint-box-success i {
+	color: var(--hint-success-icon);
 }
 
 /* Zone Edit Toggle Switch */
@@ -669,6 +751,7 @@ footer #api-status-footer span.text-yellow-500 {
 	#config-input-section,
 	#session-field-container,
 	#session-action-btn,
+	.hint-box, /* Hide all hint boxes */
 	#voucher-field-container,
 	#voucher-action-btn,
 	#voucher-group-actions,
