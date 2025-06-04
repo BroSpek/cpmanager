@@ -167,5 +167,52 @@
 			const zone = CPManager.state.zones.allConfigured.find((z) => String(z.zoneid) === String(zoneId));
 			return zone ? zone.description : `Zone ${zoneId}`;
 		},
+
+		/**
+		 * Determines the type of MAC address based on the U/L bit.
+		 * 0 = 'device' (globally unique), 1 = 'private' (locally administered).
+		 * @param {string} macAddress - The MAC address string (e.g., "00:1A:2B:3C:4D:5E").
+		 * @returns {string|null} "device", "private", or null if undetermined.
+		 */
+		getMacAddressType: function (macAddress) {
+			if (!macAddress || typeof macAddress !== "string") {
+				return null;
+			}
+
+			// Standard MAC address format: 6 octets separated by colons or hyphens.
+			// Regex to validate and extract the first octet.
+			const macRegex =
+				/^([0-9A-Fa-f]{2})[:|-]([0-9A-Fa-f]{2})[:|-]([0-9A-Fa-f]{2})[:|-]([0-9A-Fa-f]{2})[:|-]([0-9A-Fa-f]{2})[:|-]([0-9A-Fa-f]{2})$/;
+			const match = macAddress.match(macRegex);
+
+			if (!match) {
+				// Check for MAC without separators (e.g., 001A2B3C4D5E)
+				const plainMacRegex = /^[0-9A-Fa-f]{12}$/;
+				if (plainMacRegex.test(macAddress)) {
+					const firstOctetHex = macAddress.substring(0, 2);
+					const firstOctetInt = parseInt(firstOctetHex, 16);
+					if (isNaN(firstOctetInt)) {
+						return null;
+					}
+					// Check the U/L bit (2nd LSB of the first octet)
+					// 0x02 is 00000010 in binary.
+					// If (firstOctetInt & 0x02) is non-zero, the U/L bit is 1 (locally administered).
+					return (firstOctetInt & 0x02) !== 0 ? "private" : "device";
+				}
+				return null; // Invalid format
+			}
+
+			const firstOctetHex = match[1];
+			const firstOctetInt = parseInt(firstOctetHex, 16);
+
+			if (isNaN(firstOctetInt)) {
+				return null; // Should not happen if regex matches, but good for safety.
+			}
+
+			// Check the U/L bit (2nd LSB of the first octet)
+			// 0x02 is 00000010 in binary.
+			// If (firstOctetInt & 0x02) is non-zero, the U/L bit is 1 (locally administered).
+			return (firstOctetInt & 0x02) !== 0 ? "private" : "device";
+		},
 	};
 })(window.CPManager); // Explicitly pass window.CPManager

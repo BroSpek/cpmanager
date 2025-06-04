@@ -185,6 +185,15 @@
 				const readableAuthVia = CPManager.utils.formatAuthVia(session.authenticated_via); // Util function
 				const authViaTagColor = CPManager.utils.getAuthViaColor(readableAuthVia); // Util function
 
+				// Get MAC address type
+				const macAddressType = CPManager.utils.getMacAddressType(session.macAddress);
+				let macTypeTagHtml = "";
+				if (macAddressType) {
+					const macTypeTagColor = macAddressType === "device" ? "bg-slate-500" : "bg-purple-500"; // Example colors
+					const macTypeReadable = macAddressType.charAt(0).toUpperCase() + macAddressType.slice(1);
+					macTypeTagHtml = `<span class="info-tag ${macTypeTagColor} truncate" title="MAC Type: ${macTypeReadable}">${macTypeReadable}</span>`;
+				}
+
 				let isManagerCurrentDeviceSession = false;
 				if (
 					CPManager.state.sessions.managerDetails &&
@@ -212,6 +221,7 @@
 				card.innerHTML = `
             <div class="tags-container">
                 ${managerIconHtml}
+                ${macTypeTagHtml}
                 <span class="info-tag ${authViaTagColor} truncate" title="Authenticated Via: ${readableAuthVia}">${readableAuthVia}</span>
                 <span class="info-tag ${zoneTagColor} truncate" title="Zone: ${zoneDesc}">${zoneDesc}</span>
             </div>
@@ -506,12 +516,19 @@
 					if (disconnectButton) {
 						e.stopPropagation(); // Prevent card expansion
 						const sessionId = disconnectButton.dataset.sessionid;
-						const zoneid = disconnectButton.dataset.zoneid;
+						const zoneid = disconnectButton.dataset.zoneid; // Corrected: use dataset.zoneid from the button
 						const ip = disconnectButton.dataset.ip;
+
+						// Find the actual session object to check its zoneid for managerDetails comparison
+						const sessionObject = CPManager.state.sessions.all.find(
+							(s) => s.sessionId === sessionId && String(s.zoneid) === zoneid
+						);
+
 						const isMy =
 							CPManager.state.sessions.managerDetails &&
+							sessionObject && // Ensure sessionObject is found
 							CPManager.state.sessions.managerDetails.sessionId === sessionId &&
-							String(session.zoneid) === CPManager.state.sessions.managerDetails.zoneid; // Corrected to use `session.zoneid` not `zoneid`
+							String(sessionObject.zoneid) === CPManager.state.sessions.managerDetails.zoneid;
 						CPManager.sessions.handleDisconnectSession(sessionId, zoneid, ip, isMy);
 					}
 				});
