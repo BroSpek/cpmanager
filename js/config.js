@@ -38,15 +38,15 @@ CPManager.config = {
 		authservers: "Auth Servers",
 		alwaysSendAccountingReqs: "RADIUS Accounting",
 		authEnforceGroup: "Enforce Group",
-		idletimeout: "Idle Timeout",
-		hardtimeout: "Hard Timeout",
-		concurrentlogins: "Concurrent Logins",
+		idletimeout: "Idle Timeout", // Already exists, but ensure it's used for the new field
+		hardtimeout: "Hard Timeout", // New
+		concurrentlogins: "Concurrent Logins", // New
 		certificate: "SSL Certificate",
 		servername: "HTTPS Server Name",
 		allowedAddresses: "Allowed IPs",
 		allowedMACAddresses: "Allowed MACs",
 		extendedPreAuthData: "Extended Pre-Auth Data",
-		template: "Login Page Template",
+		template: "Login Page Template", // Already exists, ensure it's used for the new field
 		description: "Description",
 		uuid: "UUID",
 	},
@@ -80,6 +80,7 @@ CPManager.state = {
 	zones: {
 		allConfigured: [], // Stores all configured zones (summary data)
 		originalFullDataForEdit: null, // Stores the full data of the zone being edited
+		customTemplates: [], // To store fetched custom templates
 	},
 	dashboard: {
 		chartInstance: null, // Holds the Chart.js instance for the data usage donut chart
