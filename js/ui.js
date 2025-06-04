@@ -31,6 +31,7 @@
 		disconnectAllSessionsBtn: document.getElementById("disconnect-all-sessions-btn"),
 
 		// Vouchers Tab Elements
+		voucherHintBox: document.getElementById("voucher-hint-box"), // Added
 		voucherProviderSelect: document.getElementById("voucher-provider-select"),
 		voucherGroupSelect: document.getElementById("voucher-group-select"),
 		voucherCardContainer: document.getElementById("voucher-card-container"),
