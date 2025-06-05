@@ -3,11 +3,177 @@
 (function (CPManager) {
 	CPManager.vouchers = {
 		/**
+		 * Fetches and displays voucher provider to zone linkage in an expandable card.
+		 */
+		displayProviderZoneLinkage: async function () {
+			const detailsContainer = CPManager.elements.providerZoneLinkageDetails;
+			if (!detailsContainer) {
+				console.warn("Provider zone linkage details container not found.");
+				return;
+			}
+
+			detailsContainer.innerHTML =
+				'<p class="text-gray-500 dark:text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>Loading linkage information...</p>';
+
+			try {
+				if (CPManager.state.zones.allConfigured.length === 0) {
+					await CPManager.zones.fetchAllZoneData(); // Ensures CPManager.zones is available
+				}
+				// Ensure providers are loaded if not already (loadVoucherProviders caches them in CPManager.state.vouchers.cachedProviders)
+				if (CPManager.state.vouchers.cachedProviders.length === 0) {
+					// This is a fallback; typically loadVoucherProviders would have populated this.
+					const providers = await CPManager.api.callApi("/voucher/list_providers");
+					if (providers && Array.isArray(providers)) {
+						CPManager.state.vouchers.cachedProviders = providers;
+					} else {
+						CPManager.state.vouchers.cachedProviders = [];
+					}
+				}
+
+				const configuredVoucherProviders = CPManager.state.vouchers.cachedProviders;
+				const providerToZonesMap = {};
+
+				if (CPManager.state.zones.allConfigured.length > 0 && configuredVoucherProviders.length > 0) {
+					for (const zoneSummary of CPManager.state.zones.allConfigured) {
+						if (!zoneSummary.uuid) continue;
+						try {
+							const zoneDetailsResponse = await CPManager.api.callApi(
+								`/settings/get_zone/${zoneSummary.uuid}`
+							);
+							if (zoneDetailsResponse?.zone?.authservers) {
+								const authServersField = zoneDetailsResponse.zone.authservers;
+								let selectedAuthServers = [];
+
+								// Logic to extract selected auth servers
+								if (
+									typeof authServersField === "object" &&
+									authServersField !== null &&
+									!Array.isArray(authServersField)
+								) {
+									const formatted = CPManager.utils.formatOpnsenseSelectable(authServersField); // Assumes CPManager.utils is available
+									if (formatted) {
+										selectedAuthServers = formatted
+											.split(",")
+											.map((s) => s.trim())
+											.filter((s) => s.length > 0);
+									}
+								} else if (typeof authServersField === "string" && authServersField.trim() !== "") {
+									selectedAuthServers = authServersField
+										.split(",")
+										.map((s) => s.trim())
+										.filter((s) => s.length > 0);
+								} else if (Array.isArray(authServersField)) {
+									selectedAuthServers = authServersField
+										.map((s) => String(s).trim())
+										.filter((s) => s.length > 0);
+								}
+
+								const zoneName = zoneSummary.description || `Zone ${zoneSummary.zoneid}`;
+								selectedAuthServers.forEach((serverName) => {
+									if (configuredVoucherProviders.includes(serverName)) {
+										if (!providerToZonesMap[serverName]) {
+											providerToZonesMap[serverName] = new Set();
+										}
+										providerToZonesMap[serverName].add(zoneName);
+									}
+								});
+							}
+						} catch (detailError) {
+							console.warn(
+								`Could not fetch details for zone ${zoneSummary.uuid} for linkage card: ${detailError.message}`
+							);
+						}
+					}
+				}
+
+				const providersActuallyUsedByZones = Object.keys(providerToZonesMap).filter(
+					(providerName) => providerToZonesMap[providerName].size > 0
+				);
+
+				if (providersActuallyUsedByZones.length === 0) {
+					detailsContainer.innerHTML =
+						'<p class="text-gray-500 dark:text-gray-400">No voucher providers are currently linked to any active zones.</p>';
+				} else {
+					let listHtml = '<ul class="space-y-3">';
+					providersActuallyUsedByZones.forEach((providerName) => {
+						const zonesSet = providerToZonesMap[providerName];
+						const zonesList = Array.from(zonesSet)
+							.map(
+								(zn) =>
+									`<li><i class="fas fa-layer-group text-xs mr-1 text-gray-400 dark:text-gray-500"></i>${zn}</li>`
+							)
+							.join("");
+						listHtml += `<li class="border-b border-gray-200 dark:border-gray-700 border-dashed pb-2 last:border-b-0 last:pb-0">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">${providerName}</span> is linked to:
+                                        <ul class="list-none pl-4 mt-1 text-xs space-y-1">${zonesList}</ul>
+                                     </li>`;
+					});
+					listHtml += "</ul>";
+					detailsContainer.innerHTML = listHtml;
+				}
+			} catch (error) {
+				console.error("Error displaying provider-zone linkage:", error);
+				detailsContainer.innerHTML =
+					'<p class="text-red-500">Could not load linkage information. Check console.</p>';
+			}
+		},
+
+		/**
+		 * Initializes event listeners for the new provider-zone linkage card.
+		 */
+		initializeProviderZoneLinkageCard: function () {
+			const card = CPManager.elements.providerZoneLinkageCard;
+			if (!card) {
+				// console.warn("Provider zone linkage card element not found for listener setup."); // Optional: for debugging
+				return;
+			}
+			// Check if listener already attached to prevent duplicates if this function is called multiple times
+			if (card.dataset.listenerAttached === "true") {
+				return;
+			}
+
+			const summaryElement = card.querySelector(".card-summary");
+			const detailsContent = CPManager.elements.providerZoneLinkageDetails; // Use direct reference
+			const icon = summaryElement ? summaryElement.querySelector("i.fas") : null;
+
+			if (summaryElement && detailsContent) {
+				summaryElement.addEventListener("click", () => {
+					const isExpanded = detailsContent.classList.toggle("expanded");
+					detailsContent.setAttribute("aria-hidden", String(!isExpanded));
+					summaryElement.setAttribute("aria-expanded", String(isExpanded));
+					if (icon) {
+						icon.classList.toggle("fa-chevron-down", !isExpanded);
+						icon.classList.toggle("fa-chevron-up", isExpanded);
+					}
+					// If the card is expanded for the first time (still showing "Loading..."), fetch and display the data.
+					if (isExpanded && detailsContent.innerHTML.includes("Loading linkage information...")) {
+						CPManager.vouchers.displayProviderZoneLinkage();
+					}
+				});
+				summaryElement.addEventListener("keydown", (e) => {
+					if (e.key === "Enter" || e.key === " ") {
+						e.preventDefault();
+						summaryElement.click(); // Trigger the click handler
+					}
+				});
+				card.dataset.listenerAttached = "true"; // Mark listener as attached
+			}
+		},
+		/**
 		 * Loads voucher providers from the API and populates the provider selection dropdown.
 		 * @param {boolean} [forceRefresh=false] - If true, forces a re-fetch even if data exists.
 		 */
 		loadVoucherProviders: async function (forceRefresh = false) {
 			if (!CPManager.elements.voucherProviderSelect) return;
+
+			CPManager.vouchers.initializeProviderZoneLinkageCard(); // Initialize card interactivity
+
+			const detailsContainer = CPManager.elements.providerZoneLinkageDetails;
+			// If the card is already expanded and a general forceRefresh is requested for providers,
+			// it's good to refresh its content as well.
+			if (detailsContainer && detailsContainer.classList.contains("expanded") && forceRefresh) {
+				await CPManager.vouchers.displayProviderZoneLinkage();
+			}
 
 			if (!forceRefresh && CPManager.state.vouchers.cachedProviders.length > 0) {
 				console.log("Using cached voucher providers.");
@@ -31,6 +197,11 @@
 				if (providers && Array.isArray(providers)) {
 					CPManager.state.vouchers.cachedProviders = providers;
 					CPManager.vouchers.populateVoucherProviderSelect(providers);
+					// If linkage card is expanded, and providers were freshly loaded (implicitly due to not using cache path or forceRefresh),
+					// refresh its content. This ensures data consistency.
+					if (detailsContainer && detailsContainer.classList.contains("expanded")) {
+						await CPManager.vouchers.displayProviderZoneLinkage();
+					}
 				} else {
 					CPManager.state.vouchers.cachedProviders = [];
 					console.error(
@@ -46,7 +217,6 @@
 				CPManager.elements.voucherProviderSelect.innerHTML =
 					'<option value="">Error loading providers.</option>';
 				console.error("Exception in loadVoucherProviders:", error);
-			} finally {
 			}
 		},
 
