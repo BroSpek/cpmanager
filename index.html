@@ -222,6 +222,30 @@
 						<h2 class="text-2xl font-semibold flex items-center mb-4">
 							<i class="fas fa-ticket-alt mr-3 text-blue-600 dark:text-blue-400"></i>Voucher Management
 						</h2>
+						<div
+							id="provider-zone-linkage-card"
+							class="content-card p-3 rounded-lg shadow border relative mb-4"
+						>
+							<div
+								class="card-summary cursor-pointer pb-1"
+								role="button"
+								tabindex="0"
+								aria-expanded="false"
+								aria-controls="provider-zone-linkage-details"
+							>
+								<div class="flex justify-between items-center">
+									<span class="font-semibold text-md">Voucher Provider Zone Linkage</span>
+									<i class="fas fa-chevron-down transition-transform duration-300"></i>
+								</div>
+							</div>
+							<div
+								class="card-details-content text-sm space-y-2"
+								id="provider-zone-linkage-details"
+								aria-hidden="true"
+							>
+								<p class="text-gray-500 dark:text-gray-400">Loading linkage information...</p>
+							</div>
+						</div>
 						<div id="voucher-field-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 items-end">
 							<div class="min-w-0">
 								<label for="voucher-provider-select" class="block text-sm font-medium mb-1"

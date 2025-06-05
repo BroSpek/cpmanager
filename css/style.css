@@ -792,3 +792,25 @@ footer #api-status-footer span.text-yellow-500 {
 		color: #000 !important;
 	}
 }
+
+#provider-zone-linkage-card .card-summary i.fas {
+    transition: transform 0.3s ease;
+}
+
+#provider-zone-linkage-card .card-summary[aria-expanded="true"] i.fas {
+    transform: rotate(180deg);
+}
+
+#provider-zone-linkage-details ul {
+    list-style-type: none; /* Or 'disc' if you prefer bullets */
+    padding-left: 0;
+}
+
+#provider-zone-linkage-details ul ul {
+    /* Styles for nested list of zones */
+    padding-left: 1rem; /* Indent nested list */
+    margin-top: 0.25rem;
+}
+#provider-zone-linkage-details li {
+    font-size: 0.875rem; /* text-sm */
+}

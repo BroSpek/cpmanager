@@ -38,6 +38,11 @@
 		dropVoucherGroupBtn: document.getElementById("drop-voucher-group-btn"),
 		dropExpiredVouchersBtn: document.getElementById("drop-expired-vouchers-btn"),
 
+		// START: Added for new linkage card
+		providerZoneLinkageCard: document.getElementById("provider-zone-linkage-card"),
+		providerZoneLinkageDetails: document.getElementById("provider-zone-linkage-details"),
+		// END: Added for new linkage card
+
 		// Voucher Generation Modal Elements
 		generateVoucherModal: document.getElementById("generateVoucherModal"),
 		voucherCountSelect: document.getElementById("voucher-count-select"),
