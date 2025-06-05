@@ -104,9 +104,9 @@
 							)
 							.join("");
 						listHtml += `<li class="border-b border-gray-200 dark:border-gray-700 border-dashed pb-2 last:border-b-0 last:pb-0">
-                                        <span class="font-semibold text-gray-700 dark:text-gray-300">${providerName}</span> is linked to:
-                                        <ul class="list-none pl-4 mt-1 text-xs space-y-1">${zonesList}</ul>
-                                     </li>`;
+										<span class="font-semibold text-gray-700 dark:text-gray-300">${providerName}</span> is linked to:
+										<ul class="list-none pl-4 mt-1 text-xs space-y-1">${zonesList}</ul>
+									</li>`;
 					});
 					listHtml += "</ul>";
 					detailsContainer.innerHTML = listHtml;
@@ -517,47 +517,47 @@
 				}
 
 				card.innerHTML = `
-            <div class="tags-container">
-                <span class="info-tag ${stateTagColor} truncate" title="State: ${voucher.state}">${voucher.state}</span>
-            </div>
-            <div class="card-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="voucher-details-${
+			<div class="tags-container">
+				<span class="info-tag ${stateTagColor} truncate" title="State: ${voucher.state}">${voucher.state}</span>
+			</div>
+			<div class="card-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="voucher-details-${
 				voucher.username
 			}">
-                 <div class="info-row"><span class="info-label">Voucher Code</span><span class="info-value summary-main-value">${
+				<div class="info-row"><span class="info-label">Voucher Code</span><span class="info-value summary-main-value">${
 						voucher.username
 					}</span></div>
-            </div>
-            <div class="card-details-content text-sm space-y-1" id="voucher-details-${
+			</div>
+			<div class="card-details-content text-sm space-y-1" id="voucher-details-${
 				voucher.username
 			}" aria-hidden="true">
-                <div class="info-row"><span class="info-label">Validity</span> <span class="info-value">${CPManager.utils.formatDuration(
+				<div class="info-row"><span class="info-label">Validity</span> <span class="info-value">${CPManager.utils.formatDuration(
 					voucher.validity,
 					"seconds"
 				)}</span></div>
-                <div class="info-row"><span class="info-label">Start Time</span> <span class="info-value">${CPManager.utils.formatVoucherTimestamp(
+				<div class="info-row"><span class="info-label">Start Time</span> <span class="info-value">${CPManager.utils.formatVoucherTimestamp(
 					voucher.starttime
 				)}</span></div>
-                <div class="info-row"><span class="info-label">End Time</span> <span class="info-value">${CPManager.utils.formatVoucherTimestamp(
+				<div class="info-row"><span class="info-label">End Time</span> <span class="info-value">${CPManager.utils.formatVoucherTimestamp(
 					voucher.endtime
 				)}</span></div>
-                <div class="info-row"><span class="info-label">Expires At</span><span class="info-value">${
+				<div class="info-row"><span class="info-label">Expires At</span><span class="info-value">${
 					voucher.expirytime && voucher.expirytime !== 0
 						? CPManager.utils.formatVoucherTimestamp(voucher.expirytime)
 						: CPManager.config.placeholderValue === "—"
 						? "Never"
 						: CPManager.config.placeholderValue
 				}</span></div>			
-                ${
+				${
 					voucher.state !== "expired"
 						? `<p class="mt-3">
-                    <button class="btn btn-warning w-full" data-action="revoke-voucher" data-voucher="${voucher.username}" data-group="${groupName}">
-                        <i class="fas fa-times-circle mr-1"></i>Revoke Voucher
-                    </button>
-                 </p>`
+					<button class="btn btn-warning w-full" data-action="revoke-voucher" data-voucher="${voucher.username}" data-group="${groupName}">
+						<i class="fas fa-times-circle mr-1"></i>Revoke Voucher
+					</button>
+				</p>`
 						: ""
 				}
-            </div>
-        `;
+			</div>
+		`;
 				CPManager.elements.voucherCardContainer.appendChild(card);
 
 				const summaryElement = card.querySelector(".card-summary");

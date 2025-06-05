@@ -97,24 +97,24 @@
 					const statusColor = zoneSummary.enabled === "1" ? "bg-green-500" : "bg-red-500";
 
 					zoneCard.innerHTML = `
-                <div class="tags-container">
-                     <span class="info-tag ${statusColor} truncate" title="Status: ${statusText}">${statusText}</span>
-                </div>
-                <div class="card-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="zone-details-${
+				<div class="tags-container">
+					<span class="info-tag ${statusColor} truncate" title="Status: ${statusText}">${statusText}</span>
+				</div>
+				<div class="card-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="zone-details-${
 					zoneSummary.uuid
 				}">
-                     <div class="info-row"><span class="info-label">Name</span><span class="info-value summary-main-value">${
+					<div class="info-row"><span class="info-label">Name</span><span class="info-value summary-main-value">${
 							zoneSummary.description || `Unnamed Zone (ID: ${zoneSummary.zoneid})`
 						}</span></div>
-                     <div class="info-row"><span class="info-label">Zone ID</span><span class="info-value summary-main-value">${
+					<div class="info-row"><span class="info-label">Zone ID</span><span class="info-value summary-main-value">${
 							zoneSummary.zoneid
 						}</span></div>
-					 <div class="info-row"><span class="info-label">Short UUID</span><span class="info-value summary-main-value">${zoneSummary.uuid.substring(
+					<div class="info-row"><span class="info-label">Short UUID</span><span class="info-value summary-main-value">${zoneSummary.uuid.substring(
 							0,
 							8
 						)}...</span></div>
-                </div>
-                <div class="card-details-content text-sm space-y-1" id="zone-details-${
+				</div>
+				<div class="card-details-content text-sm space-y-1" id="zone-details-${
 					zoneSummary.uuid
 				}" aria-hidden="true">Loading details...</div>`;
 					zoneCard.dataset.uuid = zoneSummary.uuid;
@@ -253,12 +253,12 @@
 					}
 
 					detailsHtml += `
-                <p class="mt-3">
-                    <button class="btn btn-secondary btn-sm w-full" data-action="edit-zone" data-uuid="${uuid}">
-                        <i class="fas fa-edit mr-1"></i> Edit Zone Settings
-                    </button>
-                </p>
-            `;
+				<p class="mt-3">
+					<button class="btn btn-secondary btn-sm w-full" data-action="edit-zone" data-uuid="${uuid}">
+						<i class="fas fa-edit mr-1"></i> Edit Zone Settings
+					</button>
+				</p>
+			`;
 					detailsContainer.innerHTML = detailsHtml;
 				} catch (error) {
 					console.error(`Error loading details for zone ${uuid}:`, error);

@@ -219,80 +219,80 @@
 				}
 
 				card.innerHTML = `
-            <div class="tags-container">
-                ${managerIconHtml}
-                ${macTypeTagHtml}
-                <span class="info-tag ${authViaTagColor} truncate" title="Authenticated Via: ${readableAuthVia}">${readableAuthVia}</span>
-                <span class="info-tag ${zoneTagColor} truncate" title="Zone: ${zoneDesc}">${zoneDesc}</span>
-            </div>
-            <div class="session-summary card-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="session-details-${
+			<div class="tags-container">
+				${managerIconHtml}
+				${macTypeTagHtml}
+				<span class="info-tag ${authViaTagColor} truncate" title="Authenticated Via: ${readableAuthVia}">${readableAuthVia}</span>
+				<span class="info-tag ${zoneTagColor} truncate" title="Zone: ${zoneDesc}">${zoneDesc}</span>
+			</div>
+			<div class="session-summary card-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="session-details-${
 				session.sessionId
 			}">
-                <div class="space-y-1">
-                    <div class="info-row"><span class="info-label">IP Address</span> <span class="info-value summary-main-value">${
+				<div class="space-y-1">
+					<div class="info-row"><span class="info-label">IP Address</span> <span class="info-value summary-main-value">${
 						session.ipAddress || CPManager.config.placeholderValue
 					}</span></div>
-                    <div class="info-row"><span class="info-label">User</span> <span class="info-value summary-main-value">${
+					<div class="info-row"><span class="info-label">User</span> <span class="info-value summary-main-value">${
 						session.userName || CPManager.config.placeholderValue
 					}</span></div>
-                    <div class="info-row"><span class="info-label">MAC</span> <span class="info-value summary-main-value">${
+					<div class="info-row"><span class="info-label">MAC</span> <span class="info-value summary-main-value">${
 						session.macAddress || CPManager.config.placeholderValue
 					}</span></div>
-                </div>
-            </div>
-            <div class="card-details-content text-sm space-y-1" id="session-details-${
+				</div>
+			</div>
+			<div class="card-details-content text-sm space-y-1" id="session-details-${
 				session.sessionId
 			}" aria-hidden="true">
-                <div class="info-row"><span class="info-label">Zone ID</span> <span class="info-value">${
+				<div class="info-row"><span class="info-label">Zone ID</span> <span class="info-value">${
 					session.zoneid
 				}</span></div>
-                <div class="info-row"><span class="info-label">Session ID</span> <span class="info-value">${
+				<div class="info-row"><span class="info-label">Session ID</span> <span class="info-value">${
 					session.sessionId || CPManager.config.placeholderValue
 				}</span></div>
-                <div class="info-row"><span class="info-label">Start Time</span> <span class="info-value">${
+				<div class="info-row"><span class="info-label">Start Time</span> <span class="info-value">${
 					session.startTime
 						? new Date(session.startTime * 1000).toLocaleString()
 						: CPManager.config.placeholderValue
 				}</span></div>
-                <div class="info-row"><span class="info-label">Last Accessed</span> <span class="info-value">${
+				<div class="info-row"><span class="info-label">Last Accessed</span> <span class="info-value">${
 					session.last_accessed
 						? new Date(session.last_accessed * 1000).toLocaleString()
 						: CPManager.config.placeholderValue
 				}</span></div>
-                <div class="info-row"><span class="info-label">Packets Uploaded</span> <span class="info-value">${
+				<div class="info-row"><span class="info-label">Packets Uploaded</span> <span class="info-value">${
 					session.packets_in !== undefined
 						? session.packets_in.toLocaleString()
 						: CPManager.config.placeholderValue
 				}</span></div>
-                <div class="info-row"><span class="info-label">Packets Downloaded</span> <span class="info-value">${
+				<div class="info-row"><span class="info-label">Packets Downloaded</span> <span class="info-value">${
 					session.packets_out !== undefined
 						? session.packets_out.toLocaleString()
 						: CPManager.config.placeholderValue
 				}</span></div>
-                <div class="info-row"><span class="info-label">Data Uploaded</span> <span class="info-value">${
+				<div class="info-row"><span class="info-label">Data Uploaded</span> <span class="info-value">${
 					session.bytes_in !== undefined
 						? CPManager.utils.formatBytes(session.bytes_in)
 						: CPManager.config.placeholderValue
 				}</span></div>
-                <div class="info-row"><span class="info-label">Data Downloaded</span> <span class="info-value">${
+				<div class="info-row"><span class="info-label">Data Downloaded</span> <span class="info-value">${
 					session.bytes_out !== undefined
 						? CPManager.utils.formatBytes(session.bytes_out)
 						: CPManager.config.placeholderValue
 				}</span></div>
-                <div class="info-row"><span class="info-label">Acc. Timeout</span> <span class="info-value">${
+				<div class="info-row"><span class="info-label">Acc. Timeout</span> <span class="info-value">${
 					session.acc_session_timeout
 						? CPManager.utils.formatDuration(session.acc_session_timeout, "seconds")
 						: CPManager.config.placeholderValue
 				}</span></div>
-                <p class="mt-3">
-                    <button class="btn btn-warning w-full" data-action="disconnect-session" data-sessionid="${
+				<p class="mt-3">
+					<button class="btn btn-warning w-full" data-action="disconnect-session" data-sessionid="${
 						session.sessionId
 					}" data-zoneid="${session.zoneid}" data-ip="${session.ipAddress || "Unknown IP"}">
-                        <i class="fas fa-power-off mr-1"></i>Disconnect Session
-                    </button>
-                </p>
-            </div>
-        `;
+						<i class="fas fa-power-off mr-1"></i>Disconnect Session
+					</button>
+				</p>
+			</div>
+		`;
 				CPManager.elements.sessionCardContainer.appendChild(card);
 
 				const disconnectButton = card.querySelector('[data-action="disconnect-session"]');

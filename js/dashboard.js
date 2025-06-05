@@ -47,10 +47,10 @@
 				console.log("Fetching fresh dashboard data.");
 				// Show skeleton loaders for stats
 				CPManager.elements.dashboardStatsContainer.innerHTML = `
-            <div class="stat-card skeleton-card"></div>
-            <div class="stat-card skeleton-card"></div>
-            <div class="stat-card skeleton-card"></div>
-        `;
+			<div class="stat-card skeleton-card"></div>
+			<div class="stat-card skeleton-card"></div>
+			<div class="stat-card skeleton-card"></div>
+		`;
 				// Reset chart/legend text for fresh load
 				CPManager.elements.donutTotalData.textContent = CPManager.config.placeholderValue;
 				CPManager.elements.uploadLegendValue.textContent = CPManager.config.placeholderValue;
@@ -122,26 +122,26 @@
 
 				// Update dashboard stat cards
 				let statsHtml = `
-            <div class="stat-card interactive" id="dashboard-active-sessions-card" title="Go to Sessions tab" role="button" tabindex="0">
-                <div class="stat-value">${activeSessionCount}</div>
-                <div class="stat-label">Active Sessions</div>
-            </div>
-            <div class="stat-card interactive" id="dashboard-configured-zones-card" title="Go to Zones tab" role="button" tabindex="0">
-                <div class="stat-value">${totalZonesCount}</div>
-                <div class="stat-label">Configured Zones</div>
-            </div>
-            <div class="stat-card interactive" id="dashboard-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-2 items-center">
-                    <div class="voucher-stat-card-inner mb-2 sm:mb-0">
-                        <div class="stat-value">${totalVouchers}</div>
-                        <div class="stat-label">Total Vouchers</div>
-                    </div>
-                    <div class="voucher-stat-card-inner">
-                        <div class="stat-value">${activeVouchers}</div>
-                        <div class="stat-label">Active Vouchers</div>
-                    </div>
-                </div>
-            </div>`;
+			<div class="stat-card interactive" id="dashboard-active-sessions-card" title="Go to Sessions tab" role="button" tabindex="0">
+				<div class="stat-value">${activeSessionCount}</div>
+				<div class="stat-label">Active Sessions</div>
+			</div>
+			<div class="stat-card interactive" id="dashboard-configured-zones-card" title="Go to Zones tab" role="button" tabindex="0">
+				<div class="stat-value">${totalZonesCount}</div>
+				<div class="stat-label">Configured Zones</div>
+			</div>
+			<div class="stat-card interactive" id="dashboard-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-2 items-center">
+					<div class="voucher-stat-card-inner mb-2 sm:mb-0">
+						<div class="stat-value">${totalVouchers}</div>
+						<div class="stat-label">Total Vouchers</div>
+					</div>
+					<div class="voucher-stat-card-inner">
+						<div class="stat-value">${activeVouchers}</div>
+						<div class="stat-label">Active Vouchers</div>
+					</div>
+				</div>
+			</div>`;
 				CPManager.elements.dashboardStatsContainer.innerHTML = statsHtml;
 
 				// Add event listeners for interactive stat cards (ensure this isn't done redundantly if statsHtml doesn't change)
@@ -191,11 +191,11 @@
 
 					if (CPManager.elements.donutTotalData) {
 						CPManager.elements.donutTotalData.innerHTML = `
-                    <span style="font-weight: bold; display: block; font-size: 1.2em;">${CPManager.utils.formatBytes(
+					<span style="font-weight: bold; display: block; font-size: 1.2em;">${CPManager.utils.formatBytes(
 						currentTotalData
 					)}</span>
-                    <span style="font-size: 0.8em;" class="text-gray-500 dark:text-gray-400">(100.0%)</span>
-                `;
+					<span style="font-size: 0.8em;" class="text-gray-500 dark:text-gray-400">(100.0%)</span>
+				`;
 					}
 					if (CPManager.elements.uploadLegendValue)
 						CPManager.elements.uploadLegendValue.textContent =
@@ -350,13 +350,13 @@
 							segmentPercentage = (segmentValue / currentTotalForPercentage) * 100;
 						}
 						CPManager.elements.donutTotalData.innerHTML = `
-                    <span style="color: ${segmentColor}; font-weight: bold; display: block; font-size: 1.2em;">${CPManager.utils.formatBytes(
+					<span style="color: ${segmentColor}; font-weight: bold; display: block; font-size: 1.2em;">${CPManager.utils.formatBytes(
 							segmentValue
 						)}</span>
-                    <span style="font-size: 0.8em;" class="${segmentPercentageColor}">(${segmentPercentage.toFixed(
+					<span style="font-size: 0.8em;" class="${segmentPercentageColor}">(${segmentPercentage.toFixed(
 							1
 						)}%)</span>
-                `;
+				`;
 					}
 				});
 
@@ -365,11 +365,11 @@
 						const isDarkMode = document.body.classList.contains("dark-mode");
 						const totalPercentageColor = isDarkMode ? "text-slate-400" : "text-gray-500";
 						CPManager.elements.donutTotalData.innerHTML = `
-                    <span style="font-weight: bold; display: block; font-size: 1.2em;">${CPManager.utils.formatBytes(
+					<span style="font-weight: bold; display: block; font-size: 1.2em;">${CPManager.utils.formatBytes(
 						CPManager.state.dashboard.originalTotalBytes
 					)}</span>
-                    <span style="font-size: 0.8em;" class="${totalPercentageColor}">(100.0%)</span>
-                `;
+					<span style="font-size: 0.8em;" class="${totalPercentageColor}">(100.0%)</span>
+				`;
 					}
 				});
 			});
