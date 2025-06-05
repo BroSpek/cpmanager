@@ -85,7 +85,7 @@
 								console.warn(
 									"Service worker not controlling. Fallback to direct notification (if possible)."
 								);
-								// new Notification(title, { body, icon }); // Direct notification as fallback (optional)
+								// Notification(title, { body, icon }); // Direct notification as fallback (optional)
 							}
 						});
 					}

@@ -192,11 +192,44 @@
 				const appConfigData = await response.json();
 				if (appConfigData.apiBaseUrl) {
 					CPManager.config.baseUrl = appConfigData.apiBaseUrl;
-					console.log("Application configuration loaded. API Base URL set to:", CPManager.config.baseUrl);
 				} else {
 					console.warn("apiBaseUrl not found in app-config.json. Will rely on user input for API Base URL.");
 					CPManager.config.baseUrl = ""; // Set to empty if key is missing in the JSON
 				}
+
+				if (
+					appConfigData.inMemoryCacheTTLMinutes !== undefined &&
+					typeof appConfigData.inMemoryCacheTTLMinutes === "number"
+				) {
+					CPManager.config.inMemoryCacheTTLMinutes = appConfigData.inMemoryCacheTTLMinutes;
+				} else {
+					console.warn(
+						"inMemoryCacheTTLMinutes not found or invalid in app-config.json. Using default:",
+						CPManager.config.inMemoryCacheTTLMinutes
+					);
+				}
+
+				if (
+					appConfigData.itemsPerPage !== undefined &&
+					typeof appConfigData.itemsPerPage === "number" &&
+					appConfigData.itemsPerPage > 0
+				) {
+					CPManager.config.itemsPerPage = appConfigData.itemsPerPage;
+				} else {
+					console.warn(
+						"itemsPerPage not found or invalid in app-config.json. Using default:",
+						CPManager.config.itemsPerPage
+					);
+				}
+				console.log(
+					"Application configuration loaded. API Base URL:",
+					CPManager.config.baseUrl,
+					"Cache TTL:",
+					CPManager.config.inMemoryCacheTTLMinutes,
+					"min.",
+					"Items/Page:",
+					CPManager.config.itemsPerPage
+				);
 			} catch (error) {
 				console.error(
 					"Error loading application configuration (JSON parse error or network issue):",
@@ -371,10 +404,11 @@
 			}
 
 			if (CPManager.elements.sessionCardContainer)
-				CPManager.ui.clearContainer(CPManager.elements.sessionCardContainer);
+				CPManager.ui.clearContainer(CPManager.elements.sessionCardContainer, "session-pagination");
 			if (CPManager.elements.voucherCardContainer)
-				CPManager.ui.clearContainer(CPManager.elements.voucherCardContainer);
-			if (CPManager.elements.zoneListContainer) CPManager.ui.clearContainer(CPManager.elements.zoneListContainer);
+				CPManager.ui.clearContainer(CPManager.elements.voucherCardContainer, "voucher-pagination");
+			if (CPManager.elements.zoneListContainer)
+				CPManager.ui.clearContainer(CPManager.elements.zoneListContainer, "zone-pagination");
 			if (CPManager.elements.dashboardStatsContainer)
 				CPManager.ui.clearContainer(CPManager.elements.dashboardStatsContainer);
 
@@ -388,10 +422,13 @@
 				CPManager.elements.donutTotalData.textContent = CPManager.config.placeholderValue;
 
 			CPManager.state.sessions.all = [];
+			CPManager.state.sessions.currentPage = 1;
 			CPManager.state.vouchers.cachedProviders = [];
 			CPManager.state.vouchers.cachedGroups = {};
 			CPManager.state.vouchers.cachedData = {};
+			CPManager.state.vouchers.currentPage = 1;
 			CPManager.state.zones.allConfigured = [];
+			CPManager.state.zones.currentPage = 1;
 		},
 
 		/**
@@ -525,7 +562,7 @@
 					(reconfigResult.status === "ok" ||
 						(reconfigResult.message && reconfigResult.message.toLowerCase().includes("ok")))
 				) {
-					CPManager.ui.showToast("Captive Portal service reconfigured successfully.", "success");
+					CPManager.ui.showToast("Captive portal service reconfigured successfully.", "success");
 				} else {
 					const errorDetail = reconfigResult
 						? reconfigResult.status || reconfigResult.message || JSON.stringify(reconfigResult)
@@ -624,7 +661,7 @@
 				};
 
 				const startPress = (event) => {
-					event.preventDefault(); 
+					event.preventDefault();
 					longPressFired = false;
 					longPressTimer = setTimeout(() => {
 						longPressFired = true;
@@ -646,23 +683,22 @@
 					}
 					longPressFired = false;
 				};
-				
+
 				const cancelPress = () => {
 					clearTimeout(longPressTimer);
 					longPressFired = false;
-				}
+				};
 
 				// Mouse events
 				notificationsToggleBtn.addEventListener("mousedown", startPress);
 				notificationsToggleBtn.addEventListener("mouseup", endPress);
-				notificationsToggleBtn.addEventListener("mouseleave", cancelPress); 
+				notificationsToggleBtn.addEventListener("mouseleave", cancelPress);
 
 				// Touch events
-				notificationsToggleBtn.addEventListener("touchstart", startPress, { passive: false }); 
+				notificationsToggleBtn.addEventListener("touchstart", startPress, { passive: false });
 				notificationsToggleBtn.addEventListener("touchend", endPress);
-				notificationsToggleBtn.addEventListener("touchcancel", cancelPress); 
+				notificationsToggleBtn.addEventListener("touchcancel", cancelPress);
 			}
-
 
 			// Call module-specific event initializers, assuming they also handle their own element checks
 			if (CPManager.sessions && typeof CPManager.sessions.initializeSessionEventListeners === "function") {
@@ -744,7 +780,10 @@
 				}
 
 				CPManager.tabs.setActiveTab(initialTab, false);
-
+				// Initialize pagination resize handler
+				if (CPManager.ui && typeof CPManager.ui.initializeResizeHandler === "function") {
+					CPManager.ui.initializeResizeHandler();
+				}
 				CPManager.notifications.initializeNotifications();
 			} else {
 				document
@@ -840,7 +879,7 @@
 				CPManager.app.loadApiCredentials();
 				CPManager.app.initializeAllEventListeners();
 				CPManager.app.registerServiceWorker();
-				await CPManager.app.initializeAppLogic();
+				await CPManager.app.initializeAppLogic(); // This will now also call initializeResizeHandler
 			} catch (error) {
 				console.error("Failed to initialize the application due to configuration load error:", error.message);
 				if (CPManager.elements.applyCpConfigBtn) CPManager.elements.applyCpConfigBtn.disabled = true;

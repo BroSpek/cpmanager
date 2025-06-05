@@ -2,46 +2,44 @@
 
 (function (CPManager) {
 	CPManager.zones = {
-		/**
-		 * Fetches summary data for all configured captive portal zones.
-		 * Stores the data in `CPManager.state.zones.allConfigured`.
-		 * @param {boolean} [forceRefresh=false] - If true, forces a re-fetch even if data exists.
-		 */
 		fetchAllZoneData: async function (forceRefresh = false) {
 			if (
 				!forceRefresh &&
 				CPManager.state.zones.allConfigured.length > 0 &&
-				CPManager.state.zones.allConfigured[0].description !== undefined
+				CPManager.state.zones.allConfigured[0].description !== undefined && // Check if data is more than just basic
+				Date.now() - CPManager.state.zones.lastFetched < CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
 			) {
 				return;
 			}
 			try {
-				const data = await CPManager.api.callApi("/settings/search_zones"); // Endpoint for zone summaries
+				const data = await CPManager.api.callApi("/settings/search_zones");
 				if (data && Array.isArray(data.rows)) {
 					CPManager.state.zones.allConfigured = data.rows;
+					CPManager.state.zones.lastFetched = Date.now();
 				} else {
-					CPManager.state.zones.allConfigured = []; // Reset if data is not as expected
+					CPManager.state.zones.allConfigured = [];
 					console.warn("No zones found or unexpected data format from /settings/search_zones.", data);
 				}
 			} catch (error) {
 				console.error("Failed to fetch all zone data for descriptions:", error.message);
-				CPManager.state.zones.allConfigured = []; // Reset on error
+				CPManager.state.zones.allConfigured = [];
 			}
 		},
 
-		/**
-		 * Fetches custom captive portal templates from the API.
-		 * Stores them in CPManager.state.zones.customTemplates.
-		 * @param {boolean} [forceRefresh=false] - If true, forces a re-fetch.
-		 */
 		fetchCustomTemplates: async function (forceRefresh = false) {
-			if (!forceRefresh && CPManager.state.zones.customTemplates.length > 0) {
+			if (
+				!forceRefresh &&
+				CPManager.state.zones.customTemplates.length > 0 &&
+				Date.now() - CPManager.state.zones.customTemplatesLastFetched <
+					CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
+			) {
 				return;
 			}
 			try {
 				const data = await CPManager.api.callApi("/service/search_templates");
 				if (data && Array.isArray(data.rows)) {
 					CPManager.state.zones.customTemplates = data.rows;
+					CPManager.state.zones.customTemplatesLastFetched = Date.now();
 				} else {
 					CPManager.state.zones.customTemplates = [];
 					console.warn("No custom templates found or unexpected data format.", data);
@@ -52,25 +50,27 @@
 			}
 		},
 
-		/**
-		 * Loads and displays summary information for all configured zones.
-		 * @param {boolean} [forceRefreshDetails=false] - If true, forces a re-fetch of all zone data before loading.
-		 */
 		loadZoneInfo: async function (forceRefreshDetails = false) {
 			if (!CPManager.elements.zoneListContainer) return;
+			CPManager.state.zones.currentPage = 1; // Reset to first page
 
 			const needsSkeleton =
 				forceRefreshDetails ||
 				CPManager.elements.zoneListContainer.querySelectorAll(".zone-info-card").length === 0;
 			if (needsSkeleton) {
-				CPManager.ui.showSkeletonLoaders(CPManager.elements.zoneListContainer, 2);
+				CPManager.ui.showSkeletonLoaders(
+					CPManager.elements.zoneListContainer,
+					CPManager.config.itemsPerPage,
+					'<div class="skeleton-card"></div>',
+					"zone-pagination"
+				);
 			}
 
 			try {
 				await CPManager.zones.fetchAllZoneData(forceRefreshDetails);
 				await CPManager.zones.fetchCustomTemplates(forceRefreshDetails);
 
-				CPManager.ui.clearContainer(CPManager.elements.zoneListContainer);
+				CPManager.ui.clearContainer(CPManager.elements.zoneListContainer, "zone-pagination");
 
 				if (
 					!Array.isArray(CPManager.state.zones.allConfigured) ||
@@ -79,12 +79,20 @@
 					CPManager.ui.showNoDataMessage(
 						CPManager.elements.zoneListContainer,
 						"No captive portal zones configured on OPNsense.",
-						"fas fa-folder-open"
+						"fas fa-folder-open",
+						"zone-pagination"
 					);
 					return;
 				}
 
-				CPManager.state.zones.allConfigured.forEach((zoneSummary) => {
+				const allZones = CPManager.state.zones.allConfigured;
+				const page = CPManager.state.zones.currentPage;
+				const itemsPerPage = CPManager.config.itemsPerPage;
+				const startIndex = (page - 1) * itemsPerPage;
+				const endIndex = startIndex + itemsPerPage;
+				const paginatedZones = allZones.slice(startIndex, endIndex);
+
+				paginatedZones.forEach((zoneSummary) => {
 					const zoneCard = document.createElement("div");
 					zoneCard.className = "zone-info-card p-3 rounded-lg shadow border relative";
 					zoneCard.setAttribute("role", "listitem");
@@ -104,15 +112,15 @@
 					zoneSummary.uuid
 				}">
 					<div class="info-row"><span class="info-label">Name</span><span class="info-value summary-main-value">${
-							zoneSummary.description || `Unnamed Zone (ID: ${zoneSummary.zoneid})`
-						}</span></div>
+						zoneSummary.description || `Unnamed Zone (ID: ${zoneSummary.zoneid})`
+					}</span></div>
 					<div class="info-row"><span class="info-label">Zone ID</span><span class="info-value summary-main-value">${
-							zoneSummary.zoneid
-						}</span></div>
+						zoneSummary.zoneid
+					}</span></div>
 					<div class="info-row"><span class="info-label">Short UUID</span><span class="info-value summary-main-value">${zoneSummary.uuid.substring(
-							0,
-							8
-						)}...</span></div>
+						0,
+						8
+					)}...</span></div>
 				</div>
 				<div class="card-details-content text-sm space-y-1" id="zone-details-${
 					zoneSummary.uuid
@@ -135,22 +143,27 @@
 						});
 					}
 				});
+				CPManager.ui.renderPaginationControls(
+					CPManager.elements.zonePaginationContainer,
+					CPManager.state.zones.currentPage,
+					allZones.length,
+					CPManager.config.itemsPerPage,
+					(newPage) => {
+						CPManager.state.zones.currentPage = newPage;
+						CPManager.zones.loadZoneInfo(); // Re-call to render the new page
+					}
+				);
 			} catch (error) {
 				console.error("Error in loadZoneInfo:", error);
 				CPManager.ui.showNoDataMessage(
 					CPManager.elements.zoneListContainer,
 					"Error loading zone information.",
-					"fas fa-exclamation-triangle"
+					"fas fa-exclamation-triangle",
+					"zone-pagination"
 				);
 			}
 		},
 
-		/**
-		 * Handles the click/interaction on a zone card to expand/collapse and load details.
-		 * @param {HTMLElement} card - The zone card element.
-		 * @param {HTMLElement} detailsContainer - The container for detailed zone info.
-		 * @param {HTMLElement} summaryElement - The summary element that was clicked.
-		 */
 		handleZoneCardClick: async function (card, detailsContainer, summaryElement) {
 			const isCurrentlyExpanded = detailsContainer.classList.contains("expanded");
 			CPManager.ui.toggleCardDetails(card, CPManager.elements.zoneListContainer);
@@ -464,7 +477,7 @@
 					);
 					CPManager.ui.hideModal(CPManager.elements.editZoneModal);
 					CPManager.state.zones.originalFullDataForEdit = null;
-
+					CPManager.state.zones.currentPage = 1; // Reset page
 					await CPManager.zones.loadZoneInfo(true);
 
 					CPManager.ui.showToast("Applying changes by reconfiguring service...", "info", 7000);
@@ -528,7 +541,6 @@
 			if (CPManager.elements.submitEditZoneBtn) {
 				if (!CPManager.elements.submitEditZoneBtn.dataset.listenerAttached) {
 					CPManager.elements.submitEditZoneBtn.addEventListener("click", function () {
-						// This log is critical to see if the listener itself is firing
 						console.log("Save Changes button clicked (via initialized listener).");
 						CPManager.zones.saveZoneSettings();
 					});
