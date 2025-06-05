@@ -52,6 +52,17 @@ CPManager.config = {
 		description: "Description",
 		uuid: "UUID",
 	},
+	localStorageKeys: {
+		theme: "theme",
+		activeTab: "activeHelpdeskTab",
+		apiKey: "opnsenseApiKey",
+		apiSecret: "opnsenseApiSecret",
+		apiBaseUrl: "opnsenseApiBaseUrl",
+		sessionZoneFilter: "sessionZoneFilter",
+		selectedVoucherProvider: "selectedVoucherProvider",
+		voucherGroupFilterPrefix: "voucherGroupFilter_", // Will be used as prefix + providerId
+		signInNotificationsEnabled: "signInNotificationsEnabled",
+	},
 };
 
 // --- State Variables ---

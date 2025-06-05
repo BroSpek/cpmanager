@@ -2,17 +2,9 @@
 
 (function (CPManager) {
 	CPManager.sessions = {
-		/**
-		 * Fetches the status of the current device's session to identify the manager.
-		 * This helps in highlighting the manager's own session in the list.
-		 * Uses a direct fetch as it's a status check not requiring full API wrapper.
-		 */
 		fetchManagerSessionStatus: async function () {
-			const zoneIdForStatusCall = "0"; // Typically, status can be checked against any zone, '0' is common.
+			const zoneIdForStatusCall = "0";
 			try {
-				// Note: This fetch does not use the `callApi` wrapper because it's a special status endpoint
-				// and might not need the same auth or error handling if it's a public status check.
-				// If it requires authentication, it should be adapted or callApi should be made more flexible.
 				const response = await fetch(
 					`${CPManager.config.baseUrl}/api/captiveportal/access/status/${zoneIdForStatusCall}`
 				);
@@ -28,7 +20,7 @@
 				if (data && data.sessionId && data.clientState === "AUTHORIZED") {
 					CPManager.state.sessions.managerDetails = {
 						sessionId: data.sessionId,
-						zoneid: String(data.zoneid), // Ensure zoneid is a string for consistent comparison
+						zoneid: String(data.zoneid),
 						ipAddress: data.ipAddress,
 					};
 					console.log(
@@ -37,7 +29,6 @@
 						"ID:",
 						CPManager.state.sessions.managerDetails.sessionId.substring(0, 8) + "..."
 					);
-					// If sessions tab is already active, re-apply filters to highlight
 					if (
 						CPManager.elements.tabPanes.sessions &&
 						CPManager.elements.tabPanes.sessions.classList.contains("active")
@@ -47,7 +38,7 @@
 				} else {
 					CPManager.state.sessions.managerDetails = null;
 					console.log(
-						"Current device is not connected via an authorized captive portal session, or status endpoint returned unexpected data."
+						"Current device not connected via authorized captive portal session, or status endpoint returned unexpected data."
 					);
 				}
 			} catch (error) {
@@ -56,20 +47,14 @@
 			}
 		},
 
-		/**
-		 * Loads all active sessions from the OPNsense API.
-		 * Populates the zone filter dropdown and then renders the sessions.
-		 * @param {boolean} [forceRefresh=false] - If true, forces a re-fetch even if data exists.
-		 */
 		loadSessions: async function (forceRefresh = false) {
 			if (!CPManager.elements.sessionCardContainer) return;
-			CPManager.state.sessions.currentPage = 1; // Reset to first page on load
+			CPManager.state.sessions.currentPage = 1;
 
-			// Ensure zone data is available for descriptions and filtering (critical for populateSessionZoneFilter)
 			if (CPManager.state.zones.allConfigured.length === 0) {
-				await CPManager.zones.fetchAllZoneData(); // Assumes fetchAllZoneData is globally available
+				await CPManager.zones.fetchAllZoneData();
 			}
-			CPManager.sessions.populateSessionZoneFilter(); // Populate filters regardless of session data cache
+			CPManager.sessions.populateSessionZoneFilter();
 
 			if (
 				!forceRefresh &&
@@ -89,7 +74,7 @@
 			);
 
 			try {
-				const data = await CPManager.api.callApi("/session/search"); // API call
+				const data = await CPManager.api.callApi("/session/search");
 				if (data && Array.isArray(data.rows)) {
 					CPManager.state.sessions.all = data.rows;
 					CPManager.state.sessions.lastFetched = Date.now();
@@ -111,7 +96,7 @@
 				console.error("Error loading sessions:", error);
 				CPManager.ui.showNoDataMessage(
 					CPManager.elements.sessionCardContainer,
-					"Could not load sessions. Please check API connection and OPNsense logs.",
+					"Could not load sessions. Check API connection and OPNsense logs.",
 					"fas fa-exclamation-triangle",
 					"session-pagination"
 				);
@@ -119,14 +104,11 @@
 			}
 		},
 
-		/**
-		 * Populates the session zone filter dropdown with available zones.
-		 */
 		populateSessionZoneFilter: function () {
 			if (!CPManager.elements.sessionZoneFilterSelect) return;
 
-			const currentVal = localStorage.getItem("sessionZoneFilter") || "";
-			CPManager.elements.sessionZoneFilterSelect.innerHTML = '<option value="">All Zones</option>'; // Default option
+			const currentVal = localStorage.getItem(CPManager.config.localStorageKeys.sessionZoneFilter) || "";
+			CPManager.elements.sessionZoneFilterSelect.innerHTML = '<option value="">All Zones</option>';
 
 			if (CPManager.state.zones.allConfigured.length > 0) {
 				CPManager.state.zones.allConfigured.forEach((zone) => {
@@ -139,12 +121,9 @@
 			}
 		},
 
-		/**
-		 * Applies search and zone filters to the `allSessions` array and re-renders the session list.
-		 */
 		applySessionFilters: function () {
 			if (!CPManager.elements.sessionCardContainer) return;
-			CPManager.state.sessions.currentPage = 1; // Reset to first page on filter change
+			CPManager.state.sessions.currentPage = 1;
 
 			const searchTerm = CPManager.elements.sessionSearchInput
 				? CPManager.elements.sessionSearchInput.value.toLowerCase()
@@ -154,8 +133,7 @@
 				: "";
 
 			if (CPManager.elements.sessionZoneFilterSelect) {
-				// Save filter preference
-				localStorage.setItem("sessionZoneFilter", selectedZoneId);
+				localStorage.setItem(CPManager.config.localStorageKeys.sessionZoneFilter, selectedZoneId);
 			}
 
 			let filteredSessions = CPManager.state.sessions.all;
@@ -176,10 +154,6 @@
 			CPManager.sessions.renderSessions(filteredSessions);
 		},
 
-		/**
-		 * Renders the filtered list of sessions as cards in the UI.
-		 * @param {Array<object>} sessions - Array of session objects to render.
-		 */
 		renderSessions: function (sessions) {
 			if (!CPManager.elements.sessionCardContainer) return;
 			CPManager.ui.clearContainer(CPManager.elements.sessionCardContainer, "session-pagination");
@@ -205,7 +179,6 @@
 				const zoneTagColor = CPManager.utils.getZoneColor(session.zoneid);
 				const readableAuthVia = CPManager.utils.formatAuthVia(session.authenticated_via);
 				const authViaTagColor = CPManager.utils.getAuthViaColor(readableAuthVia);
-
 				const macAddressType = CPManager.utils.getMacAddressType(session.macAddress);
 				let macTypeTagHtml = "";
 				if (macAddressType) {
@@ -238,76 +211,75 @@
 				}
 
 				card.innerHTML = `
-			<div class="tags-container">
-				${managerIconHtml}
-				${macTypeTagHtml}
-				<span class="info-tag ${authViaTagColor} truncate" title="Authenticated Via: ${readableAuthVia}">${readableAuthVia}</span>
-				<span class="info-tag ${zoneTagColor} truncate" title="Zone: ${zoneDesc}">${zoneDesc}</span>
-			</div>
-			<div class="session-summary card-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="session-details-${
-				session.sessionId
-			}">
-				<div class="space-y-1">
-					<div class="info-row"><span class="info-label">IP Address</span> <span class="info-value summary-main-value">${
-						session.ipAddress || CPManager.config.placeholderValue
-					}</span></div>
-					<div class="info-row"><span class="info-label">User</span> <span class="info-value summary-main-value">${
-						session.userName || CPManager.config.placeholderValue
-					}</span></div>
-					<div class="info-row"><span class="info-label">MAC</span> <span class="info-value summary-main-value">${
-						session.macAddress || CPManager.config.placeholderValue
-					}</span></div>
-				</div>
-			</div>
-			<div class="card-details-content text-sm space-y-1" id="session-details-${session.sessionId}" aria-hidden="true">
-				<div class="info-row"><span class="info-label">Zone ID</span> <span class="info-value">${session.zoneid}</span></div>
-				<div class="info-row"><span class="info-label">Session ID</span> <span class="info-value">${
-					session.sessionId || CPManager.config.placeholderValue
-				}</span></div>
-				<div class="info-row"><span class="info-label">Start Time</span> <span class="info-value">${
-					session.startTime
-						? new Date(session.startTime * 1000).toLocaleString()
-						: CPManager.config.placeholderValue
-				}</span></div>
-				<div class="info-row"><span class="info-label">Last Accessed</span> <span class="info-value">${
-					session.last_accessed
-						? new Date(session.last_accessed * 1000).toLocaleString()
-						: CPManager.config.placeholderValue
-				}</span></div>
-				<div class="info-row"><span class="info-label">Packets Uploaded</span> <span class="info-value">${
-					session.packets_in !== undefined
-						? session.packets_in.toLocaleString()
-						: CPManager.config.placeholderValue
-				}</span></div>
-				<div class="info-row"><span class="info-label">Packets Downloaded</span> <span class="info-value">${
-					session.packets_out !== undefined
-						? session.packets_out.toLocaleString()
-						: CPManager.config.placeholderValue
-				}</span></div>
-				<div class="info-row"><span class="info-label">Data Uploaded</span> <span class="info-value">${
-					session.bytes_in !== undefined
-						? CPManager.utils.formatBytes(session.bytes_in)
-						: CPManager.config.placeholderValue
-				}</span></div>
-				<div class="info-row"><span class="info-label">Data Downloaded</span> <span class="info-value">${
-					session.bytes_out !== undefined
-						? CPManager.utils.formatBytes(session.bytes_out)
-						: CPManager.config.placeholderValue
-				}</span></div>
-				<div class="info-row"><span class="info-label">Acc. Timeout</span> <span class="info-value">${
-					session.acc_session_timeout
-						? CPManager.utils.formatDuration(session.acc_session_timeout, "seconds")
-						: CPManager.config.placeholderValue
-				}</span></div>
-				<p class="mt-3">
-					<button class="btn btn-warning w-full" data-action="disconnect-session" data-sessionid="${
+					<div class="tags-container">
+						${managerIconHtml}
+						${macTypeTagHtml}
+						<span class="info-tag ${authViaTagColor} truncate" title="Authenticated Via: ${readableAuthVia}">${readableAuthVia}</span>
+						<span class="info-tag ${zoneTagColor} truncate" title="Zone: ${zoneDesc}">${zoneDesc}</span>
+					</div>
+					<div class="session-summary card-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="session-details-${
 						session.sessionId
-					}" data-zoneid="${session.zoneid}" data-ip="${session.ipAddress || "Unknown IP"}">
-						<i class="fas fa-power-off mr-1"></i>Disconnect Session
-					</button>
-				</p>
-			</div>
-		`;
+					}">
+						<div class="space-y-1">
+							<div class="info-row"><span class="info-label">IP Address</span> <span class="info-value summary-main-value">${
+								session.ipAddress || CPManager.config.placeholderValue
+							}</span></div>
+							<div class="info-row"><span class="info-label">User</span> <span class="info-value summary-main-value">${
+								session.userName || CPManager.config.placeholderValue
+							}</span></div>
+							<div class="info-row"><span class="info-label">MAC</span> <span class="info-value summary-main-value">${
+								session.macAddress || CPManager.config.placeholderValue
+							}</span></div>
+						</div>
+					</div>
+					<div class="card-details-content text-sm space-y-1" id="session-details-${session.sessionId}" aria-hidden="true">
+						<div class="info-row"><span class="info-label">Zone ID</span> <span class="info-value">${session.zoneid}</span></div>
+						<div class="info-row"><span class="info-label">Session ID</span> <span class="info-value">${
+							session.sessionId || CPManager.config.placeholderValue
+						}</span></div>
+						<div class="info-row"><span class="info-label">Start Time</span> <span class="info-value">${
+							session.startTime
+								? new Date(session.startTime * 1000).toLocaleString()
+								: CPManager.config.placeholderValue
+						}</span></div>
+						<div class="info-row"><span class="info-label">Last Accessed</span> <span class="info-value">${
+							session.last_accessed
+								? new Date(session.last_accessed * 1000).toLocaleString()
+								: CPManager.config.placeholderValue
+						}</span></div>
+						<div class="info-row"><span class="info-label">Packets Uploaded</span> <span class="info-value">${
+							session.packets_in !== undefined
+								? session.packets_in.toLocaleString()
+								: CPManager.config.placeholderValue
+						}</span></div>
+						<div class="info-row"><span class="info-label">Packets Downloaded</span> <span class="info-value">${
+							session.packets_out !== undefined
+								? session.packets_out.toLocaleString()
+								: CPManager.config.placeholderValue
+						}</span></div>
+						<div class="info-row"><span class="info-label">Data Uploaded</span> <span class="info-value">${
+							session.bytes_in !== undefined
+								? CPManager.utils.formatBytes(session.bytes_in)
+								: CPManager.config.placeholderValue
+						}</span></div>
+						<div class="info-row"><span class="info-label">Data Downloaded</span> <span class="info-value">${
+							session.bytes_out !== undefined
+								? CPManager.utils.formatBytes(session.bytes_out)
+								: CPManager.config.placeholderValue
+						}</span></div>
+						<div class="info-row"><span class="info-label">Acc. Timeout</span> <span class="info-value">${
+							session.acc_session_timeout
+								? CPManager.utils.formatDuration(session.acc_session_timeout, "seconds")
+								: CPManager.config.placeholderValue
+						}</span></div>
+						<p class="mt-3">
+							<button class="btn btn-warning w-full" data-action="disconnect-session" data-sessionid="${
+								session.sessionId
+							}" data-zoneid="${session.zoneid}" data-ip="${session.ipAddress || "Unknown IP"}">
+								<i class="fas fa-power-off mr-1"></i>Disconnect Session
+							</button>
+						</p>
+					</div>`;
 				CPManager.elements.sessionCardContainer.appendChild(card);
 
 				const disconnectButton = card.querySelector('[data-action="disconnect-session"]');
@@ -342,26 +314,19 @@
 				CPManager.config.itemsPerPage,
 				(newPage) => {
 					CPManager.state.sessions.currentPage = newPage;
-					CPManager.sessions.renderSessions(sessions); // Re-render with the full filtered list
+					CPManager.sessions.renderSessions(sessions);
 				}
 			);
 		},
 
-		/**
-		 * Handles the disconnection of a single session.
-		 * @param {string} sessionId - The ID of the session to disconnect.
-		 * @param {string} zoneId - The zone ID of the session.
-		 * @param {string} ipAddress - The IP address of the client for confirmation message.
-		 * @param {boolean} isMySession - Flag indicating if it's the manager's own session.
-		 */
 		handleDisconnectSession: async function (sessionId, zoneId, ipAddress, isMySession) {
 			let title = isMySession ? "Disconnect YOUR Session?" : "Disconnect Client?";
 			let message = isMySession
-				? `<strong>DANGER:</strong> You are attempting to disconnect your current management session.<br/>IP: <strong>${ipAddress}</strong><br/>ID: <strong>${sessionId.substring(
+				? `<strong>DANGER:</strong> Attempting to disconnect your current management session.<br/>IP: <strong>${ipAddress}</strong><br/>ID: <strong>${sessionId.substring(
 						0,
 						8
-				  )}...</strong><br/><br/>This could lock you out. Are you absolutely sure?`
-				: `Are you sure you want to disconnect client?<br/>IP: <strong>${ipAddress}</strong><br/>ID: <strong>${sessionId.substring(
+				  )}...</strong><br/><br/>This could lock you out. Are you sure?`
+				: `Disconnect client?<br/>IP: <strong>${ipAddress}</strong><br/>ID: <strong>${sessionId.substring(
 						0,
 						8
 				  )}...</strong>`;
@@ -379,13 +344,11 @@
 							(result.message && result.message.toLowerCase().includes("ok")))
 					) {
 						CPManager.ui.showToast(
-							`Client ${ipAddress} (ID: ${sessionId.substring(0, 8)}...) disconnected successfully.`,
+							`Client ${ipAddress} (ID: ${sessionId.substring(0, 8)}...) disconnected.`,
 							"success"
 						);
-						if (isMySession) {
-							CPManager.state.sessions.managerDetails = null;
-						}
-						CPManager.state.sessions.currentPage = 1; // Reset page before refresh
+						if (isMySession) CPManager.state.sessions.managerDetails = null;
+						CPManager.state.sessions.currentPage = 1;
 						await CPManager.sessions.loadSessions(true);
 					} else {
 						CPManager.ui.showToast(
@@ -399,9 +362,6 @@
 			});
 		},
 
-		/**
-		 * Handles disconnecting all currently filtered sessions (excluding the manager's own session).
-		 */
 		handleDisconnectAllSessions: async function () {
 			const selectedZoneId = CPManager.elements.sessionZoneFilterSelect
 				? CPManager.elements.sessionZoneFilterSelect.value
@@ -441,13 +401,13 @@
 
 			if (sessionsToDisconnect.length === 0) {
 				CPManager.ui.showToast(
-					`No other active sessions found to disconnect in ${selectedZoneName} (matching current filters).`,
+					`No other active sessions found to disconnect in ${selectedZoneName} (matching filters).`,
 					"info"
 				);
 				return;
 			}
 
-			const confirmationMsg = `You are about to disconnect <strong>${sessionsToDisconnect.length}</strong> session(s) in <strong>${selectedZoneName}</strong> (excluding your own, matching current filters).<br><br>Are you sure you want to proceed?`;
+			const confirmationMsg = `Disconnect <strong>${sessionsToDisconnect.length}</strong> session(s) in <strong>${selectedZoneName}</strong> (excluding your own, matching filters)?`;
 
 			CPManager.ui.showConfirmationModal("Confirm Disconnect All Filtered", confirmationMsg, async () => {
 				CPManager.ui.showToast(
@@ -455,7 +415,6 @@
 					"info",
 					10000
 				);
-
 				let successCount = 0;
 				let failureCount = 0;
 				const disconnectPromises = [];
@@ -492,7 +451,6 @@
 							})
 					);
 				}
-
 				await Promise.all(disconnectPromises);
 
 				let summaryMessage = "";
@@ -500,33 +458,28 @@
 					summaryMessage = `Successfully disconnected all ${successCount} targeted sessions in ${selectedZoneName}.`;
 					CPManager.ui.showToast(summaryMessage, "success");
 				} else if (successCount > 0 && failureCount > 0) {
-					summaryMessage = `Disconnected ${successCount} sessions. Failed to disconnect ${failureCount} sessions in ${selectedZoneName}. Check console for details.`;
+					summaryMessage = `Disconnected ${successCount} sessions. Failed for ${failureCount} in ${selectedZoneName}. Check console.`;
 					CPManager.ui.showToast(summaryMessage, "warning", 7000);
 				} else if (successCount === 0 && failureCount > 0) {
-					summaryMessage = `Failed to disconnect any of the ${failureCount} targeted sessions in ${selectedZoneName}. Check console for details.`;
+					summaryMessage = `Failed to disconnect any of the ${failureCount} targeted sessions in ${selectedZoneName}. Check console.`;
 					CPManager.ui.showToast(summaryMessage, "error", 7000);
 				} else {
-					summaryMessage = `No sessions were processed or an unexpected issue occurred in ${selectedZoneName}.`;
+					summaryMessage = `No sessions processed or unexpected issue in ${selectedZoneName}.`;
 					CPManager.ui.showToast(summaryMessage, "info");
 				}
-				CPManager.state.sessions.currentPage = 1; // Reset page before refresh
+				CPManager.state.sessions.currentPage = 1;
 				await CPManager.sessions.loadSessions(true);
 			});
 		},
 
-		/**
-		 * Initializes event listeners for the sessions tab.
-		 */
 		initializeSessionEventListeners: function () {
-			if (CPManager.elements.sessionSearchInput) {
+			if (CPManager.elements.sessionSearchInput)
 				CPManager.elements.sessionSearchInput.addEventListener("input", CPManager.sessions.applySessionFilters);
-			}
-			if (CPManager.elements.sessionZoneFilterSelect) {
+			if (CPManager.elements.sessionZoneFilterSelect)
 				CPManager.elements.sessionZoneFilterSelect.addEventListener(
 					"change",
 					CPManager.sessions.applySessionFilters
 				);
-			}
 
 			if (CPManager.elements.sessionCardContainer) {
 				CPManager.elements.sessionCardContainer.addEventListener("click", (e) => {
@@ -536,11 +489,9 @@
 						const sessionId = disconnectButton.dataset.sessionid;
 						const zoneid = disconnectButton.dataset.zoneid;
 						const ip = disconnectButton.dataset.ip;
-
 						const sessionObject = CPManager.state.sessions.all.find(
 							(s) => s.sessionId === sessionId && String(s.zoneid) === zoneid
 						);
-
 						const isMy =
 							CPManager.state.sessions.managerDetails &&
 							sessionObject &&
@@ -551,18 +502,16 @@
 				});
 			}
 
-			if (CPManager.elements.disconnectAllSessionsBtn) {
+			if (CPManager.elements.disconnectAllSessionsBtn)
 				CPManager.elements.disconnectAllSessionsBtn.addEventListener(
 					"click",
 					CPManager.sessions.handleDisconnectAllSessions
 				);
-			}
-
 			if (CPManager.elements.findMySessionBtn) {
 				CPManager.elements.findMySessionBtn.addEventListener("click", async () => {
 					if (CPManager.state.sessions.managerDetails && CPManager.state.sessions.managerDetails.sessionId) {
 						CPManager.ui.showToast(
-							`Found your session (IP: ${CPManager.state.sessions.managerDetails.ipAddress}). Highlighting and filtering...`,
+							`Found your session (IP: ${CPManager.state.sessions.managerDetails.ipAddress}). Highlighting...`,
 							"info"
 						);
 						if (CPManager.elements.sessionZoneFilterSelect)
@@ -575,34 +524,30 @@
 							CPManager.elements.tabPanes.sessions &&
 							CPManager.elements.tabPanes.sessions.classList.contains("active")
 						) {
-							CPManager.state.sessions.currentPage = 1; // Reset page
-							await CPManager.sessions.loadSessions();
-							CPManager.sessions.applySessionFilters();
+							CPManager.state.sessions.currentPage = 1;
+							await CPManager.sessions.loadSessions(); // Filters will be applied by loadSessions if search term is set
+							CPManager.sessions.applySessionFilters(); // Explicitly apply if loadSessions doesn't always
 						} else {
-							CPManager.state.sessions.currentPage = 1; // Reset page before switching tab
+							CPManager.state.sessions.currentPage = 1;
 							CPManager.tabs.setActiveTab("sessions");
 						}
 						setTimeout(() => {
 							const highlightedCard = CPManager.elements.sessionCardContainer
 								? CPManager.elements.sessionCardContainer.querySelector(".ring-blue-500")
 								: null;
-							if (highlightedCard) {
+							if (highlightedCard)
 								highlightedCard.scrollIntoView({ behavior: "smooth", block: "center" });
-							}
 						}, 300);
 					} else {
-						CPManager.ui.showToast(
-							"Your current session details not found. Attempting to fetch...",
-							"warning"
-						);
+						CPManager.ui.showToast("Your session details not found. Fetching...", "warning");
 						await CPManager.sessions.fetchManagerSessionStatus();
 						if (!CPManager.state.sessions.managerDetails) {
 							CPManager.ui.showToast(
-								"Still couldn't find your session. Please ensure you are logged into the captive portal.",
+								"Still couldn't find your session. Ensure you are logged into the portal.",
 								"warning"
 							);
 						} else {
-							CPManager.elements.findMySessionBtn.click();
+							CPManager.elements.findMySessionBtn.click(); // Retry
 						}
 					}
 				});
