@@ -208,6 +208,7 @@
 							<div class="skeleton-card"></div>
 							<div class="skeleton-card"></div>
 						</div>
+						<div id="session-pagination" class="mt-4"></div>
 					</div>
 
 					<div id="vouchers-content" class="tab-pane hidden">
@@ -270,6 +271,7 @@
 						<div id="voucher-card-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 							<div class="skeleton-card"></div>
 						</div>
+						<div id="voucher-pagination" class="mt-4"></div>
 					</div>
 
 					<div id="info-content" class="tab-pane hidden">
@@ -289,6 +291,7 @@
 							<div class="skeleton-card"></div>
 							<div class="skeleton-card"></div>
 						</div>
+						<div id="zone-pagination" class="mt-4"></div>
 					</div>
 				</div>
 			</div>
@@ -431,13 +434,11 @@
 			class="modal modal-inactive fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-20"
 		>
 			<div class="modal-content p-6 rounded-lg shadow-xl w-full max-w-lg mx-auto">
-				<!-- Increased max-w-lg -->
 				<h3 class="text-xl font-semibold mb-6">
 					Edit Zone: <span id="editZoneModalTitleName" class="font-normal"></span>
 				</h3>
 				<form id="editZoneForm" class="space-y-4">
 					<input type="hidden" id="editZoneUuidInput" />
-					<!-- Row 1: Status and Description -->
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div>
 							<label for="zone-edit-enabled" class="block text-sm font-medium mb-1">Status:</label>
@@ -458,7 +459,6 @@
 						</div>
 					</div>
 
-					<!-- Row 2: Timeouts -->
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div>
 							<label for="zone-edit-hardtimeout" class="block text-sm font-medium"
@@ -486,7 +486,6 @@
 						</div>
 					</div>
 
-					<!-- Row 3: Concurrent Logins and Custom Template -->
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div>
 							<label for="zone-edit-concurrentlogins" class="block text-sm font-medium mb-1"
@@ -509,12 +508,10 @@
 							<label for="zone-edit-template" class="block text-sm font-medium">Custom Template:</label>
 							<select id="zone-edit-template" class="form-select mt-1 block w-full">
 								<option value="">Default</option>
-								<!-- Options will be populated by JavaScript -->
 							</select>
 						</div>
 					</div>
 
-					<!-- Row 4: Allowed Addresses -->
 					<div>
 						<label for="zone-edit-allowedAddresses" class="block text-sm font-medium"
 							>Allowed Addresses (comma-separated):</label
@@ -526,7 +523,6 @@
 							placeholder="192.168.1.2,192.168.1.100-200,10.0.0.0/24"
 						></textarea>
 					</div>
-					<!-- Row 5: Allowed MAC Addresses -->
 					<div>
 						<label for="zone-edit-allowedMACAddresses" class="block text-sm font-medium"
 							>Allowed MAC Addresses (comma-separated):</label

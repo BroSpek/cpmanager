@@ -79,7 +79,7 @@
 					const sessionData = await CPManager.api.callApi("/session/search");
 					sessionDataRows = sessionData && Array.isArray(sessionData.rows) ? sessionData.rows : [];
 					CPManager.state.dashboard.apiDataCache.sessions = sessionDataRows;
-					CPManager.state.dashboard.apiDataCache.sessionsLastFetched = Date.now(); // NEW: Store timestamp
+					CPManager.state.dashboard.apiDataCache.sessionsLastFetched = Date.now();
 				}
 
 				if (CPManager.state.zones.allConfigured.length === 0 && totalZonesCount === 0) {
@@ -123,7 +123,7 @@
 					}
 					voucherStats = { totalVouchers, activeVouchers };
 					CPManager.state.dashboard.apiDataCache.voucherStats = voucherStats;
-					CPManager.state.dashboard.apiDataCache.voucherStatsLastFetched = Date.now(); // NEW: Store timestamp
+					CPManager.state.dashboard.apiDataCache.voucherStatsLastFetched = Date.now();
 				}
 
 				const activeSessionCount = sessionDataRows.length;

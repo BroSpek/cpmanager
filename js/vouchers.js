@@ -17,11 +17,9 @@
 
 			try {
 				if (CPManager.state.zones.allConfigured.length === 0) {
-					await CPManager.zones.fetchAllZoneData(); // Ensures CPManager.zones is available
+					await CPManager.zones.fetchAllZoneData();
 				}
-				// Ensure providers are loaded if not already (loadVoucherProviders caches them in CPManager.state.vouchers.cachedProviders)
 				if (CPManager.state.vouchers.cachedProviders.length === 0) {
-					// This is a fallback; typically loadVoucherProviders would have populated this.
 					const providers = await CPManager.api.callApi("/voucher/list_providers");
 					if (providers && Array.isArray(providers)) {
 						CPManager.state.vouchers.cachedProviders = providers;
@@ -44,13 +42,12 @@
 								const authServersField = zoneDetailsResponse.zone.authservers;
 								let selectedAuthServers = [];
 
-								// Logic to extract selected auth servers
 								if (
 									typeof authServersField === "object" &&
 									authServersField !== null &&
 									!Array.isArray(authServersField)
 								) {
-									const formatted = CPManager.utils.formatOpnsenseSelectable(authServersField); // Assumes CPManager.utils is available
+									const formatted = CPManager.utils.formatOpnsenseSelectable(authServersField);
 									if (formatted) {
 										selectedAuthServers = formatted
 											.split(",")
@@ -118,22 +115,17 @@
 			}
 		},
 
-		/**
-		 * Initializes event listeners for the new provider-zone linkage card.
-		 */
 		initializeProviderZoneLinkageCard: function () {
 			const card = CPManager.elements.providerZoneLinkageCard;
 			if (!card) {
-				// console.warn("Provider zone linkage card element not found for listener setup."); // Optional: for debugging
 				return;
 			}
-			// Check if listener already attached to prevent duplicates if this function is called multiple times
 			if (card.dataset.listenerAttached === "true") {
 				return;
 			}
 
 			const summaryElement = card.querySelector(".card-summary");
-			const detailsContent = CPManager.elements.providerZoneLinkageDetails; // Use direct reference
+			const detailsContent = CPManager.elements.providerZoneLinkageDetails;
 			const icon = summaryElement ? summaryElement.querySelector("i.fas") : null;
 
 			if (summaryElement && detailsContent) {
@@ -145,7 +137,6 @@
 						icon.classList.toggle("fa-chevron-down", !isExpanded);
 						icon.classList.toggle("fa-chevron-up", isExpanded);
 					}
-					// If the card is expanded for the first time (still showing "Loading..."), fetch and display the data.
 					if (isExpanded && detailsContent.innerHTML.includes("Loading linkage information...")) {
 						CPManager.vouchers.displayProviderZoneLinkage();
 					}
@@ -153,29 +144,23 @@
 				summaryElement.addEventListener("keydown", (e) => {
 					if (e.key === "Enter" || e.key === " ") {
 						e.preventDefault();
-						summaryElement.click(); // Trigger the click handler
+						summaryElement.click();
 					}
 				});
-				card.dataset.listenerAttached = "true"; // Mark listener as attached
+				card.dataset.listenerAttached = "true";
 			}
 		},
-		/**
-		 * Loads voucher providers from the API and populates the provider selection dropdown.
-		 * @param {boolean} [forceRefresh=false] - If true, forces a re-fetch even if data exists.
-		 */
 		loadVoucherProviders: async function (forceRefresh = false) {
 			if (!CPManager.elements.voucherProviderSelect) return;
+			CPManager.state.vouchers.currentPage = 1; // Reset page
 
-			CPManager.vouchers.initializeProviderZoneLinkageCard(); // Initialize card interactivity
+			CPManager.vouchers.initializeProviderZoneLinkageCard();
 
 			const detailsContainer = CPManager.elements.providerZoneLinkageDetails;
-			// If the card is already expanded and a general forceRefresh is requested for providers,
-			// it's good to refresh its content as well.
 			if (detailsContainer && detailsContainer.classList.contains("expanded") && forceRefresh) {
 				await CPManager.vouchers.displayProviderZoneLinkage();
 			}
 
-			// MODIFIED: Add timestamp check for cache validity
 			if (
 				!forceRefresh &&
 				CPManager.state.vouchers.cachedProviders.length > 0 &&
@@ -195,17 +180,15 @@
 				CPManager.elements.voucherGroupSelect.innerHTML =
 					'<option value="">Select a provider first...</option>';
 			if (CPManager.elements.voucherCardContainer)
-				CPManager.ui.clearContainer(CPManager.elements.voucherCardContainer);
+				CPManager.ui.clearContainer(CPManager.elements.voucherCardContainer, "voucher-pagination");
 			CPManager.ui.disableVoucherActionButtons(true, true, true);
 
 			try {
 				const providers = await CPManager.api.callApi("/voucher/list_providers");
 				if (providers && Array.isArray(providers)) {
 					CPManager.state.vouchers.cachedProviders = providers;
-					CPManager.state.vouchers.lastFetchedProviders = Date.now(); // NEW: Store timestamp
+					CPManager.state.vouchers.lastFetchedProviders = Date.now();
 					CPManager.vouchers.populateVoucherProviderSelect(providers);
-					// If linkage card is expanded, and providers were freshly loaded (implicitly due to not using cache path or forceRefresh),
-					// refresh its content. This ensures data consistency.
 					if (detailsContainer && detailsContainer.classList.contains("expanded")) {
 						await CPManager.vouchers.displayProviderZoneLinkage();
 					}
@@ -227,10 +210,6 @@
 			}
 		},
 
-		/**
-		 * Populates the voucher provider select dropdown from a list of providers.
-		 * @param {Array<string>} providers - Array of provider names.
-		 */
 		populateVoucherProviderSelect: function (providers) {
 			if (!CPManager.elements.voucherProviderSelect) return;
 
@@ -268,13 +247,8 @@
 			}
 		},
 
-		/**
-		 * Handles the selection of a voucher provider.
-		 * Loads voucher groups for the selected provider.
-		 * @param {string} providerId - The ID of the selected provider.
-		 * @param {boolean} [forceRefreshGroups=false] - If true, forces a re-fetch of groups.
-		 */
 		handleProviderSelection: function (providerId, forceRefreshGroups = false) {
+			CPManager.state.vouchers.currentPage = 1; // Reset page
 			if (providerId) {
 				localStorage.setItem("selectedVoucherProvider", providerId);
 				CPManager.vouchers.loadVoucherGroups(providerId, forceRefreshGroups);
@@ -284,29 +258,24 @@
 					CPManager.elements.voucherGroupSelect.innerHTML =
 						'<option value="">Select a provider first...</option>';
 				if (CPManager.elements.voucherCardContainer)
-					CPManager.ui.clearContainer(CPManager.elements.voucherCardContainer);
+					CPManager.ui.clearContainer(CPManager.elements.voucherCardContainer, "voucher-pagination");
 				CPManager.ui.disableVoucherActionButtons(true, true, true);
 			}
 		},
 
-		/**
-		 * Loads voucher groups for a given provider and populates the group selection dropdown.
-		 * @param {string} providerId - The ID of the provider.
-		 * @param {boolean} [forceRefresh=false] - If true, forces a re-fetch even if data exists.
-		 */
 		loadVoucherGroups: async function (providerId, forceRefresh = false) {
+			CPManager.state.vouchers.currentPage = 1; // Reset page
 			if (!providerId || !CPManager.elements.voucherGroupSelect) {
 				if (CPManager.elements.voucherGroupSelect)
 					CPManager.elements.voucherGroupSelect.innerHTML =
 						'<option value="">Select a provider first...</option>';
 				if (CPManager.elements.voucherCardContainer)
-					CPManager.ui.clearContainer(CPManager.elements.voucherCardContainer);
+					CPManager.ui.clearContainer(CPManager.elements.voucherCardContainer, "voucher-pagination");
 				CPManager.ui.disableVoucherActionButtons(true, true, true);
 				return;
 			}
 
 			const cacheKey = providerId;
-			// MODIFIED: Add timestamp check for cache validity
 			if (
 				!forceRefresh &&
 				CPManager.state.vouchers.cachedGroups[cacheKey] &&
@@ -334,7 +303,12 @@
 				(!CPManager.state.vouchers.cachedData[`${providerId}_${CPManager.elements.voucherGroupSelect.value}`] ||
 					forceRefresh)
 			) {
-				CPManager.ui.showSkeletonLoaders(CPManager.elements.voucherCardContainer, 1);
+				CPManager.ui.showSkeletonLoaders(
+					CPManager.elements.voucherCardContainer,
+					1,
+					'<div class="skeleton-card"></div>',
+					"voucher-pagination"
+				);
 			}
 			CPManager.ui.disableVoucherActionButtons(false, true, true);
 
@@ -342,7 +316,7 @@
 				const groups = await CPManager.api.callApi(`/voucher/list_voucher_groups/${providerId}`);
 				if (groups && Array.isArray(groups)) {
 					CPManager.state.vouchers.cachedGroups[cacheKey] = groups;
-					CPManager.state.vouchers.cachedGroupsTimestamps[cacheKey] = Date.now(); // NEW: Store timestamp
+					CPManager.state.vouchers.cachedGroupsTimestamps[cacheKey] = Date.now();
 					CPManager.vouchers.populateVoucherGroupSelect(providerId, groups);
 				} else {
 					CPManager.state.vouchers.cachedGroups[cacheKey] = [];
@@ -356,7 +330,8 @@
 						CPManager.ui.showNoDataMessage(
 							CPManager.elements.voucherCardContainer,
 							"Error loading voucher groups.",
-							"fas fa-exclamation-triangle"
+							"fas fa-exclamation-triangle",
+							"voucher-pagination"
 						);
 					CPManager.ui.disableVoucherActionButtons(false, true, true);
 				}
@@ -367,20 +342,17 @@
 					CPManager.ui.showNoDataMessage(
 						CPManager.elements.voucherCardContainer,
 						"Error loading voucher groups.",
-						"fas fa-exclamation-triangle"
+						"fas fa-exclamation-triangle",
+						"voucher-pagination"
 					);
 				CPManager.ui.disableVoucherActionButtons(false, true, true);
 				console.error(`Exception in loadVoucherGroups for provider ${providerId}:`, error);
 			}
 		},
 
-		/**
-		 * Populates the voucher group select dropdown.
-		 * @param {string} providerId - The ID of the provider (for localStorage key).
-		 * @param {Array<string>} groups - Array of group names.
-		 */
 		populateVoucherGroupSelect: function (providerId, groups) {
 			if (!CPManager.elements.voucherGroupSelect) return;
+			CPManager.state.vouchers.currentPage = 1; // Reset page
 
 			const currentVal = localStorage.getItem(`voucherGroupFilter_${providerId}`) || "";
 			CPManager.elements.voucherGroupSelect.innerHTML = '<option value="">-- Select a Group --</option>';
@@ -411,13 +383,15 @@
 						CPManager.ui.showNoDataMessage(
 							CPManager.elements.voucherCardContainer,
 							`No voucher groups found for provider: <strong>${providerId}</strong>. You can create vouchers to start a new group.`,
-							"fas fa-folder-open"
+							"fas fa-folder-open",
+							"voucher-pagination"
 						);
 					} else {
 						CPManager.ui.showNoDataMessage(
 							CPManager.elements.voucherCardContainer,
 							"Select a group to see vouchers.",
-							"fas fa-ticket-alt"
+							"fas fa-ticket-alt",
+							"voucher-pagination"
 						);
 					}
 				}
@@ -425,19 +399,15 @@
 			}
 		},
 
-		/**
-		 * Loads vouchers for a specific group and provider.
-		 * @param {string} providerId - The ID of the provider.
-		 * @param {string} groupName - The name of the voucher group.
-		 * @param {boolean} [forceRefresh=false] - If true, forces a re-fetch even if data exists.
-		 */
 		loadVouchersForGroup: async function (providerId, groupName, forceRefresh = false) {
+			CPManager.state.vouchers.currentPage = 1; // Reset page
 			if (!providerId || !groupName || !CPManager.elements.voucherCardContainer) {
 				if (CPManager.elements.voucherCardContainer)
 					CPManager.ui.showNoDataMessage(
 						CPManager.elements.voucherCardContainer,
 						"Provider or group not selected.",
-						"fas fa-info-circle"
+						"fas fa-info-circle",
+						"voucher-pagination"
 					);
 				CPManager.state.vouchers.current = [];
 				CPManager.vouchers.renderVouchers([], groupName);
@@ -445,7 +415,6 @@
 			}
 
 			const cacheKey = `${providerId}_${groupName}`;
-			// MODIFIED: Add timestamp check for cache validity
 			if (
 				!forceRefresh &&
 				CPManager.state.vouchers.cachedData[cacheKey] &&
@@ -459,18 +428,23 @@
 					CPManager.ui.showNoDataMessage(
 						CPManager.elements.voucherCardContainer,
 						`No vouchers found in group "${groupName}".`,
-						"fas fa-folder-open"
+						"fas fa-folder-open",
+						"voucher-pagination"
 					);
 				}
 				return;
 			}
 
-			CPManager.ui.showSkeletonLoaders(CPManager.elements.voucherCardContainer, 1);
+			CPManager.ui.showSkeletonLoaders(
+				CPManager.elements.voucherCardContainer,
+				CPManager.config.itemsPerPage,
+				'<div class="skeleton-card"></div>',
+				"voucher-pagination"
+			);
 
 			try {
 				const vouchers = await CPManager.api.callApi(`/voucher/list_vouchers/${providerId}/${groupName}`);
 				if (vouchers && Array.isArray(vouchers)) {
-					// MODIFIED: Store data with timestamp
 					CPManager.state.vouchers.cachedData[cacheKey] = {
 						data: vouchers,
 						lastFetched: Date.now(),
@@ -481,11 +455,12 @@
 						CPManager.ui.showNoDataMessage(
 							CPManager.elements.voucherCardContainer,
 							`No vouchers found in group "${groupName}".`,
-							"fas fa-folder-open"
+							"fas fa-folder-open",
+							"voucher-pagination"
 						);
 					}
 				} else {
-					CPManager.state.vouchers.cachedData[cacheKey] = { data: [], lastFetched: 0 }; // Initialize with empty data and 0 timestamp on error/unexpected format
+					CPManager.state.vouchers.cachedData[cacheKey] = { data: [], lastFetched: 0 };
 					CPManager.state.vouchers.current = [];
 					CPManager.vouchers.renderVouchers([], groupName);
 					console.error(
@@ -495,36 +470,39 @@
 					CPManager.ui.showNoDataMessage(
 						CPManager.elements.voucherCardContainer,
 						"Error: Unexpected data for vouchers.",
-						"fas fa-exclamation-triangle"
+						"fas fa-exclamation-triangle",
+						"voucher-pagination"
 					);
 				}
 			} catch (error) {
-				CPManager.state.vouchers.cachedData[cacheKey] = { data: [], lastFetched: 0 }; // Initialize with empty data and 0 timestamp on error
+				CPManager.state.vouchers.cachedData[cacheKey] = { data: [], lastFetched: 0 };
 				CPManager.state.vouchers.current = [];
 				CPManager.vouchers.renderVouchers([], groupName);
 				CPManager.ui.showNoDataMessage(
 					CPManager.elements.voucherCardContainer,
 					"Error loading vouchers.",
-					"fas fa-exclamation-triangle"
+					"fas fa-exclamation-triangle",
+					"voucher-pagination"
 				);
 				console.error(`Exception in loadVouchersForGroup for ${groupName} (Provider: ${providerId}):`, error);
 			}
 		},
 
-		/**
-		 * Renders voucher cards in the UI.
-		 * @param {Array<object>} vouchers - Array of voucher objects.
-		 * @param {string} groupName - The name of the group these vouchers belong to.
-		 */
 		renderVouchers: function (vouchers, groupName) {
 			if (!CPManager.elements.voucherCardContainer) return;
-			CPManager.ui.clearContainer(CPManager.elements.voucherCardContainer);
+			CPManager.ui.clearContainer(CPManager.elements.voucherCardContainer, "voucher-pagination");
 
 			if (!vouchers || !Array.isArray(vouchers) || vouchers.length === 0) {
 				return;
 			}
 
-			vouchers.forEach((voucher) => {
+			const page = CPManager.state.vouchers.currentPage;
+			const itemsPerPage = CPManager.config.itemsPerPage;
+			const startIndex = (page - 1) * itemsPerPage;
+			const endIndex = startIndex + itemsPerPage;
+			const paginatedVouchers = vouchers.slice(startIndex, endIndex);
+
+			paginatedVouchers.forEach((voucher) => {
 				const card = document.createElement("div");
 				card.className = "voucher-card p-3 rounded-lg shadow border relative";
 				card.setAttribute("role", "listitem");
@@ -597,11 +575,18 @@
 					});
 				}
 			});
+			CPManager.ui.renderPaginationControls(
+				CPManager.elements.voucherPaginationContainer,
+				CPManager.state.vouchers.currentPage,
+				vouchers.length, // Total vouchers in the current group (full list before pagination)
+				CPManager.config.itemsPerPage,
+				(newPage) => {
+					CPManager.state.vouchers.currentPage = newPage;
+					CPManager.vouchers.renderVouchers(vouchers, groupName); // Re-render with the full list for the group
+				}
+			);
 		},
 
-		/**
-		 * Handles the voucher generation modal visibility and form reset.
-		 */
 		openGenerateVoucherModal: function () {
 			if (!CPManager.elements.generateVoucherModal || !CPManager.elements.voucherProviderSelect) return;
 			const selectedProvider = CPManager.elements.voucherProviderSelect.value;
@@ -636,10 +621,6 @@
 			if (CPManager.elements.voucherCountSelect) CPManager.elements.voucherCountSelect.focus();
 		},
 
-		/**
-		 * Handles the submission of the generate voucher form.
-		 * Now generates a PDF instead of CSV.
-		 */
 		handleSubmitGenerateVoucher: async function () {
 			if (!CPManager.elements.voucherProviderSelect || !CPManager.elements.submitGenerateVoucherBtn) return;
 
@@ -759,6 +740,7 @@
 					CPManager.ui.showToast("Vouchers PDF generated successfully!", "success");
 
 					CPManager.ui.hideModal(CPManager.elements.generateVoucherModal);
+					CPManager.state.vouchers.currentPage = 1; // Reset page
 					await CPManager.vouchers.loadVoucherGroups(selectedProvider, true);
 					if (CPManager.elements.voucherGroupSelect) CPManager.elements.voucherGroupSelect.value = groupname;
 					await CPManager.vouchers.loadVouchersForGroup(selectedProvider, groupname, true);
@@ -774,6 +756,7 @@
 					);
 					CPManager.state.vouchers.lastGenerated = [];
 					CPManager.ui.hideModal(CPManager.elements.generateVoucherModal);
+					CPManager.state.vouchers.currentPage = 1; // Reset page
 					await CPManager.vouchers.loadVoucherGroups(selectedProvider, true);
 					if (CPManager.elements.voucherGroupSelect) CPManager.elements.voucherGroupSelect.value = groupname;
 					await CPManager.vouchers.loadVouchersForGroup(selectedProvider, groupname, true);
@@ -799,13 +782,6 @@
 			}
 		},
 
-		/**
-		 * Generates a PDF from the provided voucher data using jsPDF.
-		 * This function creates a "card" style layout for vouchers.
-		 * @param {Array<object>} vouchers - Array of voucher objects to include in the PDF.
-		 * @param {string} groupName - The name of the group these vouchers belong to.
-		 * @param {object} doc - The jsPDF document instance to add content to.
-		 */
 		generateVouchersAsCardPDF: function (vouchers, groupName, doc) {
 			const pageHeight = doc.internal.pageSize.height;
 			const pageWidth = doc.internal.pageSize.width;
@@ -908,12 +884,6 @@
 			});
 		},
 
-		/**
-		 * Generates a PDF with voucher data presented in a table format.
-		 * @param {Array<object>} vouchers - Array of voucher objects.
-		 * @param {string} groupName - The name of the group.
-		 * @param {object} doc - The jsPDF document instance to add content to.
-		 */
 		generateVouchersAsTablePDF: function (vouchers, groupName, doc) {
 			const startY = 20;
 
@@ -964,9 +934,6 @@
 			});
 		},
 
-		/**
-		 * Handles revoking a single voucher.
-		 */
 		handleRevokeVoucher: async function (providerId, voucherCode, groupName) {
 			if (!providerId) {
 				CPManager.ui.showToast("Voucher provider not selected. Cannot revoke.", "error");
@@ -995,17 +962,13 @@
 								"info"
 							);
 						}
+						CPManager.state.vouchers.currentPage = 1; // Reset page
 						await CPManager.vouchers.loadVouchersForGroup(providerId, groupName, true);
-					} catch (error) {
-						// Error toast handled by callApi
-					}
+					} catch (error) {}
 				}
 			);
 		},
 
-		/**
-		 * Handles dropping all expired vouchers for the selected provider and group.
-		 */
 		handleDropExpiredVouchers: async function () {
 			if (!CPManager.elements.voucherProviderSelect || !CPManager.elements.voucherGroupSelect) return;
 			const selectedProvider = CPManager.elements.voucherProviderSelect.value;
@@ -1044,17 +1007,13 @@
 								"info"
 							);
 						}
+						CPManager.state.vouchers.currentPage = 1; // Reset page
 						await CPManager.vouchers.loadVouchersForGroup(selectedProvider, selectedGroup, true);
-					} catch (error) {
-						// Error toast handled by callApi
-					}
+					} catch (error) {}
 				}
 			);
 		},
 
-		/**
-		 * Handles dropping an entire voucher group.
-		 */
 		handleDropVoucherGroup: async function () {
 			if (!CPManager.elements.voucherProviderSelect || !CPManager.elements.voucherGroupSelect) return;
 			const selectedProvider = CPManager.elements.voucherProviderSelect.value;
@@ -1090,14 +1049,16 @@
 									);
 							}
 							delete CPManager.state.vouchers.cachedData[`${selectedProvider}_${selectedGroup}`];
-							delete CPManager.state.vouchers.cachedGroupsTimestamps[selectedProvider]; // NEW: Remove timestamp for groups
+							delete CPManager.state.vouchers.cachedGroupsTimestamps[selectedProvider];
 
+							CPManager.state.vouchers.currentPage = 1; // Reset page
 							await CPManager.vouchers.loadVoucherGroups(selectedProvider, true);
 							if (CPManager.elements.voucherCardContainer)
 								CPManager.ui.showNoDataMessage(
 									CPManager.elements.voucherCardContainer,
 									"Select a group to see vouchers.",
-									"fas fa-ticket-alt"
+									"fas fa-ticket-alt",
+									"voucher-pagination"
 								);
 							CPManager.state.vouchers.current = [];
 							CPManager.ui.disableVoucherActionButtons(false, true, true);
@@ -1109,16 +1070,11 @@
 								"error"
 							);
 						}
-					} catch (error) {
-						// Error toast handled by callApi
-					}
+					} catch (error) {}
 				}
 			);
 		},
 
-		/**
-		 * Initializes event listeners for the vouchers tab.
-		 */
 		initializeVoucherEventListeners: function () {
 			if (CPManager.elements.voucherProviderSelect) {
 				CPManager.elements.voucherProviderSelect.addEventListener("change", (e) =>
@@ -1137,6 +1093,7 @@
 						return;
 					}
 					localStorage.setItem(`voucherGroupFilter_${selectedProvider}`, selectedGroup);
+					CPManager.state.vouchers.currentPage = 1; // Reset page
 					if (selectedGroup) {
 						await CPManager.vouchers.loadVouchersForGroup(selectedProvider, selectedGroup);
 						CPManager.ui.disableVoucherActionButtons(false, false, false);
@@ -1145,7 +1102,8 @@
 							CPManager.ui.showNoDataMessage(
 								CPManager.elements.voucherCardContainer,
 								"Select a group to see vouchers.",
-								"fas fa-ticket-alt"
+								"fas fa-ticket-alt",
+								"voucher-pagination"
 							);
 						CPManager.state.vouchers.current = [];
 						CPManager.vouchers.renderVouchers([], "");

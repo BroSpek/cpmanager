@@ -63,6 +63,7 @@
 		 */
 		loadSessions: async function (forceRefresh = false) {
 			if (!CPManager.elements.sessionCardContainer) return;
+			CPManager.state.sessions.currentPage = 1; // Reset to first page on load
 
 			// Ensure zone data is available for descriptions and filtering (critical for populateSessionZoneFilter)
 			if (CPManager.state.zones.allConfigured.length === 0) {
@@ -70,25 +71,29 @@
 			}
 			CPManager.sessions.populateSessionZoneFilter(); // Populate filters regardless of session data cache
 
-			// MODIFIED: Add timestamp check for cache validity
 			if (
 				!forceRefresh &&
 				CPManager.state.sessions.all.length > 0 &&
 				Date.now() - CPManager.state.sessions.lastFetched < CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
 			) {
 				console.log("Using cached sessions. Applying filters.");
-				CPManager.sessions.applySessionFilters(); // Re-render from existing data
+				CPManager.sessions.applySessionFilters();
 				return;
 			}
 
-			CPManager.ui.showSkeletonLoaders(CPManager.elements.sessionCardContainer, 3); // Show 3 skeleton cards while loading
+			CPManager.ui.showSkeletonLoaders(
+				CPManager.elements.sessionCardContainer,
+				CPManager.config.itemsPerPage,
+				'<div class="skeleton-card"></div>',
+				"session-pagination"
+			);
 
 			try {
 				const data = await CPManager.api.callApi("/session/search"); // API call
 				if (data && Array.isArray(data.rows)) {
 					CPManager.state.sessions.all = data.rows;
-					CPManager.state.sessions.lastFetched = Date.now(); // NEW: Store timestamp
-					CPManager.sessions.applySessionFilters(); // Filter and render
+					CPManager.state.sessions.lastFetched = Date.now();
+					CPManager.sessions.applySessionFilters();
 				} else {
 					console.error(
 						"Error loading sessions: API response `data.rows` is not an array or data is undefined.",
@@ -97,18 +102,20 @@
 					CPManager.ui.showNoDataMessage(
 						CPManager.elements.sessionCardContainer,
 						"Error: Unexpected data format for sessions.",
-						"fas fa-exclamation-triangle"
+						"fas fa-exclamation-triangle",
+						"session-pagination"
 					);
-					CPManager.state.sessions.all = []; // Reset sessions
+					CPManager.state.sessions.all = [];
 				}
 			} catch (error) {
 				console.error("Error loading sessions:", error);
 				CPManager.ui.showNoDataMessage(
 					CPManager.elements.sessionCardContainer,
 					"Could not load sessions. Please check API connection and OPNsense logs.",
-					"fas fa-exclamation-triangle"
+					"fas fa-exclamation-triangle",
+					"session-pagination"
 				);
-				CPManager.state.sessions.all = []; // Reset sessions
+				CPManager.state.sessions.all = [];
 			}
 		},
 
@@ -128,7 +135,7 @@
 					option.textContent = zone.description || `Zone ${zone.zoneid}`;
 					CPManager.elements.sessionZoneFilterSelect.appendChild(option);
 				});
-				CPManager.elements.sessionZoneFilterSelect.value = currentVal; // Restore last selected value
+				CPManager.elements.sessionZoneFilterSelect.value = currentVal;
 			}
 		},
 
@@ -137,6 +144,7 @@
 		 */
 		applySessionFilters: function () {
 			if (!CPManager.elements.sessionCardContainer) return;
+			CPManager.state.sessions.currentPage = 1; // Reset to first page on filter change
 
 			const searchTerm = CPManager.elements.sessionSearchInput
 				? CPManager.elements.sessionSearchInput.value.toLowerCase()
@@ -174,28 +182,34 @@
 		 */
 		renderSessions: function (sessions) {
 			if (!CPManager.elements.sessionCardContainer) return;
-			CPManager.ui.clearContainer(CPManager.elements.sessionCardContainer);
+			CPManager.ui.clearContainer(CPManager.elements.sessionCardContainer, "session-pagination");
 
 			if (!sessions || !Array.isArray(sessions) || sessions.length === 0) {
 				CPManager.ui.showNoDataMessage(
 					CPManager.elements.sessionCardContainer,
 					"No sessions match filters or no active sessions found.",
-					"fas fa-users-slash"
+					"fas fa-users-slash",
+					"session-pagination"
 				);
 				return;
 			}
 
-			sessions.forEach((session) => {
-				const zoneDesc = CPManager.utils.getZoneDescription(session.zoneid); // Util function
-				const zoneTagColor = CPManager.utils.getZoneColor(session.zoneid); // Util function
-				const readableAuthVia = CPManager.utils.formatAuthVia(session.authenticated_via); // Util function
-				const authViaTagColor = CPManager.utils.getAuthViaColor(readableAuthVia); // Util function
+			const page = CPManager.state.sessions.currentPage;
+			const itemsPerPage = CPManager.config.itemsPerPage;
+			const startIndex = (page - 1) * itemsPerPage;
+			const endIndex = startIndex + itemsPerPage;
+			const paginatedSessions = sessions.slice(startIndex, endIndex);
 
-				// Get MAC address type
+			paginatedSessions.forEach((session) => {
+				const zoneDesc = CPManager.utils.getZoneDescription(session.zoneid);
+				const zoneTagColor = CPManager.utils.getZoneColor(session.zoneid);
+				const readableAuthVia = CPManager.utils.formatAuthVia(session.authenticated_via);
+				const authViaTagColor = CPManager.utils.getAuthViaColor(readableAuthVia);
+
 				const macAddressType = CPManager.utils.getMacAddressType(session.macAddress);
 				let macTypeTagHtml = "";
 				if (macAddressType) {
-					const macTypeTagColor = macAddressType === "device" ? "bg-slate-500" : "bg-purple-500"; // Example colors
+					const macTypeTagColor = macAddressType === "device" ? "bg-slate-500" : "bg-purple-500";
 					const macTypeReadable = macAddressType.charAt(0).toUpperCase() + macAddressType.slice(1);
 					macTypeTagHtml = `<span class="info-tag ${macTypeTagColor} truncate" title="MAC Type: ${macTypeReadable}">${macTypeReadable}</span>`;
 				}
@@ -213,7 +227,6 @@
 				card.className = `session-card p-3 rounded-lg shadow border relative ${
 					isManagerCurrentDeviceSession ? "ring-2 ring-offset-1 ring-blue-500 shadow-lg" : ""
 				}`;
-				// Add ARIA roles and labels for accessibility
 				card.setAttribute("role", "listitem");
 				card.setAttribute("aria-label", `Session for IP ${session.ipAddress || "Unknown IP"}`);
 
@@ -304,7 +317,6 @@
 					disconnectButton.classList.add("btn-danger");
 				}
 
-				// Add event listener for expanding/collapsing card details
 				const summaryElement = card.querySelector(".session-summary");
 				const detailsContent = card.querySelector(".card-details-content");
 				if (summaryElement && detailsContent) {
@@ -314,7 +326,6 @@
 						detailsContent.setAttribute("aria-hidden", !detailsContent.classList.contains("expanded"));
 					});
 					summaryElement.addEventListener("keydown", (e) => {
-						// Keyboard accessibility
 						if (e.key === "Enter" || e.key === " ") {
 							e.preventDefault();
 							CPManager.ui.toggleCardDetails(card, CPManager.elements.sessionCardContainer);
@@ -324,6 +335,16 @@
 					});
 				}
 			});
+			CPManager.ui.renderPaginationControls(
+				CPManager.elements.sessionPaginationContainer,
+				CPManager.state.sessions.currentPage,
+				sessions.length,
+				CPManager.config.itemsPerPage,
+				(newPage) => {
+					CPManager.state.sessions.currentPage = newPage;
+					CPManager.sessions.renderSessions(sessions); // Re-render with the full filtered list
+				}
+			);
 		},
 
 		/**
@@ -347,7 +368,7 @@
 
 			CPManager.ui.showConfirmationModal(title, message, async () => {
 				try {
-					const finalPayload = { sessionId: sessionId }; // OPNsense API might expect just sessionId or more specific structure
+					const finalPayload = { sessionId: sessionId };
 					const result = await CPManager.api.callApi(`/session/disconnect/${zoneId}`, "POST", finalPayload);
 
 					if (
@@ -362,9 +383,10 @@
 							"success"
 						);
 						if (isMySession) {
-							CPManager.state.sessions.managerDetails = null; // Clear manager session details if they disconnected themselves
+							CPManager.state.sessions.managerDetails = null;
 						}
-						await CPManager.sessions.loadSessions(true); // Force refresh the session list
+						CPManager.state.sessions.currentPage = 1; // Reset page before refresh
+						await CPManager.sessions.loadSessions(true);
 					} else {
 						CPManager.ui.showToast(
 							`Failed to disconnect client ${ipAddress}: ${result.message || "Unknown API response."}`,
@@ -372,7 +394,6 @@
 						);
 					}
 				} catch (errorCatch) {
-					// Error already handled by callApi and shown in a toast.
 					console.error("Error during disconnect session attempt:", errorCatch.message);
 				}
 			});
@@ -391,16 +412,14 @@
 				  ].text || `Zone ${selectedZoneId}`
 				: "All Zones";
 
-			let sessionsToDisconnect = CPManager.state.sessions.all; // Start with all sessions currently loaded
+			let sessionsToDisconnect = CPManager.state.sessions.all;
 			if (selectedZoneId) {
-				// Filter by selected zone if any
 				sessionsToDisconnect = sessionsToDisconnect.filter((s) => String(s.zoneid) === selectedZoneId);
 			}
 			const searchTerm = CPManager.elements.sessionSearchInput
 				? CPManager.elements.sessionSearchInput.value.toLowerCase()
 				: "";
 			if (searchTerm) {
-				// Further filter by search term if any
 				sessionsToDisconnect = sessionsToDisconnect.filter(
 					(s) =>
 						(s.ipAddress && s.ipAddress.toLowerCase().includes(searchTerm)) ||
@@ -410,7 +429,6 @@
 				);
 			}
 
-			// Exclude the manager's own session
 			if (CPManager.state.sessions.managerDetails && CPManager.state.sessions.managerDetails.sessionId) {
 				sessionsToDisconnect = sessionsToDisconnect.filter(
 					(s) =>
@@ -488,11 +506,11 @@
 					summaryMessage = `Failed to disconnect any of the ${failureCount} targeted sessions in ${selectedZoneName}. Check console for details.`;
 					CPManager.ui.showToast(summaryMessage, "error", 7000);
 				} else {
-					// successCount === 0 && failureCount === 0 (should not happen if sessionsToDisconnect.length > 0)
 					summaryMessage = `No sessions were processed or an unexpected issue occurred in ${selectedZoneName}.`;
 					CPManager.ui.showToast(summaryMessage, "info");
 				}
-				await CPManager.sessions.loadSessions(true); // Force refresh the session list
+				CPManager.state.sessions.currentPage = 1; // Reset page before refresh
+				await CPManager.sessions.loadSessions(true);
 			});
 		},
 
@@ -500,7 +518,6 @@
 		 * Initializes event listeners for the sessions tab.
 		 */
 		initializeSessionEventListeners: function () {
-			// console.log('Sessions: Initializing event listeners for sessions module.'); // Removed for cleanup
 			if (CPManager.elements.sessionSearchInput) {
 				CPManager.elements.sessionSearchInput.addEventListener("input", CPManager.sessions.applySessionFilters);
 			}
@@ -511,24 +528,22 @@
 				);
 			}
 
-			// Event delegation for disconnect buttons within session cards
 			if (CPManager.elements.sessionCardContainer) {
 				CPManager.elements.sessionCardContainer.addEventListener("click", (e) => {
 					const disconnectButton = e.target.closest('[data-action="disconnect-session"]');
 					if (disconnectButton) {
-						e.stopPropagation(); // Prevent card expansion
+						e.stopPropagation();
 						const sessionId = disconnectButton.dataset.sessionid;
-						const zoneid = disconnectButton.dataset.zoneid; // Corrected: use dataset.zoneid from the button
+						const zoneid = disconnectButton.dataset.zoneid;
 						const ip = disconnectButton.dataset.ip;
 
-						// Find the actual session object to check its zoneid for managerDetails comparison
 						const sessionObject = CPManager.state.sessions.all.find(
 							(s) => s.sessionId === sessionId && String(s.zoneid) === zoneid
 						);
 
 						const isMy =
 							CPManager.state.sessions.managerDetails &&
-							sessionObject && // Ensure sessionObject is found
+							sessionObject &&
 							CPManager.state.sessions.managerDetails.sessionId === sessionId &&
 							String(sessionObject.zoneid) === CPManager.state.sessions.managerDetails.zoneid;
 						CPManager.sessions.handleDisconnectSession(sessionId, zoneid, ip, isMy);
@@ -551,22 +566,22 @@
 							"info"
 						);
 						if (CPManager.elements.sessionZoneFilterSelect)
-							CPManager.elements.sessionZoneFilterSelect.value = ""; // Reset zone filter
+							CPManager.elements.sessionZoneFilterSelect.value = "";
 						if (CPManager.elements.sessionSearchInput)
 							CPManager.elements.sessionSearchInput.value =
-								CPManager.state.sessions.managerDetails.sessionId; // Search by your session ID
+								CPManager.state.sessions.managerDetails.sessionId;
 
 						if (
 							CPManager.elements.tabPanes.sessions &&
 							CPManager.elements.tabPanes.sessions.classList.contains("active")
 						) {
-							// If already on sessions tab, ensure data is loaded (potentially from cache) and then apply filters
-							await CPManager.sessions.loadSessions(); // Ensure sessions are loaded (uses cache by default)
+							CPManager.state.sessions.currentPage = 1; // Reset page
+							await CPManager.sessions.loadSessions();
 							CPManager.sessions.applySessionFilters();
 						} else {
-							CPManager.tabs.setActiveTab("sessions"); // This will trigger loadSessions (which uses cache by default)
+							CPManager.state.sessions.currentPage = 1; // Reset page before switching tab
+							CPManager.tabs.setActiveTab("sessions");
 						}
-						// Scroll to the card after a short delay to allow rendering
 						setTimeout(() => {
 							const highlightedCard = CPManager.elements.sessionCardContainer
 								? CPManager.elements.sessionCardContainer.querySelector(".ring-blue-500")
@@ -580,15 +595,13 @@
 							"Your current session details not found. Attempting to fetch...",
 							"warning"
 						);
-						// Attempt to fetch manager session status again if not found
-						await CPManager.sessions.fetchManagerSessionStatus(); // Made await
+						await CPManager.sessions.fetchManagerSessionStatus();
 						if (!CPManager.state.sessions.managerDetails) {
 							CPManager.ui.showToast(
 								"Still couldn't find your session. Please ensure you are logged into the captive portal.",
 								"warning"
 							);
 						} else {
-							// If found now, re-trigger the find logic
 							CPManager.elements.findMySessionBtn.click();
 						}
 					}

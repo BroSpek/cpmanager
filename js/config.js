@@ -9,7 +9,8 @@ window.CPManager = window.CPManager || {};
 CPManager.config = {
 	baseUrl: null, // Will be populated from app-config.json or localStorage
 	placeholderValue: "—",
-	inMemoryCacheTTLMinutes: 1, // NEW: Default in-memory cache TTL in minutes
+	inMemoryCacheTTLMinutes: 1,
+	itemsPerPage: 6, // Default items per page for pagination
 	predefinedColors: [
 		"bg-pink-500",
 		"bg-purple-500",
@@ -39,15 +40,15 @@ CPManager.config = {
 		authservers: "Auth Servers",
 		alwaysSendAccountingReqs: "RADIUS Accounting",
 		authEnforceGroup: "Enforce Group",
-		idletimeout: "Idle Timeout", // Already exists, but ensure it's used for the new field
-		hardtimeout: "Hard Timeout", // New
-		concurrentlogins: "Concurrent Logins", // New
+		idletimeout: "Idle Timeout",
+		hardtimeout: "Hard Timeout",
+		concurrentlogins: "Concurrent Logins",
 		certificate: "SSL Certificate",
 		servername: "HTTPS Server Name",
 		allowedAddresses: "Allowed IPs",
 		allowedMACAddresses: "Allowed MACs",
 		extendedPreAuthData: "Extended Pre-Auth Data",
-		template: "Login Page Template", // Already exists, ensure it's used for the new field
+		template: "Login Page Template",
 		description: "Description",
 		uuid: "UUID",
 	},
@@ -71,6 +72,7 @@ CPManager.state = {
 		all: [], // Stores all fetched sessions to allow client-side filtering
 		lastFetched: 0, // Timestamp when sessions.all was last fetched
 		managerDetails: null, // Stores details of the current device's session
+		currentPage: 1, // For pagination
 	},
 	vouchers: {
 		current: [], // Stores vouchers for the currently selected group (for rendering)
@@ -80,6 +82,7 @@ CPManager.state = {
 		cachedGroups: {}, // Key: providerId, Value: array of group names
 		cachedGroupsTimestamps: {}, // Key: providerId, Value: timestamp
 		cachedData: {}, // Key: `${providerId}_${groupName}`, Value: { data: array of voucher objects, lastFetched: timestamp }
+		currentPage: 1, // For pagination
 	},
 	zones: {
 		allConfigured: [], // Stores all configured zones (summary data)
@@ -87,6 +90,7 @@ CPManager.state = {
 		originalFullDataForEdit: null, // Stores the full data of the zone being edited
 		customTemplates: [], // To store fetched custom templates
 		customTemplatesLastFetched: 0, // Timestamp for customTemplates
+		currentPage: 1, // For pagination
 	},
 	dashboard: {
 		chartInstance: null, // Holds the Chart.js instance for the data usage donut chart
