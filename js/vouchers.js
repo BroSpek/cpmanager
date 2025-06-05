@@ -3,138 +3,11 @@
 (function (CPManager) {
 	CPManager.vouchers = {
 		/**
-		 * Displays a hint about voucher usage based on zone configurations.
-		 * Lists providers and the zones they are linked to, with correct pluralization.
-		 */
-		displayVoucherUsageHint: async function () {
-			if (!CPManager.elements.voucherHintBox) return;
-
-			CPManager.elements.voucherHintBox.innerHTML =
-				'<div><i class="fas fa-spinner fa-spin mr-2"></i><span>Loading zone authentication info...</span></div>';
-			CPManager.elements.voucherHintBox.className = "hint-box hint-box-info"; // Default to info while loading
-			CPManager.elements.voucherHintBox.classList.remove("hidden");
-
-			try {
-				// Ensure zone summaries and voucher providers are loaded
-				if (CPManager.state.zones.allConfigured.length === 0) {
-					await CPManager.zones.fetchAllZoneData();
-				}
-				if (CPManager.state.vouchers.cachedProviders.length === 0) {
-					console.log("Voucher providers not cached for hint, attempting to load...");
-					await CPManager.vouchers.loadVoucherProviders(false);
-				}
-
-				const configuredVoucherProviders = CPManager.state.vouchers.cachedProviders;
-				const providerToZonesMap = {}; // Key: providerName, Value: Set of zoneName strings
-
-				if (CPManager.state.zones.allConfigured.length > 0) {
-					for (const zoneSummary of CPManager.state.zones.allConfigured) {
-						if (!zoneSummary.uuid) continue;
-						try {
-							const zoneDetailsResponse = await CPManager.api.callApi(
-								`/settings/get_zone/${zoneSummary.uuid}`
-							);
-							if (
-								zoneDetailsResponse &&
-								zoneDetailsResponse.zone &&
-								zoneDetailsResponse.zone.authservers
-							) {
-								const authServersField = zoneDetailsResponse.zone.authservers;
-								let selectedAuthServers = [];
-
-								if (
-									typeof authServersField === "object" &&
-									authServersField !== null &&
-									!Array.isArray(authServersField)
-								) {
-									const formatted = CPManager.utils.formatOpnsenseSelectable(authServersField);
-									if (formatted) {
-										selectedAuthServers = formatted
-											.split(",")
-											.map((s) => s.trim())
-											.filter((s) => s.length > 0);
-									}
-								} else if (typeof authServersField === "string" && authServersField.trim() !== "") {
-									selectedAuthServers = authServersField
-										.split(",")
-										.map((s) => s.trim())
-										.filter((s) => s.length > 0);
-								} else if (Array.isArray(authServersField)) {
-									selectedAuthServers = authServersField
-										.map((s) => String(s).trim())
-										.filter((s) => s.length > 0);
-								}
-
-								const zoneName = zoneSummary.description || `Zone ${zoneSummary.zoneid}`;
-
-								selectedAuthServers.forEach((serverName) => {
-									if (configuredVoucherProviders.includes(serverName)) {
-										if (!providerToZonesMap[serverName]) {
-											providerToZonesMap[serverName] = new Set();
-										}
-										providerToZonesMap[serverName].add(zoneName);
-									}
-								});
-							}
-						} catch (detailError) {
-							console.warn(
-								`Could not fetch details for zone ${zoneSummary.uuid} for hint: ${detailError.message}`
-							);
-						}
-					}
-				}
-
-				const providersActuallyUsedByZones = Object.keys(providerToZonesMap).filter(
-					(providerName) => providerToZonesMap[providerName].size > 0
-				);
-
-				if (providersActuallyUsedByZones.length === 0) {
-					CPManager.elements.voucherHintBox.className = "hint-box hint-box-warning";
-					CPManager.elements.voucherHintBox.innerHTML = `
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <div><strong>Warning:</strong> No captive portal zones are currently configured to use any of the available Voucher authentication servers. Vouchers generated here may not be usable until a zone is configured appropriately in OPNsense (Services > Captive Portal > Administration > Edit Zone > Authentication method) to use one of the listed Voucher Providers.</div>
-                    `;
-				} else {
-					CPManager.elements.voucherHintBox.className = "hint-box hint-box-info";
-					let listItems = providersActuallyUsedByZones
-						.map((providerName) => {
-							const zonesSet = providerToZonesMap[providerName];
-							const zoneCount = zonesSet.size;
-							const zoneNoun = zoneCount === 1 ? "zone" : "zones";
-							const zonesList = Array.from(zonesSet)
-								.map((zn) => `<strong>"${zn}"</strong>`)
-								.join(", ");
-							return `<li>Provider <strong>"${providerName}"</strong> is currently linked to ${zoneCount} ${zoneNoun}: ${zonesList}.</li>`;
-						})
-						.join("");
-					CPManager.elements.voucherHintBox.innerHTML = `
-                        <i class="fas fa-info-circle"></i>
-                        <div>Voucher provider linkage:<ul>${listItems}</ul>Ensure these providers are of type "Vouchers" in OPNsense (System > Access > Servers) and linked to the desired zones.</div>
-                    `;
-				}
-			} catch (error) {
-				console.error("Error displaying voucher usage hint:", error);
-				CPManager.elements.voucherHintBox.className = "hint-box hint-box-warning";
-				CPManager.elements.voucherHintBox.innerHTML = `
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div>Could not determine zone authentication configurations. Please check API connectivity.</div>
-                `;
-			}
-			CPManager.elements.voucherHintBox.classList.remove("hidden");
-		},
-
-		/**
 		 * Loads voucher providers from the API and populates the provider selection dropdown.
 		 * @param {boolean} [forceRefresh=false] - If true, forces a re-fetch even if data exists.
 		 */
 		loadVoucherProviders: async function (forceRefresh = false) {
 			if (!CPManager.elements.voucherProviderSelect) return;
-
-			const displayHintAfterProviders = async () => {
-				if (typeof CPManager.vouchers.displayVoucherUsageHint === "function") {
-					await CPManager.vouchers.displayVoucherUsageHint();
-				}
-			};
 
 			if (!forceRefresh && CPManager.state.vouchers.cachedProviders.length > 0) {
 				console.log("Using cached voucher providers.");
@@ -142,7 +15,6 @@
 				if (CPManager.elements.voucherProviderSelect.value) {
 					CPManager.vouchers.handleProviderSelection(CPManager.elements.voucherProviderSelect.value);
 				}
-				await displayHintAfterProviders();
 				return;
 			}
 
@@ -153,7 +25,6 @@
 			if (CPManager.elements.voucherCardContainer)
 				CPManager.ui.clearContainer(CPManager.elements.voucherCardContainer);
 			CPManager.ui.disableVoucherActionButtons(true, true, true);
-			if (CPManager.elements.voucherHintBox) CPManager.elements.voucherHintBox.classList.add("hidden");
 
 			try {
 				const providers = await CPManager.api.callApi("/voucher/list_providers");
@@ -176,7 +47,6 @@
 					'<option value="">Error loading providers.</option>';
 				console.error("Exception in loadVoucherProviders:", error);
 			} finally {
-				await displayHintAfterProviders();
 			}
 		},
 
