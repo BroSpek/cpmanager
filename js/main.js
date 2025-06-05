@@ -605,26 +605,64 @@
 				});
 			}
 
-			// Listener for the notifications toggle button
+			// Listener for the notifications toggle button with long-press
 			const notificationsToggleBtn = document.getElementById("notifications-toggle-btn");
 			if (notificationsToggleBtn) {
-				notificationsToggleBtn.addEventListener("click", () => {
+				let longPressTimer;
+				let longPressFired = false;
+				const LONG_PRESS_DURATION = 750; // milliseconds
+
+				const handleShortClick = () => {
+					// Original click action
 					if (CPManager.state.notifications.sessionPollIntervalId) {
 						CPManager.notifications.stopSessionPolling();
-						CPManager.notifications.updateNotificationToggleState(false);
+						CPManager.notifications.updateNotificationToggleState(false); // Corrected: removed second argument
 						CPManager.ui.showToast("Sign-in notifications disabled.", "info");
 					} else {
 						CPManager.notifications.requestNotificationPermission();
 					}
-				});
+				};
+
+				const startPress = (event) => {
+					event.preventDefault(); 
+					longPressFired = false;
+					longPressTimer = setTimeout(() => {
+						longPressFired = true;
+						// Check if notifications are conceptually enabled before sending a test
+						// The aria-label "Disable sign-in notifications" means the icon is currently 'bell' (enabled)
+						if (notificationsToggleBtn.getAttribute("aria-label") === "Disable sign-in notifications") {
+							CPManager.app.handleSendTestNotification();
+						} else {
+							CPManager.ui.showToast("Please enable notifications first to send a test.", "warning");
+						}
+					}, LONG_PRESS_DURATION);
+				};
+
+				const endPress = (event) => {
+					event.preventDefault();
+					clearTimeout(longPressTimer);
+					if (!longPressFired) {
+						handleShortClick();
+					}
+					longPressFired = false;
+				};
+				
+				const cancelPress = () => {
+					clearTimeout(longPressTimer);
+					longPressFired = false;
+				}
+
+				// Mouse events
+				notificationsToggleBtn.addEventListener("mousedown", startPress);
+				notificationsToggleBtn.addEventListener("mouseup", endPress);
+				notificationsToggleBtn.addEventListener("mouseleave", cancelPress); 
+
+				// Touch events
+				notificationsToggleBtn.addEventListener("touchstart", startPress, { passive: false }); 
+				notificationsToggleBtn.addEventListener("touchend", endPress);
+				notificationsToggleBtn.addEventListener("touchcancel", cancelPress); 
 			}
 
-			// START: New listener for the Test Notification button
-			const testNotificationBtn = document.getElementById("test-notification-btn");
-			if (testNotificationBtn) {
-				testNotificationBtn.addEventListener("click", CPManager.app.handleSendTestNotification);
-			}
-			// END: New listener
 
 			// Call module-specific event initializers, assuming they also handle their own element checks
 			if (CPManager.sessions && typeof CPManager.sessions.initializeSessionEventListeners === "function") {
@@ -672,7 +710,7 @@
 					) {
 						el.disabled = false;
 					} else if (isSaveCredsBtn) {
-						el.disabled = true;
+						el.disabled = true; // Keep save button disabled if already configured and showing main app
 					}
 				});
 				if (CPManager.elements.mainTabs) {
@@ -751,6 +789,7 @@
 		 * Handles sending a test notification.
 		 */
 		handleSendTestNotification: async function () {
+			console.log("Attempting to send test notification..."); // Debug log
 			if (!("Notification" in window)) {
 				CPManager.ui.showToast("This browser does not support desktop notifications.", "error");
 				return;
@@ -764,8 +803,9 @@
 			let permission = Notification.permission;
 
 			if (permission === "default") {
+				// We should await the permission request result before proceeding
 				await CPManager.notifications.requestNotificationPermission();
-				permission = Notification.permission;
+				permission = Notification.permission; // Update permission status
 			}
 
 			if (permission === "granted") {
@@ -773,7 +813,7 @@
 					title: "Test Notification",
 					body: "If you see this, notifications are working!",
 					icon: "icons/icon-192x192.png",
-					id: `test-${new Date().getTime()}`,
+					id: `test-${new Date().getTime()}`, // Unique ID for the test notification
 				};
 
 				navigator.serviceWorker.controller.postMessage({
