@@ -131,8 +131,8 @@
 				<div class="stat-label">Configured Zones</div>
 			</div>
 			<div class="stat-card interactive" id="dashboard-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
-				<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-2 items-center">
-					<div class="voucher-stat-card-inner mb-2 sm:mb-0">
+				<div class="grid grid-cols-2 gap-x-2 items-center">
+					<div class="voucher-stat-card-inner mb-0">
 						<div class="stat-value">${totalVouchers}</div>
 						<div class="stat-label">Total Vouchers</div>
 					</div>

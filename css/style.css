@@ -489,7 +489,7 @@ dataUsageCanvasContainer > .new-canvas-wrapper > canvas {
 	gap: 0.5rem; /* gap-2 */
 	margin-top: 0.75rem; /* mt-3 */
 }
-@media (min-width: 640px) {
+@media (min-width: 1280px) {
 	/* sm breakpoint */
 	.chart-legend {
 		flex-direction: row;
