@@ -175,7 +175,13 @@
 				await CPManager.vouchers.displayProviderZoneLinkage();
 			}
 
-			if (!forceRefresh && CPManager.state.vouchers.cachedProviders.length > 0) {
+			// MODIFIED: Add timestamp check for cache validity
+			if (
+				!forceRefresh &&
+				CPManager.state.vouchers.cachedProviders.length > 0 &&
+				Date.now() - CPManager.state.vouchers.lastFetchedProviders <
+					CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
+			) {
 				console.log("Using cached voucher providers.");
 				CPManager.vouchers.populateVoucherProviderSelect(CPManager.state.vouchers.cachedProviders);
 				if (CPManager.elements.voucherProviderSelect.value) {
@@ -196,6 +202,7 @@
 				const providers = await CPManager.api.callApi("/voucher/list_providers");
 				if (providers && Array.isArray(providers)) {
 					CPManager.state.vouchers.cachedProviders = providers;
+					CPManager.state.vouchers.lastFetchedProviders = Date.now(); // NEW: Store timestamp
 					CPManager.vouchers.populateVoucherProviderSelect(providers);
 					// If linkage card is expanded, and providers were freshly loaded (implicitly due to not using cache path or forceRefresh),
 					// refresh its content. This ensures data consistency.
@@ -299,10 +306,13 @@
 			}
 
 			const cacheKey = providerId;
+			// MODIFIED: Add timestamp check for cache validity
 			if (
 				!forceRefresh &&
 				CPManager.state.vouchers.cachedGroups[cacheKey] &&
-				CPManager.state.vouchers.cachedGroups[cacheKey].length > 0
+				CPManager.state.vouchers.cachedGroupsTimestamps[cacheKey] &&
+				Date.now() - CPManager.state.vouchers.cachedGroupsTimestamps[cacheKey] <
+					CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
 			) {
 				console.log(`Using cached voucher groups for provider ${providerId}.`);
 				CPManager.vouchers.populateVoucherGroupSelect(
@@ -332,6 +342,7 @@
 				const groups = await CPManager.api.callApi(`/voucher/list_voucher_groups/${providerId}`);
 				if (groups && Array.isArray(groups)) {
 					CPManager.state.vouchers.cachedGroups[cacheKey] = groups;
+					CPManager.state.vouchers.cachedGroupsTimestamps[cacheKey] = Date.now(); // NEW: Store timestamp
 					CPManager.vouchers.populateVoucherGroupSelect(providerId, groups);
 				} else {
 					CPManager.state.vouchers.cachedGroups[cacheKey] = [];
@@ -434,9 +445,15 @@
 			}
 
 			const cacheKey = `${providerId}_${groupName}`;
-			if (!forceRefresh && CPManager.state.vouchers.cachedData[cacheKey]) {
+			// MODIFIED: Add timestamp check for cache validity
+			if (
+				!forceRefresh &&
+				CPManager.state.vouchers.cachedData[cacheKey] &&
+				Date.now() - CPManager.state.vouchers.cachedData[cacheKey].lastFetched <
+					CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
+			) {
 				console.log(`Using cached vouchers for group ${groupName} (Provider: ${providerId}).`);
-				CPManager.state.vouchers.current = CPManager.state.vouchers.cachedData[cacheKey];
+				CPManager.state.vouchers.current = CPManager.state.vouchers.cachedData[cacheKey].data;
 				CPManager.vouchers.renderVouchers(CPManager.state.vouchers.current, groupName);
 				if (CPManager.state.vouchers.current.length === 0) {
 					CPManager.ui.showNoDataMessage(
@@ -453,7 +470,11 @@
 			try {
 				const vouchers = await CPManager.api.callApi(`/voucher/list_vouchers/${providerId}/${groupName}`);
 				if (vouchers && Array.isArray(vouchers)) {
-					CPManager.state.vouchers.cachedData[cacheKey] = vouchers;
+					// MODIFIED: Store data with timestamp
+					CPManager.state.vouchers.cachedData[cacheKey] = {
+						data: vouchers,
+						lastFetched: Date.now(),
+					};
 					CPManager.state.vouchers.current = vouchers;
 					CPManager.vouchers.renderVouchers(CPManager.state.vouchers.current, groupName);
 					if (vouchers.length === 0) {
@@ -464,7 +485,7 @@
 						);
 					}
 				} else {
-					CPManager.state.vouchers.cachedData[cacheKey] = [];
+					CPManager.state.vouchers.cachedData[cacheKey] = { data: [], lastFetched: 0 }; // Initialize with empty data and 0 timestamp on error/unexpected format
 					CPManager.state.vouchers.current = [];
 					CPManager.vouchers.renderVouchers([], groupName);
 					console.error(
@@ -478,7 +499,7 @@
 					);
 				}
 			} catch (error) {
-				CPManager.state.vouchers.cachedData[cacheKey] = [];
+				CPManager.state.vouchers.cachedData[cacheKey] = { data: [], lastFetched: 0 }; // Initialize with empty data and 0 timestamp on error
 				CPManager.state.vouchers.current = [];
 				CPManager.vouchers.renderVouchers([], groupName);
 				CPManager.ui.showNoDataMessage(
@@ -524,12 +545,10 @@
 				voucher.username
 			}">
 				<div class="info-row"><span class="info-label">Voucher Code</span><span class="info-value summary-main-value">${
-						voucher.username
-					}</span></div>
+					voucher.username
+				}</span></div>
 			</div>
-			<div class="card-details-content text-sm space-y-1" id="voucher-details-${
-				voucher.username
-			}" aria-hidden="true">
+			<div class="card-details-content text-sm space-y-1" id="voucher-details-${voucher.username}" aria-hidden="true">
 				<div class="info-row"><span class="info-label">Validity</span> <span class="info-value">${CPManager.utils.formatDuration(
 					voucher.validity,
 					"seconds"
@@ -1071,6 +1090,7 @@
 									);
 							}
 							delete CPManager.state.vouchers.cachedData[`${selectedProvider}_${selectedGroup}`];
+							delete CPManager.state.vouchers.cachedGroupsTimestamps[selectedProvider]; // NEW: Remove timestamp for groups
 
 							await CPManager.vouchers.loadVoucherGroups(selectedProvider, true);
 							if (CPManager.elements.voucherCardContainer)

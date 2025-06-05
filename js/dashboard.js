@@ -28,11 +28,15 @@
 			let voucherStats = null;
 			let totalZonesCount = 0;
 
-			// Try to use cached data if not forcing refresh
+			// MODIFIED: Add timestamp checks for cached data validity
 			if (
 				!forceRefresh &&
 				CPManager.state.dashboard.apiDataCache.sessions &&
-				CPManager.state.dashboard.apiDataCache.voucherStats !== null
+				Date.now() - CPManager.state.dashboard.apiDataCache.sessionsLastFetched <
+					CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000 &&
+				CPManager.state.dashboard.apiDataCache.voucherStats !== null &&
+				Date.now() - CPManager.state.dashboard.apiDataCache.voucherStatsLastFetched <
+					CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
 			) {
 				console.log("Using cached dashboard API data.");
 				sessionDataRows = CPManager.state.dashboard.apiDataCache.sessions;
@@ -66,10 +70,16 @@
 
 			try {
 				// Fetch data only if not available in cache or if forced
-				if (!sessionDataRows || forceRefresh) {
+				if (
+					!sessionDataRows ||
+					forceRefresh ||
+					Date.now() - CPManager.state.dashboard.apiDataCache.sessionsLastFetched >=
+						CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
+				) {
 					const sessionData = await CPManager.api.callApi("/session/search");
 					sessionDataRows = sessionData && Array.isArray(sessionData.rows) ? sessionData.rows : [];
-					CPManager.state.dashboard.apiDataCache.sessions = sessionDataRows; // Cache it
+					CPManager.state.dashboard.apiDataCache.sessions = sessionDataRows;
+					CPManager.state.dashboard.apiDataCache.sessionsLastFetched = Date.now(); // NEW: Store timestamp
 				}
 
 				if (CPManager.state.zones.allConfigured.length === 0 && totalZonesCount === 0) {
@@ -79,7 +89,12 @@
 				totalZonesCount = CPManager.state.zones.allConfigured.length;
 
 				// Fetch voucher statistics only if not available in cache or if forced
-				if (!voucherStats || forceRefresh) {
+				if (
+					!voucherStats ||
+					forceRefresh ||
+					Date.now() - CPManager.state.dashboard.apiDataCache.voucherStatsLastFetched >=
+						CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
+				) {
 					let totalVouchers = 0,
 						activeVouchers = 0;
 					try {
@@ -107,7 +122,8 @@
 						CPManager.ui.showToast("Could not load all voucher statistics for dashboard.", "warning");
 					}
 					voucherStats = { totalVouchers, activeVouchers };
-					CPManager.state.dashboard.apiDataCache.voucherStats = voucherStats; // Cache it
+					CPManager.state.dashboard.apiDataCache.voucherStats = voucherStats;
+					CPManager.state.dashboard.apiDataCache.voucherStatsLastFetched = Date.now(); // NEW: Store timestamp
 				}
 
 				const activeSessionCount = sessionDataRows.length;
@@ -231,23 +247,23 @@
 						CPManager.state.dashboard.chartInstance.update();
 					} else {
 						// Create it.
-						const chartData = {
-							labels: ["Client Upload", "Client Download"],
-							datasets: [
-								{
-									data: chartDataValues,
-									backgroundColor: ["#3B82F6", "#10B981"], // blue-500, green-500
-									hoverBackgroundColor: ["#2563EB", "#059669"], // blue-600, green-600
-									borderColor: chartBorderColor,
-									borderWidth: 2,
-									hoverBorderWidth: 3,
-									hoverOffset: 8,
-								},
-							],
-						};
-						const chartConfig = {
+						const ctx = CPManager.elements.dataUsageCanvas.getContext("2d");
+						CPManager.state.dashboard.chartInstance = new Chart(ctx, {
 							type: "doughnut",
-							data: chartData,
+							data: {
+								labels: ["Client Upload", "Client Download"],
+								datasets: [
+									{
+										data: chartDataValues,
+										backgroundColor: ["#3B82F6", "#10B981"], // blue-500, green-500
+										hoverBackgroundColor: ["#2563EB", "#059669"], // blue-600, green-600
+										borderColor: chartBorderColor,
+										borderWidth: 2,
+										hoverBorderWidth: 3,
+										hoverOffset: 8,
+									},
+								],
+							},
 							options: {
 								responsive: true,
 								maintainAspectRatio: false,
@@ -288,9 +304,7 @@
 									},
 								},
 							},
-						};
-						const ctx = CPManager.elements.dataUsageCanvas.getContext("2d");
-						CPManager.state.dashboard.chartInstance = new Chart(ctx, chartConfig);
+						});
 					}
 				} else {
 					console.log("Dashboard chart data unchanged, not re-rendering chart.");
@@ -302,7 +316,10 @@
 				if (CPManager.elements.donutTotalData)
 					CPManager.elements.donutTotalData.textContent = CPManager.config.placeholderValue;
 				// Clear cache on significant error
-				CPManager.state.dashboard.apiDataCache = { sessions: null, voucherStats: null };
+				CPManager.state.dashboard.apiDataCache.sessions = null;
+				CPManager.state.dashboard.apiDataCache.sessionsLastFetched = 0;
+				CPManager.state.dashboard.apiDataCache.voucherStats = null;
+				CPManager.state.dashboard.apiDataCache.voucherStatsLastFetched = 0;
 			}
 		},
 
@@ -353,9 +370,7 @@
 					<span style="color: ${segmentColor}; font-weight: bold; display: block; font-size: 1.2em;">${CPManager.utils.formatBytes(
 							segmentValue
 						)}</span>
-					<span style="font-size: 0.8em;" class="${segmentPercentageColor}">(${segmentPercentage.toFixed(
-							1
-						)}%)</span>
+					<span style="font-size: 0.8em;" class="${segmentPercentageColor}">(${segmentPercentage.toFixed(1)}%)</span>
 				`;
 					}
 				});

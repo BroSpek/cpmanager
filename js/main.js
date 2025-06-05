@@ -192,11 +192,29 @@
 				const appConfigData = await response.json();
 				if (appConfigData.apiBaseUrl) {
 					CPManager.config.baseUrl = appConfigData.apiBaseUrl;
-					console.log("Application configuration loaded. API Base URL set to:", CPManager.config.baseUrl);
 				} else {
 					console.warn("apiBaseUrl not found in app-config.json. Will rely on user input for API Base URL.");
 					CPManager.config.baseUrl = ""; // Set to empty if key is missing in the JSON
 				}
+				// NEW: Load inMemoryCacheTTLMinutes from app-config.json
+				if (
+					appConfigData.inMemoryCacheTTLMinutes !== undefined &&
+					typeof appConfigData.inMemoryCacheTTLMinutes === "number"
+				) {
+					CPManager.config.inMemoryCacheTTLMinutes = appConfigData.inMemoryCacheTTLMinutes;
+					console.log(
+						"Application configuration loaded. In-memory cache TTL set to:",
+						CPManager.config.inMemoryCacheTTLMinutes,
+						"minutes."
+					);
+				} else {
+					console.warn(
+						"inMemoryCacheTTLMinutes not found or invalid in app-config.json. Using default:",
+						CPManager.config.inMemoryCacheTTLMinutes,
+						"minutes."
+					);
+				}
+				console.log("Application configuration loaded. API Base URL set to:", CPManager.config.baseUrl);
 			} catch (error) {
 				console.error(
 					"Error loading application configuration (JSON parse error or network issue):",
@@ -525,7 +543,7 @@
 					(reconfigResult.status === "ok" ||
 						(reconfigResult.message && reconfigResult.message.toLowerCase().includes("ok")))
 				) {
-					CPManager.ui.showToast("Captive Portal service reconfigured successfully.", "success");
+					CPManager.ui.showToast("Captive portal service reconfigured successfully.", "success");
 				} else {
 					const errorDetail = reconfigResult
 						? reconfigResult.status || reconfigResult.message || JSON.stringify(reconfigResult)
@@ -624,7 +642,7 @@
 				};
 
 				const startPress = (event) => {
-					event.preventDefault(); 
+					event.preventDefault();
 					longPressFired = false;
 					longPressTimer = setTimeout(() => {
 						longPressFired = true;
@@ -646,23 +664,22 @@
 					}
 					longPressFired = false;
 				};
-				
+
 				const cancelPress = () => {
 					clearTimeout(longPressTimer);
 					longPressFired = false;
-				}
+				};
 
 				// Mouse events
 				notificationsToggleBtn.addEventListener("mousedown", startPress);
 				notificationsToggleBtn.addEventListener("mouseup", endPress);
-				notificationsToggleBtn.addEventListener("mouseleave", cancelPress); 
+				notificationsToggleBtn.addEventListener("mouseleave", cancelPress);
 
 				// Touch events
-				notificationsToggleBtn.addEventListener("touchstart", startPress, { passive: false }); 
+				notificationsToggleBtn.addEventListener("touchstart", startPress, { passive: false });
 				notificationsToggleBtn.addEventListener("touchend", endPress);
-				notificationsToggleBtn.addEventListener("touchcancel", cancelPress); 
+				notificationsToggleBtn.addEventListener("touchcancel", cancelPress);
 			}
-
 
 			// Call module-specific event initializers, assuming they also handle their own element checks
 			if (CPManager.sessions && typeof CPManager.sessions.initializeSessionEventListeners === "function") {

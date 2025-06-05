@@ -8,10 +8,12 @@
 		 * @param {boolean} [forceRefresh=false] - If true, forces a re-fetch even if data exists.
 		 */
 		fetchAllZoneData: async function (forceRefresh = false) {
+			// MODIFIED: Add timestamp check for cache validity
 			if (
 				!forceRefresh &&
 				CPManager.state.zones.allConfigured.length > 0 &&
-				CPManager.state.zones.allConfigured[0].description !== undefined
+				CPManager.state.zones.allConfigured[0].description !== undefined &&
+				Date.now() - CPManager.state.zones.lastFetched < CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
 			) {
 				return;
 			}
@@ -19,6 +21,7 @@
 				const data = await CPManager.api.callApi("/settings/search_zones"); // Endpoint for zone summaries
 				if (data && Array.isArray(data.rows)) {
 					CPManager.state.zones.allConfigured = data.rows;
+					CPManager.state.zones.lastFetched = Date.now(); // NEW: Store timestamp
 				} else {
 					CPManager.state.zones.allConfigured = []; // Reset if data is not as expected
 					console.warn("No zones found or unexpected data format from /settings/search_zones.", data);
@@ -35,13 +38,20 @@
 		 * @param {boolean} [forceRefresh=false] - If true, forces a re-fetch.
 		 */
 		fetchCustomTemplates: async function (forceRefresh = false) {
-			if (!forceRefresh && CPManager.state.zones.customTemplates.length > 0) {
+			// MODIFIED: Add timestamp check for cache validity
+			if (
+				!forceRefresh &&
+				CPManager.state.zones.customTemplates.length > 0 &&
+				Date.now() - CPManager.state.zones.customTemplatesLastFetched <
+					CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
+			) {
 				return;
 			}
 			try {
 				const data = await CPManager.api.callApi("/service/search_templates");
 				if (data && Array.isArray(data.rows)) {
 					CPManager.state.zones.customTemplates = data.rows;
+					CPManager.state.zones.customTemplatesLastFetched = Date.now(); // NEW: Store timestamp
 				} else {
 					CPManager.state.zones.customTemplates = [];
 					console.warn("No custom templates found or unexpected data format.", data);
@@ -104,15 +114,15 @@
 					zoneSummary.uuid
 				}">
 					<div class="info-row"><span class="info-label">Name</span><span class="info-value summary-main-value">${
-							zoneSummary.description || `Unnamed Zone (ID: ${zoneSummary.zoneid})`
-						}</span></div>
+						zoneSummary.description || `Unnamed Zone (ID: ${zoneSummary.zoneid})`
+					}</span></div>
 					<div class="info-row"><span class="info-label">Zone ID</span><span class="info-value summary-main-value">${
-							zoneSummary.zoneid
-						}</span></div>
+						zoneSummary.zoneid
+					}</span></div>
 					<div class="info-row"><span class="info-label">Short UUID</span><span class="info-value summary-main-value">${zoneSummary.uuid.substring(
-							0,
-							8
-						)}...</span></div>
+						0,
+						8
+					)}...</span></div>
 				</div>
 				<div class="card-details-content text-sm space-y-1" id="zone-details-${
 					zoneSummary.uuid

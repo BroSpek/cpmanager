@@ -21,7 +21,6 @@
 			<div class="container mx-auto flex justify-between items-center">
 				<h1 class="text-xl font-semibold"><i class="fas fa-shield-alt mr-2"></i>Captive Portal Manager</h1>
 				<div class="flex items-center space-x-2">
-					<!-- Test notification button removed -->
 					<button
 						id="notifications-toggle-btn"
 						class="p-2 rounded-md focus:outline-none"
@@ -197,11 +196,11 @@
 								</select>
 							</div>
 						</div>
-						<div id="session-action-btn" class="mb-4 flex flex-col sm:flex-row gap-4 sm:items-baseline">
-							<button id="find-my-session-btn" class="btn btn-info w-full sm:w-auto">
-								<i class="fas fa-street-view mr-2"></i>Find My Session
+						<div id="session-action-btn" class="mb-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+							<button id="find-my-session-btn" class="btn btn-info w-full">
+								<i class="fas fa-street-view mr-2"></i>My Session
 							</button>
-							<button id="disconnect-all-sessions-btn" class="btn btn-danger w-full sm:w-auto">
+							<button id="disconnect-all-sessions-btn" class="btn btn-danger w-full">
 								<i class="fas fa-broadcast-tower mr-2"></i>Disconnect All
 							</button>
 						</div>
@@ -257,21 +256,19 @@
 								</select>
 							</div>
 						</div>
-						<div id="voucher-action-btn" class="mb-4 flex flex-col sm:flex-row gap-4">
-							<button id="create-vouchers-btn" class="btn btn-primary w-full sm:w-auto whitespace-nowrap">
-								<i class="fas fa-plus-circle mr-2"></i>Create New Vouchers
+						<div id="voucher-action-btn" class="mb-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+							<button id="create-vouchers-btn" class="btn btn-primary w-full whitespace-nowrap">
+								<i class="fas fa-plus-circle mr-2"></i>Create New
+							</button>
+							<button id="drop-expired-vouchers-btn" class="btn btn-warning w-full">
+								<i class="fas fa-trash-alt mr-2"></i>Drop Expired
+							</button>
+							<button id="drop-voucher-group-btn" class="btn btn-danger w-full">
+								<i class="fas fa-trash-alt mr-2"></i>Drop Group
 							</button>
 						</div>
 						<div id="voucher-card-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 							<div class="skeleton-card"></div>
-						</div>
-						<div id="voucher-group-actions" class="mt-4 flex flex-col sm:flex-row gap-4">
-							<button id="drop-expired-vouchers-btn" class="btn btn-warning w-full sm:w-auto">
-								<i class="fas fa-trash-alt mr-2"></i>Drop Expired Vouchers
-							</button>
-							<button id="drop-voucher-group-btn" class="btn btn-danger w-full sm:w-auto">
-								<i class="fas fa-trash-alt mr-2"></i>Drop Voucher Group
-							</button>
 						</div>
 					</div>
 
@@ -279,13 +276,13 @@
 						<h2 class="text-2xl font-semibold flex items-center mb-4">
 							<i class="fas fa-layer-group mr-3 text-blue-600 dark:text-blue-400"></i>Zone Management
 						</h2>
-						<div id="zone-action-container" class="mb-4 flex flex-col sm:flex-row gap-4">
+						<div id="zone-action-container" class="mb-4 grid grid-cols-2 md:grid-cols-4 gap-4">
 							<button
 								id="apply-cp-config-btn"
-								class="btn btn-success w-full sm:w-auto"
+								class="btn btn-success w-full"
 								title="Apply Captive Portal Configuration"
 							>
-								<i class="fas fa-rotate mr-2"></i>Apply Configuration
+								<i class="fas fa-rotate mr-2"></i>Apply
 							</button>
 						</div>
 						<div id="zone-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">

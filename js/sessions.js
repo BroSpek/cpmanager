@@ -70,7 +70,12 @@
 			}
 			CPManager.sessions.populateSessionZoneFilter(); // Populate filters regardless of session data cache
 
-			if (!forceRefresh && CPManager.state.sessions.all.length > 0) {
+			// MODIFIED: Add timestamp check for cache validity
+			if (
+				!forceRefresh &&
+				CPManager.state.sessions.all.length > 0 &&
+				Date.now() - CPManager.state.sessions.lastFetched < CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
+			) {
 				console.log("Using cached sessions. Applying filters.");
 				CPManager.sessions.applySessionFilters(); // Re-render from existing data
 				return;
@@ -82,6 +87,7 @@
 				const data = await CPManager.api.callApi("/session/search"); // API call
 				if (data && Array.isArray(data.rows)) {
 					CPManager.state.sessions.all = data.rows;
+					CPManager.state.sessions.lastFetched = Date.now(); // NEW: Store timestamp
 					CPManager.sessions.applySessionFilters(); // Filter and render
 				} else {
 					console.error(
@@ -240,12 +246,8 @@
 					}</span></div>
 				</div>
 			</div>
-			<div class="card-details-content text-sm space-y-1" id="session-details-${
-				session.sessionId
-			}" aria-hidden="true">
-				<div class="info-row"><span class="info-label">Zone ID</span> <span class="info-value">${
-					session.zoneid
-				}</span></div>
+			<div class="card-details-content text-sm space-y-1" id="session-details-${session.sessionId}" aria-hidden="true">
+				<div class="info-row"><span class="info-label">Zone ID</span> <span class="info-value">${session.zoneid}</span></div>
 				<div class="info-row"><span class="info-label">Session ID</span> <span class="info-value">${
 					session.sessionId || CPManager.config.placeholderValue
 				}</span></div>
