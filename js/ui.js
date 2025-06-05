@@ -288,11 +288,11 @@
 		showNoDataMessage: function (container, message = "No data available.", iconClass = "fas fa-info-circle") {
 			if (container) {
 				container.innerHTML = `
-            <div class="text-center p-4 text-gray-500">
-                <i class="${iconClass} fa-3x mb-2"></i>
-                <p>${message}</p>
-            </div>
-        `;
+			<div class="text-center p-4 text-gray-500">
+				<i class="${iconClass} fa-3x mb-2"></i>
+				<p>${message}</p>
+			</div>
+		`;
 			}
 		},
 	};
