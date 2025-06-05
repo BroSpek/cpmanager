@@ -62,6 +62,8 @@
 	--config-input-section-bg: #fef3c7; /* yellow-100 */
 	--config-input-section-border: #fbbf24; /* yellow-500 */
 	--config-input-section-text: #b45309; /* yellow-700 */
+
+	--placeholder-text-color: #9ca3af; /* text-gray-400 */
 }
 
 .dark-mode {
@@ -123,6 +125,8 @@
 	--config-input-section-bg: #374151; /* gray-700, example, adjust as needed */
 	--config-input-section-border: #4b5563; /* gray-600 */
 	--config-input-section-text: #fde047; /* yellow-300 */
+
+	--placeholder-text-color: #6b7280; /* Tailwind gray-500 for dark mode */
 }
 
 html {
@@ -378,12 +382,10 @@ body {
 
 /* Placeholder text styling */
 .placeholder-text {
-	color: #9ca3af; /* text-gray-400 - this is Tailwind gray-400, might need a variable if different in dark mode */
+	color: var(--placeholder-text-color);
 	font-style: italic;
 }
-.dark-mode .placeholder-text {
-	color: #6b7280; /* Example: Tailwind gray-500 for dark mode */
-}
+/* .dark-mode .placeholder-text is handled by the --placeholder-text-color variable in .dark-mode scope */
 
 /* Skeleton card styling for loading states */
 .skeleton-card {

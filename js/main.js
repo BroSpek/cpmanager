@@ -18,7 +18,6 @@
 				document.body.classList.remove("dark-mode");
 			}
 
-			// Update theme toggle button icon based on the selected theme preference
 			if (CPManager.elements.themeToggleBtn) {
 				CPManager.elements.themeToggleBtn.innerHTML =
 					theme === "light"
@@ -40,8 +39,8 @@
 		/**
 		 * Function to toggle the theme between light, dark, and system.
 		 */
-		toggleTheme: function () {
-			const currentThemeSetting = localStorage.getItem("theme") || "system"; // Default to system
+		toggleTheme: async function () {
+			const currentThemeSetting = localStorage.getItem(CPManager.config.localStorageKeys.theme) || "system";
 			let newThemeSetting;
 
 			if (currentThemeSetting === "light") {
@@ -53,26 +52,13 @@
 				newThemeSetting = "light";
 			}
 
-			localStorage.setItem("theme", newThemeSetting);
+			localStorage.setItem(CPManager.config.localStorageKeys.theme, newThemeSetting);
 			CPManager.app.applyTheme(newThemeSetting);
 
-			// Re-initialize chart if it exists, as its colors might depend on the effectively applied theme
-			if (
-				CPManager.state.dashboard.chartInstance &&
-				typeof CPManager.dashboard.loadDashboardData === "function"
-			) {
-				console.log("Theme setting changed, re-loading dashboard data for chart update.");
-				if (CPManager.state.dashboard.chartInstance) {
-					CPManager.state.dashboard.chartInstance.destroy();
-					CPManager.state.dashboard.chartInstance = null;
-				}
-				if (typeof CPManager.dashboard.storeOriginalChartData === "function") {
-					CPManager.dashboard.storeOriginalChartData(0, 0, 0); // Resetting with zeros
-				}
-				CPManager.state.dashboard.apiDataCache.sessions = null; // Force re-fetch
-				CPManager.state.dashboard.apiDataCache.voucherStats = null; // Force re-fetch
-
-				CPManager.dashboard.loadDashboardData(true); // Force refresh dashboard data
+			// Refresh dashboard chart due to theme change
+			if (CPManager.dashboard && typeof CPManager.dashboard.handleThemeChange === "function") {
+				console.log("Theme setting changed by toggle, triggering dashboard theme handler.");
+				await CPManager.dashboard.handleThemeChange();
 			}
 		},
 
@@ -80,46 +66,27 @@
 		 * Function to load the saved theme from localStorage.
 		 */
 		loadTheme: function () {
-			const savedTheme = localStorage.getItem("theme") || "system"; // Default to system
+			const savedTheme = localStorage.getItem(CPManager.config.localStorageKeys.theme) || "system";
 			CPManager.app.applyTheme(savedTheme);
 
-			// Listener for system theme changes if "system" is selected
 			if (savedTheme === "system") {
 				const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-				darkModeMediaQuery.addEventListener("change", () => {
-					if (localStorage.getItem("theme") === "system") {
+				darkModeMediaQuery.addEventListener("change", async () => {
+					if (localStorage.getItem(CPManager.config.localStorageKeys.theme) === "system") {
 						CPManager.app.applyTheme("system");
-						// Optionally, refresh chart if visual aspects change significantly
-						if (
-							CPManager.state.dashboard.chartInstance &&
-							typeof CPManager.dashboard.loadDashboardData === "function"
-						) {
-							console.log("System theme changed, re-loading dashboard data for chart update.");
-							if (CPManager.state.dashboard.chartInstance) {
-								CPManager.state.dashboard.chartInstance.destroy();
-								CPManager.state.dashboard.chartInstance = null;
-							}
-							if (typeof CPManager.dashboard.storeOriginalChartData === "function") {
-								CPManager.dashboard.storeOriginalChartData(0, 0, 0);
-							}
-							CPManager.state.dashboard.apiDataCache.sessions = null;
-							CPManager.state.dashboard.apiDataCache.voucherStats = null;
-
-							CPManager.dashboard.loadDashboardData(true);
+						if (CPManager.dashboard && typeof CPManager.dashboard.handleThemeChange === "function") {
+							console.log("System theme preference changed, triggering dashboard theme handler.");
+							await CPManager.dashboard.handleThemeChange();
 						}
 					}
 				});
 			}
 		},
 
-		/**
-		 * Function to control the UI mode for credential entry.
-		 * @param {boolean} isEntryMode - True to show credential entry UI, false to show normal app UI.
-		 */
 		setCredentialEntryUIMode: function (isEntryMode) {
 			const navElement = document.querySelector("nav");
 			const mainTabsContainerElement = CPManager.elements.mainTabs?.closest(".mb-4.border-b");
-			const tabContentElement = CPManager.elements.tabPanes.dashboard?.closest(".p-4.rounded-lg.shadow"); // Get parent of any tab pane
+			const tabContentElement = CPManager.elements.tabPanes.dashboard?.closest(".p-4.rounded-lg.shadow");
 			const footerElement = document.querySelector("footer");
 			const configInputSection = CPManager.elements.configInputSection;
 			const mainContentScrollAreaElement = document.getElementById("main-content-scroll-area");
@@ -130,29 +97,26 @@
 				if (tabContentElement) tabContentElement.style.display = "none";
 				if (footerElement) footerElement.style.display = "none";
 
-				if (configInputSection) {
-					configInputSection.classList.remove("hidden");
-				}
+				if (configInputSection) configInputSection.classList.remove("hidden");
 				if (mainContentScrollAreaElement) {
 					mainContentScrollAreaElement.style.display = "flex";
 					mainContentScrollAreaElement.style.flexDirection = "column";
 					mainContentScrollAreaElement.style.alignItems = "center";
 					mainContentScrollAreaElement.style.justifyContent = "center";
-					mainContentScrollAreaElement.style.minHeight = "calc(100vh)"; // Full viewport height
+					mainContentScrollAreaElement.style.minHeight = "calc(100vh)";
 					mainContentScrollAreaElement.style.padding = "1rem";
 					mainContentScrollAreaElement.style.backgroundColor = "var(--bg-color)";
 				}
 				if (configInputSection) {
 					configInputSection.style.maxWidth = "500px";
 					configInputSection.style.width = "100%";
-					configInputSection.style.marginTop = "0"; // Reset margin due to flex centering
-					configInputSection.style.marginBottom = "auto"; // Helps with centering
-					// Ensure the config section itself has a light background if body theme is dark
+					configInputSection.style.marginTop = "0";
+					configInputSection.style.marginBottom = "auto";
 					configInputSection.style.backgroundColor = "var(--config-input-section-bg)";
 					configInputSection.style.color = "var(--config-input-section-text)";
 				}
 			} else {
-				if (navElement) navElement.style.display = ""; // Revert to stylesheet's display
+				if (navElement) navElement.style.display = "";
 				if (mainTabsContainerElement) mainTabsContainerElement.style.display = "";
 				if (tabContentElement) tabContentElement.style.display = "";
 				if (footerElement) footerElement.style.display = "";
@@ -171,14 +135,11 @@
 					mainContentScrollAreaElement.style.justifyContent = "";
 					mainContentScrollAreaElement.style.minHeight = "";
 					mainContentScrollAreaElement.style.padding = "";
-					mainContentScrollAreaElement.style.backgroundColor = ""; // Revert to themed background
+					mainContentScrollAreaElement.style.backgroundColor = "";
 				}
 			}
 		},
 
-		/**
-		 * Loads application configuration from `app-config.json`.
-		 */
 		loadAppConfiguration: async function () {
 			try {
 				const response = await fetch("./app-config.json");
@@ -186,7 +147,7 @@
 					console.warn(
 						`Failed to fetch app-config.json: ${response.status} ${response.statusText}. Will rely on user input for API Base URL.`
 					);
-					CPManager.config.baseUrl = ""; // Explicitly set to empty string if file not found/parseable
+					CPManager.config.baseUrl = "";
 					return;
 				}
 				const appConfigData = await response.json();
@@ -194,7 +155,7 @@
 					CPManager.config.baseUrl = appConfigData.apiBaseUrl;
 				} else {
 					console.warn("apiBaseUrl not found in app-config.json. Will rely on user input for API Base URL.");
-					CPManager.config.baseUrl = ""; // Set to empty if key is missing in the JSON
+					CPManager.config.baseUrl = "";
 				}
 
 				if (
@@ -202,83 +163,57 @@
 					typeof appConfigData.inMemoryCacheTTLMinutes === "number"
 				) {
 					CPManager.config.inMemoryCacheTTLMinutes = appConfigData.inMemoryCacheTTLMinutes;
-				} else {
-					console.warn(
-						"inMemoryCacheTTLMinutes not found or invalid in app-config.json. Using default:",
-						CPManager.config.inMemoryCacheTTLMinutes
-					);
 				}
-
 				if (
 					appConfigData.itemsPerPage !== undefined &&
 					typeof appConfigData.itemsPerPage === "number" &&
 					appConfigData.itemsPerPage > 0
 				) {
 					CPManager.config.itemsPerPage = appConfigData.itemsPerPage;
-				} else {
-					console.warn(
-						"itemsPerPage not found or invalid in app-config.json. Using default:",
-						CPManager.config.itemsPerPage
-					);
 				}
 				console.log(
-					"Application configuration loaded. API Base URL:",
+					"App config loaded. API Base URL:",
 					CPManager.config.baseUrl,
 					"Cache TTL:",
 					CPManager.config.inMemoryCacheTTLMinutes,
-					"min.",
 					"Items/Page:",
 					CPManager.config.itemsPerPage
 				);
 			} catch (error) {
-				console.error(
-					"Error loading application configuration (JSON parse error or network issue):",
-					error.message
-				);
+				console.error("Error loading app configuration:", error.message);
 				CPManager.config.baseUrl = "";
 				if (CPManager.elements.apiStatusFooterText) {
 					CPManager.elements.apiStatusFooterText.textContent = "App Config Load Failed!";
 					CPManager.elements.apiStatusFooterText.className = "font-semibold text-red-500 dark:text-red-400";
 				}
 				CPManager.ui.showToast(
-					`Warning: App configuration file failed to load. Please enter API Base URL manually. Error: ${error.message}`,
+					`Warning: App configuration file failed to load. Error: ${error.message}`,
 					"warning",
 					10000
 				);
 			}
 		},
 
-		/**
-		 * Registers the service worker for PWA features and notifications.
-		 */
 		registerServiceWorker: function () {
 			if ("serviceWorker" in navigator) {
 				navigator.serviceWorker
 					.register("./sw.js")
-					.then((reg) => {
-						console.log("Service worker registered successfully:", reg.scope);
-					})
-					.catch((err) => {
-						console.error("Service worker registration failed:", err);
-					});
+					.then((reg) => console.log("Service worker registered:", reg.scope))
+					.catch((err) => console.error("Service worker registration failed:", err));
 				let refreshing;
 				navigator.serviceWorker.addEventListener("controllerchange", () => {
 					if (refreshing) return;
-					console.log("Service Worker: Controller changed. Page will reload.");
 					window.location.reload();
 					refreshing = true;
 				});
 			}
 		},
 
-		/**
-		 * Loads API credentials (key, secret, base URL) from local storage.
-		 */
 		loadApiCredentials: function () {
-			CPManager.state.currentApiKey = localStorage.getItem("opnsenseApiKey") || "";
-			CPManager.state.currentApiSecret = localStorage.getItem("opnsenseApiSecret") || "";
-			// Load API Base URL from local storage, if available
-			CPManager.config.baseUrl = localStorage.getItem("opnsenseApiBaseUrl") || CPManager.config.baseUrl || ""; // Prioritize stored, then existing, then empty
+			CPManager.state.currentApiKey = localStorage.getItem(CPManager.config.localStorageKeys.apiKey) || "";
+			CPManager.state.currentApiSecret = localStorage.getItem(CPManager.config.localStorageKeys.apiSecret) || "";
+			CPManager.config.baseUrl =
+				localStorage.getItem(CPManager.config.localStorageKeys.apiBaseUrl) || CPManager.config.baseUrl || "";
 
 			if (CPManager.elements.configApiKeyInput)
 				CPManager.elements.configApiKeyInput.value = CPManager.state.currentApiKey;
@@ -288,9 +223,6 @@
 				CPManager.elements.configApiBaseUrlInput.value = CPManager.config.baseUrl;
 		},
 
-		/**
-		 * Saves API credentials and base URL to local storage.
-		 */
 		saveApiCredentials: async function () {
 			if (
 				!CPManager.elements.configApiKeyInput ||
@@ -310,44 +242,26 @@
 			try {
 				new URL(CPManager.config.baseUrl);
 			} catch (e) {
-				CPManager.ui.showToast(
-					"Invalid OPNsense API Base URL format. Please enter a valid URL (e.g., https://192.168.1.1).",
-					"error"
-				);
+				CPManager.ui.showToast("Invalid OPNsense API Base URL format.", "error");
 				return;
 			}
 
 			if (CPManager.state.currentApiKey && CPManager.state.currentApiSecret) {
 				try {
-					localStorage.setItem("opnsenseApiKey", CPManager.state.currentApiKey);
-					localStorage.setItem("opnsenseApiSecret", CPManager.state.currentApiSecret);
-					localStorage.setItem("opnsenseApiBaseUrl", CPManager.config.baseUrl);
-					CPManager.ui.showToast("API credentials and Base URL saved to browser local storage.", "success");
+					localStorage.setItem(CPManager.config.localStorageKeys.apiKey, CPManager.state.currentApiKey);
+					localStorage.setItem(CPManager.config.localStorageKeys.apiSecret, CPManager.state.currentApiSecret);
+					localStorage.setItem(CPManager.config.localStorageKeys.apiBaseUrl, CPManager.config.baseUrl);
+					CPManager.ui.showToast("API credentials and Base URL saved.", "success");
 
-					await CPManager.app.initializeAppLogic(); // This re-evaluates connection and UI state
+					await CPManager.app.initializeAppLogic();
+					let currentActiveTabId =
+						localStorage.getItem(CPManager.config.localStorageKeys.activeTab) || "dashboard";
+					if (!CPManager.elements.tabPanes[currentActiveTabId]) currentActiveTabId = "dashboard";
 
-					let currentActiveTabId = "dashboard";
-					try {
-						const savedTab = localStorage.getItem("activeHelpdeskTab");
-						if (savedTab && CPManager.elements.tabPanes[savedTab]) {
-							currentActiveTabId = savedTab;
-						}
-					} catch (e) {
-						console.warn(
-							"localStorage access error for active tab during credential save refresh:",
-							e.message
-						);
-					}
-
-					console.log(
-						`saveApiCredentials: Forcing refresh for tab: ${currentActiveTabId} after saving credentials.`
-					);
+					console.log(`saveApiCredentials: Forcing refresh for tab: ${currentActiveTabId}`);
 					CPManager.tabs.setActiveTab(currentActiveTabId, true);
 				} catch (e) {
-					CPManager.ui.showToast(
-						"Failed to save credentials to local storage. Storage might be full or disabled.",
-						"error"
-					);
+					CPManager.ui.showToast("Failed to save to local storage.", "error");
 					console.error("Error saving to localStorage:", e);
 				}
 			} else {
@@ -355,25 +269,22 @@
 			}
 		},
 
-		/**
-		 * Clears API credentials from local storage and resets UI.
-		 */
 		clearApiCredentials: function () {
 			try {
-				localStorage.removeItem("opnsenseApiKey");
-				localStorage.removeItem("opnsenseApiSecret");
-				localStorage.removeItem("opnsenseApiBaseUrl");
+				localStorage.removeItem(CPManager.config.localStorageKeys.apiKey);
+				localStorage.removeItem(CPManager.config.localStorageKeys.apiSecret);
+				localStorage.removeItem(CPManager.config.localStorageKeys.apiBaseUrl);
 			} catch (e) {
 				console.error("Error clearing localStorage:", e);
 			}
 			CPManager.state.currentApiKey = "";
 			CPManager.state.currentApiSecret = "";
-			CPManager.config.baseUrl = "";
+			CPManager.config.baseUrl = ""; // Also clear the runtime config
 			if (CPManager.elements.configApiKeyInput) CPManager.elements.configApiKeyInput.value = "";
 			if (CPManager.elements.configApiSecretInput) CPManager.elements.configApiSecretInput.value = "";
 			if (CPManager.elements.configApiBaseUrlInput) CPManager.elements.configApiBaseUrlInput.value = "";
 
-			CPManager.ui.showToast("API credentials cleared from local storage.", "info");
+			CPManager.ui.showToast("API credentials cleared.", "info");
 			CPManager.app.setCredentialEntryUIMode(true);
 
 			document.querySelectorAll("button").forEach((el) => {
@@ -393,16 +304,15 @@
 				)
 				.forEach((el) => (el.disabled = true));
 
-			if (CPManager.elements.mainTabs) {
+			if (CPManager.elements.mainTabs)
 				CPManager.elements.mainTabs
 					.querySelectorAll(".tab-btn")
 					.forEach((btn) => (btn.style.pointerEvents = "none"));
-			}
 			if (CPManager.elements.apiStatusFooterText) {
 				CPManager.elements.apiStatusFooterText.textContent = "Credentials Cleared";
 				CPManager.elements.apiStatusFooterText.className = "font-semibold text-yellow-500 dark:text-yellow-400";
 			}
-
+			// Clear all data related UI elements
 			if (CPManager.elements.sessionCardContainer)
 				CPManager.ui.clearContainer(CPManager.elements.sessionCardContainer, "session-pagination");
 			if (CPManager.elements.voucherCardContainer)
@@ -415,12 +325,11 @@
 			if (CPManager.state.dashboard.chartInstance) {
 				CPManager.state.dashboard.chartInstance.destroy();
 				CPManager.state.dashboard.chartInstance = null;
-				CPManager.state.dashboard.apiDataCache = { sessions: null, voucherStats: null };
-				CPManager.dashboard.storeOriginalChartData(0, 0, 0);
 			}
 			if (CPManager.elements.donutTotalData)
 				CPManager.elements.donutTotalData.textContent = CPManager.config.placeholderValue;
 
+			// Reset states
 			CPManager.state.sessions.all = [];
 			CPManager.state.sessions.currentPage = 1;
 			CPManager.state.vouchers.cachedProviders = [];
@@ -429,23 +338,17 @@
 			CPManager.state.vouchers.currentPage = 1;
 			CPManager.state.zones.allConfigured = [];
 			CPManager.state.zones.currentPage = 1;
+			CPManager.state.dashboard.apiDataCache = { sessions: null, voucherStats: null };
+			CPManager.dashboard.storeOriginalChartData(0, 0, 0);
 		},
 
-		/**
-		 * Checks API status and configuration, updates UI accordingly.
-		 * @returns {Promise<boolean>} True if connected and configured, false otherwise.
-		 */
 		checkApiStatusAndConfig: async function () {
 			if (!CPManager.config.baseUrl) {
 				if (CPManager.elements.apiStatusFooterText) {
 					CPManager.elements.apiStatusFooterText.textContent = "API Base URL Missing!";
 					CPManager.elements.apiStatusFooterText.className = "font-semibold text-red-500 dark:text-red-400";
 				}
-				CPManager.ui.showToast(
-					"Critical: OPNsense API Base URL is missing. Please configure it.",
-					"error",
-					10000
-				);
+				CPManager.ui.showToast("OPNsense API Base URL is missing.", "error", 10000);
 				CPManager.app.setCredentialEntryUIMode(true);
 				document
 					.querySelectorAll(
@@ -471,7 +374,6 @@
 						"font-semibold text-yellow-500 dark:text-yellow-400";
 				}
 				CPManager.app.setCredentialEntryUIMode(true);
-
 				document
 					.querySelectorAll(
 						'button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"]):not(#theme-toggle-btn)'
@@ -492,10 +394,11 @@
 			CPManager.app.setCredentialEntryUIMode(false);
 
 			try {
-				await CPManager.zones.fetchAllZoneData();
+				await CPManager.zones.fetchAllZoneData(); // This has its own caching and error handling for API calls
 				const initialCheckData = CPManager.state.zones.allConfigured;
 
 				if (Array.isArray(initialCheckData)) {
+					// Check if data is array (even if empty)
 					if (CPManager.elements.apiStatusFooterText) {
 						CPManager.elements.apiStatusFooterText.textContent = "Connected";
 						CPManager.elements.apiStatusFooterText.className =
@@ -512,10 +415,7 @@
 						"Initial API check (fetchAllZoneData) returned unexpected data format:",
 						initialCheckData
 					);
-					CPManager.ui.showToast(
-						"API connection check returned unexpected data. App might not function correctly.",
-						"warning"
-					);
+					CPManager.ui.showToast("API connection check returned unexpected data.", "warning");
 					return false;
 				}
 			} catch (error) {
@@ -526,30 +426,17 @@
 				console.error("Initial API check (fetchAllZoneData) failed:", error.message);
 				if (error.message.includes("401") || error.message.includes("Unauthorized")) {
 					CPManager.app.setCredentialEntryUIMode(true);
-					CPManager.ui.showToast(
-						"API authentication failed. Please check your API Key and Secret.",
-						"error",
-						10000
-					);
+					CPManager.ui.showToast("API authentication failed. Check API Key/Secret.", "error", 10000);
 				} else if (error.message.includes("Failed to fetch")) {
-					CPManager.ui.showToast(
-						"Cannot reach OPNsense API. Please check your Base URL, network, and CORS settings.",
-						"error",
-						10000
-					);
+					CPManager.ui.showToast("Cannot reach OPNsense API. Check Base URL & CORS.", "error", 10000);
 					CPManager.app.setCredentialEntryUIMode(true);
 				}
 				return false;
 			}
 		},
 
-		/**
-		 * Handles the click of the global "Apply Captive Portal Configuration" button.
-		 * Calls the service/reconfigure endpoint.
-		 */
 		handleApplyCpConfiguration: async function () {
 			if (!CPManager.elements.applyCpConfigBtn) return;
-
 			const originalButtonText = CPManager.elements.applyCpConfigBtn.innerHTML;
 			CPManager.elements.applyCpConfigBtn.disabled = true;
 			CPManager.elements.applyCpConfigBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Applying...';
@@ -567,8 +454,7 @@
 					const errorDetail = reconfigResult
 						? reconfigResult.status || reconfigResult.message || JSON.stringify(reconfigResult)
 						: "Unknown response";
-					CPManager.ui.showToast(`Service reconfigure attempt finished. Status: ${errorDetail}`, "warning");
-					console.warn('Reconfigure result not explicitly "ok":', reconfigResult);
+					CPManager.ui.showToast(`Service reconfigure status: ${errorDetail}`, "warning");
 				}
 			} catch (error) {
 				console.error("Error during manual reconfigure call:", error.message);
@@ -578,37 +464,23 @@
 			}
 		},
 
-		/**
-		 * Initializes all static event listeners for the application.
-		 */
 		initializeAllEventListeners: function () {
-			// Verify CPManager.elements is an object before accessing its properties
 			if (!CPManager || typeof CPManager.elements !== "object" || CPManager.elements === null) {
-				console.error("CPManager.elements is not properly initialized. Cannot attach event listeners.");
-				return; // Prevent further errors
+				console.error("CPManager.elements not initialized. Cannot attach listeners.");
+				return;
 			}
 
-			if (CPManager.elements.themeToggleBtn) {
+			if (CPManager.elements.themeToggleBtn)
 				CPManager.elements.themeToggleBtn.addEventListener("click", CPManager.app.toggleTheme);
-			}
-
 			if (CPManager.elements.saveApiCredsBtn)
 				CPManager.elements.saveApiCredsBtn.addEventListener("click", CPManager.app.saveApiCredentials);
-
 			if (CPManager.elements.clearApiCredsBtn)
 				CPManager.elements.clearApiCredsBtn.addEventListener("click", CPManager.app.clearApiCredentials);
-
 			if (CPManager.elements.applyCpConfigBtn)
 				CPManager.elements.applyCpConfigBtn.addEventListener("click", CPManager.app.handleApplyCpConfiguration);
+			if (CPManager.elements.mainTabs) CPManager.tabs.initializeTabs();
+			else console.warn("Main tabs container not found for event listener init.");
 
-			// Call initializeTabs only if mainTabs element is available
-			if (CPManager.elements.mainTabs) {
-				CPManager.tabs.initializeTabs();
-			} else {
-				console.warn("Main tabs container (mainTabs) not found. Tabs functionality may be limited.");
-			}
-
-			// Confirmation Modal Buttons
 			if (CPManager.elements.confirmationModal && CPManager.elements.confirmCancelBtn) {
 				CPManager.elements.confirmCancelBtn.addEventListener("click", () => {
 					CPManager.ui.hideModal(CPManager.elements.confirmationModal);
@@ -623,169 +495,115 @@
 				});
 			}
 
-			// Generic cancel button handler for modals
 			const cancelButtons = document.querySelectorAll('.modal [id^="cancel-"]');
-			if (cancelButtons) {
-				cancelButtons.forEach((btn) => {
-					if (btn && btn.dataset.specificHandlerAttached !== "true") {
-						btn.addEventListener("click", () => {
-							const modal = btn.closest(".modal");
-							if (modal) {
-								CPManager.ui.hideModal(modal);
-								if (modal.id === "editZoneModal" && CPManager.state.zones.originalFullDataForEdit) {
-									CPManager.state.zones.originalFullDataForEdit = null;
-								}
+			cancelButtons.forEach((btn) => {
+				if (btn && btn.dataset.specificHandlerAttached !== "true") {
+					btn.addEventListener("click", () => {
+						const modal = btn.closest(".modal");
+						if (modal) {
+							CPManager.ui.hideModal(modal);
+							if (modal.id === "editZoneModal" && CPManager.state.zones.originalFullDataForEdit) {
+								CPManager.state.zones.originalFullDataForEdit = null;
 							}
-						});
-						btn.dataset.specificHandlerAttached = "true";
-					}
-				});
-			}
+						}
+					});
+					btn.dataset.specificHandlerAttached = "true";
+				}
+			});
 
-			// Listener for the notifications toggle button with long-press
 			const notificationsToggleBtn = document.getElementById("notifications-toggle-btn");
 			if (notificationsToggleBtn) {
 				let longPressTimer;
 				let longPressFired = false;
-				const LONG_PRESS_DURATION = 750; // milliseconds
-
+				const LONG_PRESS_DURATION = 750;
 				const handleShortClick = () => {
-					// Original click action
 					if (CPManager.state.notifications.sessionPollIntervalId) {
 						CPManager.notifications.stopSessionPolling();
-						CPManager.notifications.updateNotificationToggleState(false); // Corrected: removed second argument
+						CPManager.notifications.updateNotificationToggleState(false);
 						CPManager.ui.showToast("Sign-in notifications disabled.", "info");
 					} else {
 						CPManager.notifications.requestNotificationPermission();
 					}
 				};
-
 				const startPress = (event) => {
 					event.preventDefault();
 					longPressFired = false;
 					longPressTimer = setTimeout(() => {
 						longPressFired = true;
-						// Check if notifications are conceptually enabled before sending a test
-						// The aria-label "Disable sign-in notifications" means the icon is currently 'bell' (enabled)
 						if (notificationsToggleBtn.getAttribute("aria-label") === "Disable sign-in notifications") {
 							CPManager.app.handleSendTestNotification();
 						} else {
-							CPManager.ui.showToast("Please enable notifications first to send a test.", "warning");
+							CPManager.ui.showToast("Enable notifications first to send a test.", "warning");
 						}
 					}, LONG_PRESS_DURATION);
 				};
-
 				const endPress = (event) => {
 					event.preventDefault();
 					clearTimeout(longPressTimer);
-					if (!longPressFired) {
-						handleShortClick();
-					}
+					if (!longPressFired) handleShortClick();
 					longPressFired = false;
 				};
-
 				const cancelPress = () => {
 					clearTimeout(longPressTimer);
 					longPressFired = false;
 				};
-
-				// Mouse events
 				notificationsToggleBtn.addEventListener("mousedown", startPress);
 				notificationsToggleBtn.addEventListener("mouseup", endPress);
 				notificationsToggleBtn.addEventListener("mouseleave", cancelPress);
-
-				// Touch events
 				notificationsToggleBtn.addEventListener("touchstart", startPress, { passive: false });
 				notificationsToggleBtn.addEventListener("touchend", endPress);
 				notificationsToggleBtn.addEventListener("touchcancel", cancelPress);
 			}
 
-			// Call module-specific event initializers, assuming they also handle their own element checks
-			if (CPManager.sessions && typeof CPManager.sessions.initializeSessionEventListeners === "function") {
+			if (CPManager.sessions && CPManager.sessions.initializeSessionEventListeners)
 				CPManager.sessions.initializeSessionEventListeners();
-			} else {
-				console.warn("Sessions module or its initializer not found.");
-			}
-
-			if (CPManager.vouchers && typeof CPManager.vouchers.initializeVoucherEventListeners === "function") {
+			if (CPManager.vouchers && CPManager.vouchers.initializeVoucherEventListeners)
 				CPManager.vouchers.initializeVoucherEventListeners();
-			} else {
-				console.warn("Vouchers module or its initializer not found.");
-			}
-
-			if (CPManager.zones && typeof CPManager.zones.initializeZoneEventListeners === "function") {
+			if (CPManager.zones && CPManager.zones.initializeZoneEventListeners)
 				CPManager.zones.initializeZoneEventListeners();
-			} else {
-				console.warn("Zones module or its initializer not found.");
-			}
-
-			if (CPManager.dashboard && typeof CPManager.dashboard.initializeDashboardEventListeners === "function") {
+			if (CPManager.dashboard && CPManager.dashboard.initializeDashboardEventListeners)
 				CPManager.dashboard.initializeDashboardEventListeners();
-			} else {
-				console.warn("Dashboard module or its initializer not found.");
-			}
 		},
 
-		/**
-		 * Core application logic after initial setup. Checks API, loads data, sets active tab.
-		 */
 		initializeAppLogic: async function () {
 			const connected = await CPManager.app.checkApiStatusAndConfig();
-
 			if (connected) {
 				document.querySelectorAll("button, input, select").forEach((el) => {
-					const isConfigBaseUrl = el.id === "config-api-base-url";
-					const isConfigKey = el.id === "config-api-key";
-					const isConfigSecret = el.id === "config-api-secret";
-					const isSaveCredsBtn = el === CPManager.elements.saveApiCredsBtn;
-
+					const isConfigEl = el.id.startsWith("config-api-") || el === CPManager.elements.saveApiCredsBtn;
 					if (
-						!(isConfigKey || isConfigSecret || isConfigBaseUrl || isSaveCredsBtn) ||
+						!isConfigEl ||
 						el === CPManager.elements.clearApiCredsBtn ||
 						el === CPManager.elements.themeToggleBtn
 					) {
 						el.disabled = false;
-					} else if (isSaveCredsBtn) {
-						el.disabled = true; // Keep save button disabled if already configured and showing main app
+					} else if (el === CPManager.elements.saveApiCredsBtn) {
+						el.disabled = true; // Keep save disabled if configured and in main app view
 					}
 				});
-				if (CPManager.elements.mainTabs) {
+				if (CPManager.elements.mainTabs)
 					CPManager.elements.mainTabs
 						.querySelectorAll(".tab-btn")
 						.forEach((btn) => (btn.style.pointerEvents = "auto"));
-				}
 				if (CPManager.elements.clearApiCredsBtn) CPManager.elements.clearApiCredsBtn.disabled = false;
 				if (CPManager.elements.themeToggleBtn) CPManager.elements.themeToggleBtn.disabled = false;
 
 				await CPManager.sessions.fetchManagerSessionStatus();
 				CPManager.ui.disableVoucherActionButtons(false, true, true);
 
-				let initialTab = "dashboard";
-
+				let initialTab = localStorage.getItem(CPManager.config.localStorageKeys.activeTab) || "dashboard";
 				const hashTab = window.location.hash.substring(1);
 				if (hashTab && CPManager.elements.tabPanes[hashTab]) {
 					initialTab = hashTab;
-					if (window.history.replaceState) {
+					if (window.history.replaceState)
 						window.history.replaceState(null, null, window.location.pathname + window.location.search);
-					}
-				} else {
-					try {
-						const savedTab = localStorage.getItem("activeHelpdeskTab");
-						if (savedTab && CPManager.elements.tabPanes[savedTab]) {
-							initialTab = savedTab;
-						}
-					} catch (e) {
-						console.warn("localStorage access error for active tab:", e.message);
-					}
 				}
+				if (!CPManager.elements.tabPanes[initialTab]) initialTab = "dashboard"; // Fallback
 
 				CPManager.tabs.setActiveTab(initialTab, false);
-				// Initialize pagination resize handler
-				if (CPManager.ui && typeof CPManager.ui.initializeResizeHandler === "function") {
-					CPManager.ui.initializeResizeHandler();
-				}
+				if (CPManager.ui && CPManager.ui.initializeResizeHandler) CPManager.ui.initializeResizeHandler();
 				CPManager.notifications.initializeNotifications();
 			} else {
+				// Ensure all non-config buttons/inputs are disabled if not connected
 				document
 					.querySelectorAll(
 						'button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"]):not(#theme-toggle-btn)'
@@ -796,112 +614,98 @@
 						"input:not(#config-api-key):not(#config-api-secret):not(#config-api-base-url), select"
 					)
 					.forEach((el) => (el.disabled = true));
-
-				if (CPManager.elements.mainTabs) {
+				if (CPManager.elements.mainTabs)
 					CPManager.elements.mainTabs
 						.querySelectorAll(".tab-btn")
 						.forEach((btn) => (btn.style.pointerEvents = "none"));
-				}
+
+				// Enable only necessary config buttons
 				if (CPManager.elements.saveApiCredsBtn) CPManager.elements.saveApiCredsBtn.disabled = false;
 				if (CPManager.elements.clearApiCredsBtn) CPManager.elements.clearApiCredsBtn.disabled = false;
 				if (CPManager.elements.themeToggleBtn) CPManager.elements.themeToggleBtn.disabled = false;
-
 				if (CPManager.elements.applyCpConfigBtn) CPManager.elements.applyCpConfigBtn.disabled = true;
 
 				const dashboardPane = CPManager.elements.tabPanes.dashboard;
-				if (dashboardPane && !CPManager.config.baseUrl) {
-					if (CPManager.elements.tabPanes)
-						Object.values(CPManager.elements.tabPanes).forEach((pane) => {
-							if (pane) {
-								pane.classList.add("hidden");
-								pane.classList.remove("active");
-							}
-						});
+				if (
+					dashboardPane &&
+					!CPManager.config.baseUrl &&
+					document.querySelector("#config-input-section.hidden")
+				) {
+					// Check if config section is hidden implying app thought it was configured
+					Object.values(CPManager.elements.tabPanes).forEach((pane) => {
+						if (pane) {
+							pane.classList.add("hidden");
+							pane.classList.remove("active");
+						}
+					});
 					dashboardPane.classList.remove("hidden");
 					dashboardPane.classList.add("active");
-					dashboardPane.innerHTML = `<div class="text-center p-8 text-red-500 dark:text-red-400"><i class="fas fa-exclamation-triangle fa-3x mb-3"></i><p>Application configuration (app-config.json) failed to load. Cannot connect.</p></div>`;
+					dashboardPane.innerHTML = `<div class="text-center p-8 text-red-500 dark:text-red-400"><i class="fas fa-exclamation-triangle fa-3x mb-3"></i><p>App config failed to load. Cannot connect.</p></div>`;
 				}
 			}
 		},
 
-		/**
-		 * Handles sending a test notification.
-		 */
 		handleSendTestNotification: async function () {
-			console.log("Attempting to send test notification..."); // Debug log
 			if (!("Notification" in window)) {
-				CPManager.ui.showToast("This browser does not support desktop notifications.", "error");
+				CPManager.ui.showToast("Browser does not support notifications.", "error");
 				return;
 			}
-
 			if (!navigator.serviceWorker.controller) {
-				CPManager.ui.showToast("Service worker is not active. Cannot send notification.", "warning");
+				CPManager.ui.showToast("Service worker not active.", "warning");
 				return;
 			}
-
 			let permission = Notification.permission;
-
 			if (permission === "default") {
-				// We should await the permission request result before proceeding
 				await CPManager.notifications.requestNotificationPermission();
-				permission = Notification.permission; // Update permission status
+				permission = Notification.permission;
 			}
-
 			if (permission === "granted") {
-				const testPayload = {
-					title: "Test Notification",
-					body: "If you see this, notifications are working!",
-					icon: "icons/icon-192x192.png",
-					id: `test-${new Date().getTime()}`, // Unique ID for the test notification
-				};
-
 				navigator.serviceWorker.controller.postMessage({
 					type: "SHOW_NOTIFICATION",
-					payload: testPayload,
+					payload: {
+						title: "Test Notification",
+						body: "Notifications are working!",
+						icon: "icons/icon-192x192.png",
+						id: `test-${Date.now()}`,
+					},
 				});
 				CPManager.ui.showToast("Test notification sent!", "success");
 			} else if (permission === "denied") {
 				CPManager.ui.showToast(
-					"Notification permission has been denied. Please enable it in your browser settings.",
+					"Notification permission denied. Please enable in browser settings.",
 					"error",
 					7000
 				);
 			}
 		},
 
-		/**
-		 * Initializes the entire application.
-		 */
 		initializeApp: async function () {
 			CPManager.app.loadTheme();
 			try {
-				await CPManager.app.loadAppConfiguration();
-				CPManager.app.loadApiCredentials();
-				CPManager.app.initializeAllEventListeners();
-				CPManager.app.registerServiceWorker();
-				await CPManager.app.initializeAppLogic(); // This will now also call initializeResizeHandler
+				await CPManager.app.loadAppConfiguration(); // Must complete before loading credentials that might depend on it
+				CPManager.app.loadApiCredentials(); // Load credentials after base URL might be set from config
+				CPManager.app.initializeAllEventListeners(); // Setup listeners
+				CPManager.app.registerServiceWorker(); // Register SW
+				await CPManager.app.initializeAppLogic(); // Check connection and load initial data
 			} catch (error) {
-				console.error("Failed to initialize the application due to configuration load error:", error.message);
+				console.error("Failed to initialize the application:", error.message);
 				if (CPManager.elements.applyCpConfigBtn) CPManager.elements.applyCpConfigBtn.disabled = true;
 				const dashboardPane = CPManager.elements.tabPanes.dashboard;
 				if (dashboardPane) {
-					if (CPManager.elements.tabPanes) {
-						Object.values(CPManager.elements.tabPanes).forEach((pane) => {
-							if (pane) {
-								pane.classList.add("hidden");
-								pane.classList.remove("active");
-							}
-						});
-						dashboardPane.classList.remove("hidden");
-						dashboardPane.classList.add("active");
-					}
-					dashboardPane.innerHTML = `<div class="text-center p-8 text-red-500 dark:text-red-400"><i class="fas fa-exclamation-triangle fa-3x mb-3"></i><p>Critical Error: Application configuration (app-config.json) failed to load. Cannot connect or function.</p><p class="text-sm mt-2">Details: ${error.message}</p></div>`;
+					Object.values(CPManager.elements.tabPanes).forEach((pane) => {
+						if (pane) {
+							pane.classList.add("hidden");
+							pane.classList.remove("active");
+						}
+					});
+					dashboardPane.classList.remove("hidden");
+					dashboardPane.classList.add("active");
+					dashboardPane.innerHTML = `<div class="text-center p-8 text-red-500 dark:text-red-400"><i class="fas fa-exclamation-triangle fa-3x mb-3"></i><p>Critical Error: App init failed. ${error.message}</p></div>`;
 				}
-				CPManager.app.setCredentialEntryUIMode(true);
+				CPManager.app.setCredentialEntryUIMode(true); // Fallback to credential entry
 			}
 		},
 	};
 
-	// Initialize the app when the DOM is fully loaded
 	document.addEventListener("DOMContentLoaded", CPManager.app.initializeApp);
 })(window.CPManager);

@@ -63,7 +63,7 @@
 
 			// Save the active tab to localStorage for persistence
 			try {
-				localStorage.setItem("activeHelpdeskTab", tabId);
+				localStorage.setItem(CPManager.config.localStorageKeys.activeTab, tabId);
 			} catch (e) {
 				console.warn("Could not save active tab to localStorage:", e.message);
 			}
@@ -78,8 +78,6 @@
 					const tabButton = e.target.closest(".tab-btn");
 					if (tabButton && tabButton.dataset.tab) {
 						e.preventDefault(); // Prevent default anchor behavior
-						// When user clicks a tab, use cached data by default.
-						// A separate refresh button within tab content would call setActiveTab(..., true) or the load function directly with true.
 						CPManager.tabs.setActiveTab(tabButton.dataset.tab, false);
 					}
 				});
