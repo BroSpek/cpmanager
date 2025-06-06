@@ -346,9 +346,12 @@ body {
 }
 /* Specific top padding for cards that have tags, to avoid overlap */
 .session-card > .card-summary,
-.voucher-card > .card-summary,
 .zone-info-card > .card-summary {
 	padding-top: 1.8rem; /* Increased padding to make space for absolutely positioned tags */
+}
+/* Because of checkbox: */
+.voucher-card > .card-summary {
+	padding-top: 0.6rem;
 }
 
 /* Info row styling for key-value pairs in cards */
@@ -955,4 +958,28 @@ nav[aria-label="Pagination"] > div:last-child > div[aria-label="Pagination"] > :
 nav[aria-label="Pagination"] > div:last-child > div[aria-label="Pagination"] > :last-child {
 	border-top-right-radius: 0.375rem;
 	border-bottom-right-radius: 0.375rem;
+}
+
+/* General Checkbox and Radio styling for UI improvement */
+input[type="checkbox"],
+input[type="radio"] {
+	transition: opacity 0.2s ease-in-out;
+}
+
+/* Make unchecked controls barely visible */
+input[type="checkbox"]:not(:checked),
+input[type="radio"]:not(:checked) {
+	opacity: 0.2;
+}
+
+/* On hover, make them fully visible for better interaction */
+input[type="checkbox"]:not(:checked):hover,
+input[type="radio"]:not(:checked):hover {
+	opacity: 1;
+}
+
+/* Ensure checked controls are fully visible */
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+	opacity: 1;
 }
