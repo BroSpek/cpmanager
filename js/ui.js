@@ -41,6 +41,8 @@
 		dropExpiredVouchersBtn: document.getElementById("drop-expired-vouchers-btn"),
 		providerZoneLinkageCard: document.getElementById("provider-zone-linkage-card"),
 		providerZoneLinkageDetails: document.getElementById("provider-zone-linkage-details"),
+		voucherSearchInput: document.getElementById("voucher-search-input"),
+		voucherStateFilterSelect: document.getElementById("voucher-state-filter-select"),
 
 		// Voucher Generation Modal Elements
 		generateVoucherModal: document.getElementById("generateVoucherModal"),

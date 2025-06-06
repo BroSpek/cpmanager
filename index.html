@@ -239,7 +239,11 @@
 								<p class="text-gray-500 dark:text-gray-400">Loading linkage information...</p>
 							</div>
 						</div>
-						<div id="voucher-field-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 items-end">
+						<!-- Voucher Filters: Provider and Group -->
+						<div
+							id="voucher-provider-group-filters"
+							class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 items-end"
+						>
 							<div class="min-w-0">
 								<label for="voucher-provider-select" class="block text-sm font-medium mb-1"
 									>Voucher Provider:</label
@@ -257,6 +261,35 @@
 								</select>
 							</div>
 						</div>
+						<!-- New Voucher Filters: Search and State -->
+						<div
+							id="voucher-search-state-filters"
+							class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 items-end"
+						>
+							<div class="min-w-0">
+								<label for="voucher-search-input" class="block text-sm font-medium mb-1"
+									>Search Voucher Code:</label
+								>
+								<input
+									type="text"
+									id="voucher-search-input"
+									class="form-input w-full"
+									placeholder="Enter voucher code..."
+								/>
+							</div>
+							<div class="min-w-0">
+								<label for="voucher-state-filter-select" class="block text-sm font-medium mb-1"
+									>Filter by State:</label
+								>
+								<select id="voucher-state-filter-select" class="form-select w-full">
+									<option value="">All States</option>
+									<option value="valid">Used</option>
+									<option value="unused">Unused</option>
+									<option value="expired">Expired</option>
+								</select>
+							</div>
+						</div>
+						<!-- End New Voucher Filters -->
 						<div id="voucher-action-btn" class="mb-4 grid grid-cols-2 md:grid-cols-4 gap-4">
 							<button id="create-vouchers-btn" class="btn btn-primary w-full whitespace-nowrap">
 								<i class="fas fa-plus-circle mr-2"></i>Create New
