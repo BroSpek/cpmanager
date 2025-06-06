@@ -283,7 +283,7 @@
 								>
 								<select id="voucher-state-filter-select" class="form-select w-full">
 									<option value="">All States</option>
-									<option value="valid">Used</option>
+									<option value="valid">Valid</option>
 									<option value="unused">Unused</option>
 									<option value="expired">Expired</option>
 								</select>
@@ -294,12 +294,33 @@
 							<button id="create-vouchers-btn" class="btn btn-primary w-full whitespace-nowrap">
 								<i class="fas fa-plus-circle mr-2"></i>Create New
 							</button>
+							<button id="void-selected-vouchers-btn" class="btn btn-warning w-full" disabled>
+								<i class="fas fa-times-circle mr-2"></i>Void Selected
+							</button>
 							<button id="drop-expired-vouchers-btn" class="btn btn-warning w-full">
 								<i class="fas fa-trash-alt mr-2"></i>Drop Expired
 							</button>
 							<button id="drop-voucher-group-btn" class="btn btn-danger w-full">
 								<i class="fas fa-trash-alt mr-2"></i>Drop Group
 							</button>
+						</div>
+						<!-- Select All Container -->
+						<div id="voucher-select-all-container" class="mb-3 hidden">
+							<label
+								for="voucher-select-all-checkbox"
+								class="flex items-center text-sm font-medium cursor-pointer"
+							>
+								<input
+									type="checkbox"
+									id="voucher-select-all-checkbox"
+									class="h-4 w-4 rounded border-gray-400 text-blue-600 focus:ring-blue-500 mr-2"
+								/>
+								<span id="voucher-select-all-label">Select All</span>
+								<span
+									id="voucher-selected-count-text"
+									class="text-sm text-gray-600 dark:text-gray-400 ml-2"
+								></span>
+							</label>
 						</div>
 						<div id="voucher-card-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 							<div class="skeleton-card"></div>
