@@ -346,9 +346,12 @@ body {
 }
 /* Specific top padding for cards that have tags, to avoid overlap */
 .session-card > .card-summary,
-.voucher-card > .card-summary,
 .zone-info-card > .card-summary {
 	padding-top: 1.8rem; /* Increased padding to make space for absolutely positioned tags */
+}
+/* Because of checkbox: */
+.voucher-card > .card-summary {
+	padding-top: 0.6rem;
 }
 
 /* Info row styling for key-value pairs in cards */
