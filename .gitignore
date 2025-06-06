@@ -4,3 +4,4 @@ img/
 # Ignore editor settings
 .editorconfig
 .prettierrc.json
+/node_modules
