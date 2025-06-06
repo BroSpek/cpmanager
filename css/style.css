@@ -956,3 +956,27 @@ nav[aria-label="Pagination"] > div:last-child > div[aria-label="Pagination"] > :
 	border-top-right-radius: 0.375rem;
 	border-bottom-right-radius: 0.375rem;
 }
+
+/* General Checkbox and Radio styling for UI improvement */
+input[type="checkbox"],
+input[type="radio"] {
+	transition: opacity 0.2s ease-in-out;
+}
+
+/* Make unchecked controls barely visible */
+input[type="checkbox"]:not(:checked),
+input[type="radio"]:not(:checked) {
+	opacity: 0.2;
+}
+
+/* On hover, make them fully visible for better interaction */
+input[type="checkbox"]:not(:checked):hover,
+input[type="radio"]:not(:checked):hover {
+	opacity: 1;
+}
+
+/* Ensure checked controls are fully visible */
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+	opacity: 1;
+}
