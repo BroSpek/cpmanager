@@ -1,8 +1,10 @@
 {
   "name": "cpmanager",
   "version": "1.0.0",
-  "main": "js/main.js",
   "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build index.html --public-url ./ && npm run copy-config",
+    "copy-config": "copyfiles app-config.json dist/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -17,6 +19,8 @@
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
     "globals": "^16.2.0",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "parcel": "^2.12.0",
+    "copyfiles": "^2.4.1"
   }
 }

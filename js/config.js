@@ -1,7 +1,7 @@
 // js/config.js
 
-// Initialize the global CPManager object if it doesn't exist
-// This line ensures window.CPManager is available before other scripts try to access it.
+// Ensure the global CPManager object exists before any module tries to extend it
+// This line initializes CPManager for the entire bundled application.
 window.CPManager = window.CPManager || {};
 
 // --- Configuration Object ---
