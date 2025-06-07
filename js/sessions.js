@@ -245,7 +245,7 @@
         const isChecked = this.selectedSessions.has(session.sessionId);
 
         const card = document.createElement("div");
-        card.className = `session-card p-2 rounded-lg shadow border group ${
+        card.className = `session-card p-2 rounded-lg shadow border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 ${
           isManagerCurrentDeviceSession
             ? "ring-2 ring-offset-1 ring-blue-500 shadow-lg"
             : ""
@@ -255,9 +255,6 @@
           "aria-label",
           `Session for IP ${session.ipAddress || "Unknown IP"}`
         );
-        card.style.backgroundColor = "var(--card-bg)";
-        card.style.borderColor = "var(--card-border)";
-        card.style.color = "var(--card-text)";
 
         let managerIconHtml = "";
         if (isManagerCurrentDeviceSession) {

@@ -28,9 +28,11 @@ import "./notifications.js";
     }
 
     if (actualTheme === "dark") {
-      document.body.classList.add("dark-mode");
+      // Use 'dark' for Tailwind's class strategy
+      document.documentElement.classList.add("dark");
     } else {
-      document.body.classList.remove("dark-mode");
+      // Remove 'dark' for light mode
+      document.documentElement.classList.remove("dark");
     }
 
     if (CPManager.elements.themeToggleBtn) {
@@ -143,16 +145,12 @@ import "./notifications.js";
         mainContentScrollAreaElement.style.justifyContent = "center";
         mainContentScrollAreaElement.style.minHeight = "calc(100vh)";
         mainContentScrollAreaElement.style.padding = "1rem";
-        mainContentScrollAreaElement.style.backgroundColor = "var(--bg-color)";
       }
       if (configInputSection) {
         configInputSection.style.maxWidth = "500px";
         configInputSection.style.width = "100%";
         configInputSection.style.marginTop = "0";
         configInputSection.style.marginBottom = "auto";
-        configInputSection.style.backgroundColor =
-          "var(--config-input-section-bg)";
-        configInputSection.style.color = "var(--config-input-section-text)";
       }
     } else {
       if (navElement) navElement.style.display = "";
@@ -174,7 +172,6 @@ import "./notifications.js";
         mainContentScrollAreaElement.style.justifyContent = "";
         mainContentScrollAreaElement.style.minHeight = "";
         mainContentScrollAreaElement.style.padding = "";
-        mainContentScrollAreaElement.style.backgroundColor = "";
       }
     }
   };

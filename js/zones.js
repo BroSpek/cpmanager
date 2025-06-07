@@ -108,15 +108,13 @@
 
         paginatedZones.forEach((zoneSummary) => {
           const zoneCard = document.createElement("div");
-          zoneCard.className = "zone-info-card p-2 rounded-lg shadow border";
+          zoneCard.className =
+            "zone-info-card p-2 rounded-lg shadow border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600";
           zoneCard.setAttribute("role", "listitem");
           zoneCard.setAttribute(
             "aria-label",
             `Zone: ${zoneSummary.description || `Zone ID ${zoneSummary.zoneid}`}`
           );
-          zoneCard.style.backgroundColor = "var(--card-bg)";
-          zoneCard.style.borderColor = "var(--card-border)";
-          zoneCard.style.color = "var(--card-text)";
 
           const statusText =
             zoneSummary.enabled === "1" ? "Enabled" : "Disabled";

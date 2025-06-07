@@ -1,134 +1,4 @@
 /* General body and HTML styling for full height and layout */
-:root {
-  --bg-color: #f3f4f6; /* Light mode default: gray-100 */
-  --text-color: #1f2937; /* Light mode default: gray-800 */
-  --bg-secondary-color: #ffffff; /* Light mode default: white */
-  --text-secondary-color: #374151; /* Light mode default: gray-700 */
-  --border-color: #e5e7eb; /* Light mode default: gray-200 */
-  --border-secondary-color: #d1d5db; /* Light mode default: gray-300 */
-  --nav-bg-color: #1e293b; /* slate-800 */
-  --nav-text-color: #ffffff;
-  --footer-bg-color: #f3f4f6; /* gray-100 */
-  --footer-text-color: #4b5563; /* gray-600 */
-  --link-hover-color: #374151; /* gray-700 */
-  --link-hover-border-color: #9ca3af; /* gray-400 */
-  --tab-active-text-color: #2563eb; /* blue-600 */
-  --tab-active-border-color: #2563eb; /* blue-600 */
-
-  --form-input-bg: #ffffff;
-  --form-input-text: #1f2937;
-  --form-input-border: #d1d5db;
-  --form-input-focus-border: #2563eb;
-  --form-input-focus-ring: rgba(59, 130, 246, 0.3);
-
-  --card-bg: #f9fafb; /* gray-50 */
-  --card-text: #374151; /* gray-700 */
-  --card-border: #e5e7eb; /* gray-200 */
-  --card-info-label-color: #374151;
-  --card-info-value-color: #4b5563;
-  --card-info-value-main-color: #1d4ed8;
-
-  --modal-bg: #ffffff;
-  --modal-text: #1f2937;
-
-  --skeleton-card-bg: #e5e7eb; /* bg-gray-200 */
-
-  --stat-value-color: #1d4ed8; /* text-blue-700 */
-  --stat-label-color: #6b7280; /* text-gray-500 */
-  --donut-center-text-color: #1f2937; /* text-gray-800 */
-  --legend-item-text-color: #4b5563; /* text-gray-600 */
-
-  /* Global Hint Box Variables - Light Mode */
-  --hint-info-bg: #eff6ff; /* bg-blue-50 */
-  --hint-info-border: #bfdbfe; /* border-blue-200 */
-  --hint-info-text: #374151; /* text-gray-700 */
-  --hint-info-icon: #3b82f6; /* text-blue-500 */
-
-  --hint-warning-bg: #fffbeb; /* bg-yellow-50 */
-  --hint-warning-border: #fde68a; /* border-yellow-200 */
-  --hint-warning-text: #78350f; /* text-yellow-800 */
-  --hint-warning-icon: #f59e0b; /* text-yellow-500 */
-
-  --hint-danger-bg: #fef2f2; /* bg-red-50 */
-  --hint-danger-border: #fecaca; /* border-red-200 */
-  --hint-danger-text: #991b1b; /* text-red-800 */
-  --hint-danger-icon: #ef4444; /* text-red-500 */
-
-  --hint-success-bg: #f0fdf4; /* bg-green-50 */
-  --hint-success-border: #bbf7d0; /* border-green-200 */
-  --hint-success-text: #166534; /* text-green-800 */
-  --hint-success-icon: #22c55e; /* text-green-500 */
-
-  --config-input-section-bg: #fef3c7; /* yellow-100 */
-  --config-input-section-border: #fbbf24; /* yellow-500 */
-  --config-input-section-text: #b45309; /* yellow-700 */
-
-  --placeholder-text-color: #9ca3af; /* text-gray-400 */
-}
-
-.dark-mode {
-  --bg-color: #0f172a; /* Dark mode default: slate-900 */
-  --text-color: #e2e8f0; /* Dark mode default: slate-200 */
-  --bg-secondary-color: #1e293b; /* Dark mode default: slate-800 */
-  --text-secondary-color: #94a3b8; /* Dark mode default: slate-400 */
-  --border-color: #334155; /* Dark mode default: slate-700 */
-  --border-secondary-color: #475569; /* Dark mode default: slate-600 */
-  --footer-bg-color: #0f172a; /* slate-900 */
-  --footer-text-color: #94a3b8; /* slate-400 */
-  --link-hover-color: #cbd5e1; /* slate-300 */
-  --link-hover-border-color: #64748b; /* slate-500 */
-
-  --form-input-bg: #1e293b; /* slate-800 or 700 */
-  --form-input-text: #e2e8f0; /* slate-200 */
-  --form-input-border: #475569; /* slate-600 */
-  --form-input-focus-border: #3b82f6; /* blue-500 */
-  --form-input-focus-ring: rgba(59, 130, 246, 0.4);
-
-  --card-bg: #0f172a; /* slate-900 */
-  --card-text: #cbd5e1; /* slate-300 */
-  --card-border: #334155; /* slate-700 */
-  --card-info-label-color: #cbd5e1;
-  --card-info-value-color: #94a3b8;
-  --card-info-value-main-color: #60a5fa;
-
-  --modal-bg: #1e293b; /* slate-800 */
-  --modal-text: #e2e8f0; /* slate-200 */
-
-  --skeleton-card-bg: #334155; /* bg-slate-700 */
-
-  --stat-value-color: #60a5fa; /* text-blue-400 */
-  --stat-label-color: #94a3b8; /* text-slate-400 */
-  --donut-center-text-color: #e2e8f0; /* text-slate-200 */
-  --legend-item-text-color: #94a3b8; /* text-slate-400 */
-
-  /* Global Hint Box Variables - Dark Mode */
-  --hint-info-bg: #172554; /* bg-sky-900 */
-  --hint-info-border: #075985; /* border-sky-700 */
-  --hint-info-text: #bae6fd; /* text-sky-200 */
-  --hint-info-icon: #7dd3fc; /* text-sky-300 */
-
-  --hint-warning-bg: #453800; /* Darker yellow */
-  --hint-warning-border: #785b00;
-  --hint-warning-text: #fef3c7; /* light yellow */
-  --hint-warning-icon: #facc15; /* lighter yellow */
-
-  --hint-danger-bg: #5f1818; /* Darker red */
-  --hint-danger-border: #902c2c;
-  --hint-danger-text: #fecaca; /* light red */
-  --hint-danger-icon: #f87171; /* lighter red */
-
-  --hint-success-bg: #144222; /* Darker green */
-  --hint-success-border: #1d6334;
-  --hint-success-text: #bbf7d0; /* light green */
-  --hint-success-icon: #4ade80; /* lighter green */
-
-  --config-input-section-bg: #374151; /* gray-700, example, adjust as needed */
-  --config-input-section-border: #4b5563; /* gray-600 */
-  --config-input-section-text: #fde047; /* yellow-300 */
-
-  --placeholder-text-color: #6b7280; /* Tailwind gray-500 for dark mode */
-}
-
 html {
   height: 100%;
   overflow: hidden; /* Prevent scroll on html to manage scrolling within #main-content-scroll-area */
@@ -138,8 +8,6 @@ body {
   flex-direction: column;
   height: 100vh; /* Full viewport height */
   overflow: hidden; /* Prevent scroll on body */
-  background-color: var(--bg-color);
-  color: var(--text-color);
   margin: 0; /* Reset default margin */
   transition:
     background-color 0.3s ease,
@@ -153,7 +21,6 @@ body {
 #main-content-scroll-area {
   -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
   scrollbar-width: none; /* Hide scrollbar for Firefox */
-  background-color: var(--bg-color); /* Ensure scroll area bg matches body */
 }
 
 /* General scrollbar styling (if not hidden or for other elements) */
@@ -162,15 +29,23 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--border-color); /* Use themed background */
-  border-radius: 10px;
+  background: #e5e7eb; /* gray-200 */
+}
+.dark ::-webkit-scrollbar-track {
+  background: #334155; /* slate-700 */
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--text-secondary-color); /* Use themed thumb */
+  background: #374151; /* gray-700 */
   border-radius: 10px;
 }
+.dark ::-webkit-scrollbar-thumb {
+  background: #94a3b8; /* slate-400 */
+}
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-color); /* Darker on hover */
+  background: #1f2937; /* gray-800 */
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #e2e8f0; /* slate-200 */
 }
 
 /* Card details content (for expandable sections) */
@@ -185,18 +60,22 @@ body {
 }
 .card-details-content.expanded {
   max-height: 1000px; /* Large enough to accommodate content */
-  padding-top: 0.5rem; /* Adjust as needed */
-  padding-bottom: 0.5rem; /* Adjust as needed */
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 /* Skeleton card styling for loading states */
 .skeleton-card {
-  background-color: var(--skeleton-card-bg);
   border-radius: 0.5rem; /* rounded-lg */
   padding: 1rem; /* p-4 */
   min-height: 80px;
   animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: #e5e7eb; /* bg-gray-200 */
 }
+.dark .skeleton-card {
+  background-color: #334155; /* bg-slate-700 */
+}
+
 @keyframes pulse {
   0%,
   100% {
@@ -209,14 +88,12 @@ body {
 
 /* Donut Chart Specific Styling */
 #dataUsageCanvasContainer {
-  position: relative; /* For canvas positioning if needed */
-  margin-bottom: 0.5rem; /* mb-2 */
+  position: relative;
+  margin-bottom: 0.5rem;
   animation: fadeInScaleUp 0.8s ease-out forwards;
-  opacity: 0; /* Start hidden for animation */
+  opacity: 0;
 }
-
 @keyframes fadeInScaleUp {
-  /* Animation for chart appearance */
   0% {
     opacity: 0;
     transform: scale(0.8);
@@ -228,32 +105,14 @@ body {
 }
 
 /* Zone Edit Toggle Switch */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
+.toggle-bg {
+  background-color: #d1d5db; /* Equivalent to bg-gray-300 */
 }
-
-/* Default (Light Mode) Toggle Background */
-input[type="checkbox"].peer + .toggle-bg {
-  background-color: var(--border-color); /* gray-200 */
+.dark .toggle-bg {
+  background-color: #475569; /* Equivalent to dark:bg-slate-600 */
 }
-input[type="checkbox"].peer:checked + .toggle-bg {
-  background-color: var(--tab-active-border-color); /* blue-600 */
-}
-
-/* Dark Mode Toggle Background */
-.dark-mode input[type="checkbox"].peer + .toggle-bg {
-  background-color: #475569; /* bg-slate-600 for unchecked toggle in dark */
-}
-.dark-mode input[type="checkbox"].peer:checked + .toggle-bg {
-  background-color: #2563eb; /* bg-blue-600 for checked toggle in dark */
+.peer:checked + .toggle-bg {
+  background-color: #3b82f6; /* Equivalent to bg-blue-500 */
 }
 
 /* General Checkbox and Radio styling for UI improvement */
@@ -261,20 +120,14 @@ input[type="checkbox"],
 input[type="radio"] {
   transition: opacity 0.2s ease-in-out;
 }
-
-/* Make unchecked controls barely visible */
 input[type="checkbox"]:not(:checked),
 input[type="radio"]:not(:checked) {
   opacity: 0.2;
 }
-
-/* On hover, make them fully visible for better interaction */
 input[type="checkbox"]:not(:checked):hover,
 input[type="radio"]:not(:checked):hover {
   opacity: 1;
 }
-
-/* Ensure checked controls are fully visible */
 input[type="checkbox"]:checked,
 input[type="radio"]:checked {
   opacity: 1;
@@ -283,30 +136,28 @@ input[type="radio"]:checked {
 /* Print-specific styles */
 @media print {
   body {
-    background-color: #fff !important; /* Force white background for printing */
-    color: #000 !important; /* Force black text for printing */
-    -webkit-print-color-adjust: exact; /* For background colors and images */
+    background-color: #fff !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* Hide elements not needed in print */
   nav,
-	footer,
-	#mainTabs,
-	#config-input-section,
-	#session-field-container,
-	#session-action-btn,
-	.hint-box, /* Hide all hint boxes */
-	#voucher-field-container,
-	#voucher-action-btn,
-	#voucher-group-actions,
-	#zone-action-container,
-	#toast-notification,
-	.modal {
+  footer,
+  #mainTabs,
+  #config-input-section,
+  #session-field-container,
+  #session-action-btn,
+  .hint-box,
+  #voucher-field-container,
+  #voucher-action-btn,
+  #voucher-group-actions,
+  #zone-action-container,
+  #toast-notification,
+  .modal {
     display: none !important;
   }
 
-  /* Show only the content for PDF generation */
   #main-content-scroll-area {
     overflow: visible !important;
     height: auto !important;

@@ -383,24 +383,23 @@
 
       const totalPages = Math.ceil(totalItems / itemsPerPage);
       const nav = document.createElement("nav");
+      // REMOVED background, border, and shadow classes to make the container invisible
       nav.className =
         "flex items-center justify-between px-4 py-3 sm:px-6 mt-6";
       nav.setAttribute("aria-label", "Pagination");
-      nav.style.backgroundColor = "var(--bg-secondary-color)";
-      nav.classList.add("rounded-md");
 
       const summaryDiv = document.createElement("div");
-      summaryDiv.className = "sm:block";
+      summaryDiv.className = "hidden sm:block";
       const startItem = (currentPage - 1) * itemsPerPage + 1;
       const endItem = Math.min(currentPage * itemsPerPage, totalItems);
-      summaryDiv.innerHTML = `<p class="text-sm" style="color: var(--text-secondary-color)">Showing <span class="font-medium" style="color: var(--text-color);">${startItem}</span> to <span class="font-medium" style="color: var(--text-color);">${endItem}</span> of <span class="font-medium" style="color: var(--text-color);">${totalItems}</span> results</p>`;
+      summaryDiv.innerHTML = `<p class="text-sm text-gray-700 dark:text-slate-300">Showing <span class="font-medium text-gray-900 dark:text-white">${startItem}</span> to <span class="font-medium text-gray-900 dark:text-white">${endItem}</span> of <span class="font-medium text-gray-900 dark:text-white">${totalItems}</span> results</p>`;
       nav.appendChild(summaryDiv);
 
       const buttonsOuterDiv = document.createElement("div");
       buttonsOuterDiv.className = "flex-1 flex justify-between sm:justify-end";
       const buttonsInnerDiv = document.createElement("div");
       buttonsInnerDiv.className =
-        "relative z-0 inline-flex rounded-lg shadow-sm -space-x-px";
+        "relative z-0 inline-flex rounded-md shadow-sm -space-x-px";
       buttonsInnerDiv.setAttribute("aria-label", "Pagination");
 
       const createButton = (
@@ -420,30 +419,28 @@
               : "Next page"
             : `Go to page ${pageNum}`
         );
+
+        // Define base classes
         let baseClasses =
-          "relative inline-flex items-center justify-center text-sm font-medium focus:z-20 transition-all duration-150 ease-in-out border";
-        let sizeClasses = isIcon ? " p-2.5" : " px-4 py-2";
+          "relative inline-flex items-center text-sm font-medium border";
+        let sizeClasses = isIcon ? " p-2" : " px-4 py-2";
         let colorClasses = "";
 
-        button.style.borderColor = "var(--border-secondary-color)";
-
         if (isCurrent) {
-          colorClasses = " z-10";
-          button.style.backgroundColor = "var(--tab-active-border-color)";
-          button.style.color = "var(--nav-text-color)";
-          button.style.borderColor = "var(--tab-active-border-color)";
+          // Current page button style
+          colorClasses = " z-10 bg-blue-500 border-blue-500 text-white";
           button.setAttribute("aria-current", "page");
         } else if (isEnabled) {
-          button.style.backgroundColor = "var(--form-input-bg)";
-          button.style.color = "var(--text-secondary-color)";
+          // Default enabled button style (matches card/field)
+          colorClasses =
+            " bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-gray-500 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700";
         } else {
-          colorClasses = " cursor-not-allowed";
-          button.style.backgroundColor = "var(--bg-color)";
-          button.style.color = "var(--border-secondary-color)";
-          button.style.opacity = "0.5";
+          // Disabled button style
+          colorClasses =
+            " bg-slate-100 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-500 cursor-not-allowed";
         }
 
-        button.className = baseClasses + sizeClasses + colorClasses;
+        button.className = `${baseClasses} ${sizeClasses} ${colorClasses}`;
 
         if (isEnabled && !isCurrent) {
           button.addEventListener("click", () => onPageChangeCallback(pageNum));
@@ -458,7 +455,7 @@
         true,
         currentPage > 1
       );
-      prevButton.classList.add("rounded-l-lg");
+      prevButton.classList.add("rounded-l-md");
       buttonsInnerDiv.appendChild(prevButton);
 
       let pageRangeDisplayed = 2;
@@ -505,10 +502,7 @@
           const ellipsisSpan = document.createElement("span");
           ellipsisSpan.innerHTML = "&hellip;";
           ellipsisSpan.className =
-            "relative inline-flex items-center px-4 py-2 border text-sm font-medium";
-          ellipsisSpan.style.borderColor = "var(--border-secondary-color)";
-          ellipsisSpan.style.backgroundColor = "var(--form-input-bg)";
-          ellipsisSpan.style.color = "var(--text-secondary-color)";
+            "relative inline-flex items-center px-4 py-2 border text-sm font-medium bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-gray-500 dark:text-slate-300";
           buttonsInnerDiv.appendChild(ellipsisSpan);
         } else {
           buttonsInnerDiv.appendChild(
@@ -529,7 +523,7 @@
         true,
         currentPage < totalPages
       );
-      nextButton.classList.add("rounded-r-lg");
+      nextButton.classList.add("rounded-r-md");
       buttonsInnerDiv.appendChild(nextButton);
 
       buttonsOuterDiv.appendChild(buttonsInnerDiv);
