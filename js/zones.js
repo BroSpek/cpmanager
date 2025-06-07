@@ -1,451 +1,725 @@
-import { getAPI } from './api.js';
-import { showNotification } from './notifications.js';
+// js/zones.js
 
-let activeZoneId = null;
-let zones = [];
-let currentZonePage = 1;
-const ZONES_PER_PAGE = 5;
-
-
-export function getActiveZone() {
-    return zones.find(z => z.id === activeZoneId);
-}
-
-export function getActiveZoneId() {
-    return activeZoneId;
-}
-
-export function setActiveZoneId(zoneId) {
-    activeZoneId = zoneId;
-    // Store in local storage to remember selection
-    localStorage.setItem('activeZoneId', zoneId);
-}
-
-export async function loadZones() {
-    try {
-        const response = await getAPI('/zones');
-        zones = response.zones || [];
-        const storedZoneId = localStorage.getItem('activeZoneId');
-        if (storedZoneId && zones.some(z => z.id === storedZoneId)) {
-            activeZoneId = storedZoneId;
-        } else if (zones.length > 0) {
-            activeZoneId = zones[0].id;
-            localStorage.setItem('activeZoneId', activeZoneId);
-        }
-        renderZoneSelector();
-        return zones;
-    } catch (error) {
-        console.error('Failed to load zones:', error);
-        showNotification(`Failed to load zones: ${error.message}`, 'error');
-        return [];
-    }
-}
-
-export function renderZoneSelector() {
-    const zoneSelectorContainer = document.getElementById('zone-selector-container');
-    if (!zoneSelectorContainer) return;
-
-    if (zones.length === 0) {
-        zoneSelectorContainer.innerHTML = '<p class="text-white">No zones available.</p>';
+(function (CPManager) {
+  CPManager.zones = {
+    fetchAllZoneData: async function (forceRefresh = false) {
+      if (
+        !forceRefresh &&
+        CPManager.state.zones.allConfigured.length > 0 &&
+        CPManager.state.zones.allConfigured[0].description !== undefined && // Check if data is more than just basic
+        Date.now() - CPManager.state.zones.lastFetched <
+          CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
+      ) {
         return;
-    }
-
-    const selectHTML = `
-        <select id="zone-selector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            ${zones.map(zone => `<option value="${zone.id}" ${zone.id === activeZoneId ? 'selected' : ''}>${zone.name}</option>`).join('')}
-        </select>
-    `;
-    zoneSelectorContainer.innerHTML = selectHTML;
-
-    const zoneSelector = document.getElementById('zone-selector');
-    zoneSelector.addEventListener('change', (event) => {
-        const newZoneId = event.target.value;
-        if (newZoneId !== activeZoneId) {
-            activeZoneId = newZoneId;
-            localStorage.setItem('activeZoneId', activeZoneId);
-            // Post a custom event that the app can listen to
-            window.dispatchEvent(new CustomEvent('zoneChanged', { detail: { zoneId: activeZoneId } }));
-        }
-    });
-}
-
-
-export function renderZonesPage() {
-    const appContainer = document.getElementById('app');
-    appContainer.innerHTML = `
-        <div class="p-4 md:p-8">
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-2xl font-bold">Manage Zones</h1>
-                <button id="add-zone-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Add Zone
-                </button>
-            </div>
-            <div id="zones-list" class="space-y-4"></div>
-            <div id="zones-pagination" class="mt-4 flex justify-center items-center"></div>
-        </div>
-    `;
-
-    loadAndRenderZonesList(currentZonePage);
-
-    document.getElementById('add-zone-btn').addEventListener('click', () => showAddZoneModal());
-}
-
-async function loadAndRenderZonesList(page) {
-    const listContainer = document.getElementById('zones-list');
-    listContainer.innerHTML = '<div>Loading...</div>';
-    try {
-        // We assume 'zones' is already loaded and up-to-date from the initial load
-        // Paginate the already loaded zones array
-        const totalPages = Math.ceil(zones.length / ZONES_PER_PAGE);
-        const startIndex = (page - 1) * ZONES_PER_PAGE;
-        const endIndex = startIndex + ZONES_PER_PAGE;
-        const pagedZones = zones.slice(startIndex, endIndex);
-
-        if (pagedZones.length > 0) {
-            const listHtml = pagedZones.map(zone => {
-                 const linkageCardId = `linkage-card-${zone.id}`;
-                 return `
-                    <div class="card">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h2 class="text-xl font-bold">${zone.name}</h2>
-                                <p class="text-sm text-gray-500">${zone.id}</p>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button class="link-provider-btn text-green-500 hover:text-green-700" data-zone-id="${zone.id}" data-linkage-card-id="${linkageCardId}">Link Provider</button>
-                                <button class="edit-zone-btn text-blue-500 hover:text-blue-700" data-zone-id="${zone.id}" data-zone-name="${zone.name}">Edit</button>
-                                <button class="delete-zone-btn text-red-500 hover:text-red-700" data-zone-id="${zone.id}" data-zone-name="${zone.name}">Delete</button>
-                            </div>
-                        </div>
-                        <div id="${linkageCardId}" class="mt-4" style="display: none;"></div>
-                    </div>
-                 `
-            }).join('');
-            listContainer.innerHTML = listHtml;
-            attachZoneActionListeners();
+      }
+      try {
+        const data = await CPManager.api.callApi("/settings/search_zones");
+        if (data && Array.isArray(data.rows)) {
+          CPManager.state.zones.allConfigured = data.rows;
+          CPManager.state.zones.lastFetched = Date.now();
         } else {
-            listContainer.innerHTML = '<p>No zones found.</p>';
+          CPManager.state.zones.allConfigured = [];
+          console.warn(
+            "No zones found or unexpected data format from /settings/search_zones.",
+            data
+          );
         }
+      } catch (error) {
+        console.error(
+          "Failed to fetch all zone data for descriptions:",
+          error.message
+        );
+        CPManager.state.zones.allConfigured = [];
+      }
+    },
 
-        renderZonePagination(page, totalPages);
-    } catch (error) {
-        console.error('Error rendering zones list:', error);
-        listContainer.innerHTML = '<p class="text-red-500">Failed to render zones.</p>';
-    }
-}
-
-
-function renderZonePagination(currentPage, totalPages) {
-    const paginationContainer = document.getElementById('zones-pagination');
-    if (!paginationContainer || totalPages <= 1) {
-        if(paginationContainer) paginationContainer.innerHTML = '';
+    fetchCustomTemplates: async function (forceRefresh = false) {
+      if (
+        !forceRefresh &&
+        CPManager.state.zones.customTemplates.length > 0 &&
+        Date.now() - CPManager.state.zones.customTemplatesLastFetched <
+          CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
+      ) {
         return;
-    }
-
-    const onPageChange = (newPage) => {
-        currentZonePage = newPage;
-        loadAndRenderZonesList(newPage);
-    };
-
-    const prevButton = document.createElement('button');
-    prevButton.textContent = 'Previous';
-    if (currentPage > 1) {
-        prevButton.className = 'pagination-button bg-transparent border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700';
-        prevButton.onclick = () => onPageChange(currentPage - 1);
-    } else {
-        prevButton.className = 'pagination-button bg-transparent border border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed';
-        prevButton.disabled = true;
-    }
-
-    const pageInfo = document.createElement('span');
-    pageInfo.className = 'px-4 py-2';
-    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-
-    const nextButton = document.createElement('button');
-    nextButton.textContent = 'Next';
-    if (currentPage < totalPages) {
-        nextButton.className = 'pagination-button bg-transparent border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700';
-        nextButton.onclick = () => onPageChange(currentPage + 1);
-    } else {
-        nextButton.className = 'pagination-button bg-transparent border border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed';
-        nextButton.disabled = true;
-    }
-
-    paginationContainer.innerHTML = '';
-    paginationContainer.appendChild(prevButton);
-    paginationContainer.appendChild(pageInfo);
-    paginationContainer.appendChild(nextButton);
-}
-
-
-function attachZoneActionListeners() {
-    document.querySelectorAll('.edit-zone-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const zoneId = e.target.dataset.zoneId;
-            const zoneName = e.target.dataset.zoneName;
-            showEditZoneModal({ id: zoneId, name: zoneName });
-        });
-    });
-
-    document.querySelectorAll('.delete-zone-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const zoneId = e.target.dataset.zoneId;
-            const zoneName = e.target.dataset.zoneName;
-            showDeleteZoneConfirm({ id: zoneId, name: zoneName });
-        });
-    });
-
-    document.querySelectorAll('.link-provider-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const zoneId = e.target.dataset.zoneId;
-            const linkageCardId = e.target.dataset.linkageCardId;
-            const card = document.getElementById(linkageCardId);
-            
-            // Toggle visibility
-            if (card.style.display === 'none') {
-                renderZoneLinkage(zoneId, linkageCardId);
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-                card.innerHTML = ''; // Clear content when hiding
-            }
-        });
-    });
-}
-
-async function renderZoneLinkage(zoneId, containerId) {
-    const linkageContainer = document.getElementById(containerId);
-    linkageContainer.innerHTML = '<p>Loading linkage info...</p>';
-
-    try {
-        const zoneDetails = await getAPI(`/zones/${zoneId}`);
-        const allProviders = await getAPI('/providers');
-        
-        const linkedProviderId = zoneDetails.provider_id;
-
-        let content = `
-            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold mb-2">Voucher Provider Zone Linkage</h3>
-        `;
-
-        if (linkedProviderId) {
-            const linkedProvider = allProviders.providers.find(p => p.id === linkedProviderId);
-            content += `
-                <p>Currently linked to: <strong>${linkedProvider ? linkedProvider.name : 'Unknown Provider'}</strong> (${linkedProviderId})</p>
-                <button class="unlink-provider-btn mt-2 bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-3 rounded text-sm" data-zone-id="${zoneId}">Unlink</button>
-            `;
+      }
+      try {
+        const data = await CPManager.api.callApi("/service/search_templates");
+        if (data && Array.isArray(data.rows)) {
+          CPManager.state.zones.customTemplates = data.rows;
+          CPManager.state.zones.customTemplatesLastFetched = Date.now();
         } else {
-            content += '<p>Not linked to any provider.</p>';
+          CPManager.state.zones.customTemplates = [];
+          console.warn(
+            "No custom templates found or unexpected data format.",
+            data
+          );
+        }
+      } catch (error) {
+        console.error("Failed to fetch custom templates:", error.message);
+        CPManager.state.zones.customTemplates = [];
+      }
+    },
+
+    loadZoneInfo: async function (forceRefreshDetails = false) {
+      if (!CPManager.elements.zoneListContainer) return;
+      CPManager.state.zones.currentPage = 1; // Reset to first page
+
+      const needsSkeleton =
+        forceRefreshDetails ||
+        CPManager.elements.zoneListContainer.querySelectorAll(".zone-info-card")
+          .length === 0;
+      if (needsSkeleton) {
+        CPManager.ui.showSkeletonLoaders(
+          CPManager.elements.zoneListContainer,
+          CPManager.config.itemsPerPage,
+          '<div class="skeleton-card"></div>',
+          "zone-pagination"
+        );
+      }
+
+      try {
+        await CPManager.zones.fetchAllZoneData(forceRefreshDetails);
+        await CPManager.zones.fetchCustomTemplates(forceRefreshDetails);
+
+        CPManager.ui.clearContainer(
+          CPManager.elements.zoneListContainer,
+          "zone-pagination"
+        );
+
+        if (
+          !Array.isArray(CPManager.state.zones.allConfigured) ||
+          CPManager.state.zones.allConfigured.length === 0
+        ) {
+          CPManager.ui.showNoDataMessage(
+            CPManager.elements.zoneListContainer,
+            "No captive portal zones configured on OPNsense.",
+            "fas fa-folder-open",
+            "zone-pagination"
+          );
+          return;
         }
 
-        content += `
-            <div class="mt-4">
-                <label for="provider-select-${zoneId}" class="block text-sm font-medium">Link to a new provider:</label>
-                <div class="flex items-center space-x-2 mt-1">
-                    <select id="provider-select-${zoneId}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                        <option value="">Select a provider</option>
-                        ${allProviders.providers.map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
-                    </select>
-                    <button class="link-new-provider-btn bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" data-zone-id="${zoneId}">Link</button>
+        const allZones = CPManager.state.zones.allConfigured;
+        const page = CPManager.state.zones.currentPage;
+        const itemsPerPage = CPManager.config.itemsPerPage;
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedZones = allZones.slice(startIndex, endIndex);
+
+        paginatedZones.forEach((zoneSummary) => {
+          const zoneCard = document.createElement("div");
+          zoneCard.className =
+            "zone-info-card p-2 rounded-lg shadow border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600";
+          zoneCard.setAttribute("role", "listitem");
+          zoneCard.setAttribute(
+            "aria-label",
+            `Zone: ${zoneSummary.description || `Zone ID ${zoneSummary.zoneid}`}`
+          );
+
+          const statusText =
+            zoneSummary.enabled === "1" ? "Enabled" : "Disabled";
+          const statusColor =
+            zoneSummary.enabled === "1" ? "bg-green-500" : "bg-red-500";
+
+          const statusTag = `<span class="py-0.5 px-1.5 text-xs rounded-sm text-white max-w-[100px] whitespace-nowrap overflow-hidden text-ellipsis ${statusColor}" title="Status: ${statusText}">${statusText}</span>`;
+          const cardSummaryId = `zone-summary-${zoneSummary.uuid}`;
+          const cardDetailsId = `zone-details-${zoneSummary.uuid}`;
+
+          zoneCard.innerHTML = `
+            <div class="flex justify-end items-center mb-1">
+                <div class="flex items-center gap-1">
+                    ${statusTag}
                 </div>
             </div>
-        </div>`;
-
-        linkageContainer.innerHTML = content;
-        attachLinkageActionListeners(zoneId);
-
-    } catch (error) {
-        console.error('Error loading linkage info:', error);
-        linkageContainer.innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`;
-    }
-}
-
-function attachLinkageActionListeners(zoneId) {
-    const linkageContainer = document.querySelector(`[data-zone-id="${zoneId}"]`).closest('.card');
-    
-    const unlinkBtn = linkageContainer.querySelector('.unlink-provider-btn');
-    if (unlinkBtn) {
-        unlinkBtn.addEventListener('click', async () => {
-            await updateZoneLinkage(zoneId, null);
+            <div id="${cardSummaryId}" class="zone-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="${cardDetailsId}">
+              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Name</span><span class="text-sm text-right font-semibold break-all flex-grow" style="color: var(--card-info-value-main-color);">${
+                zoneSummary.description ||
+                `Unnamed Zone (ID: ${zoneSummary.zoneid})`
+              }</span></div>
+              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Zone ID</span><span class="text-sm text-right font-semibold break-all flex-grow" style="color: var(--card-info-value-main-color);">${
+                zoneSummary.zoneid
+              }</span></div>
+              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Short UUID</span><span class="text-sm text-right font-semibold break-all flex-grow" style="color: var(--card-info-value-main-color);">${zoneSummary.uuid.substring(
+                0,
+                8
+              )}...</span></div>
+            </div>
+            <div class="card-details-content max-h-0 overflow-hidden transition-all duration-300 ease-out text-sm space-y-1" id="${cardDetailsId}" aria-hidden="true">Loading details...</div>`;
+          zoneCard.dataset.uuid = zoneSummary.uuid;
+          zoneCard.dataset.initialZoneid = zoneSummary.zoneid;
+          CPManager.elements.zoneListContainer.appendChild(zoneCard);
         });
-    }
+        CPManager.ui.renderPaginationControls(
+          CPManager.elements.zonePaginationContainer,
+          CPManager.state.zones.currentPage,
+          allZones.length,
+          CPManager.config.itemsPerPage,
+          (newPage) => {
+            CPManager.state.zones.currentPage = newPage;
+            CPManager.zones.loadZoneInfo(); // Re-call to render the new page
+          }
+        );
+      } catch (error) {
+        console.error("Error in loadZoneInfo:", error);
+        CPManager.ui.showNoDataMessage(
+          CPManager.elements.zoneListContainer,
+          "Error loading zone information.",
+          "fas fa-exclamation-triangle",
+          "zone-pagination"
+        );
+      }
+    },
 
-    const linkNewBtn = linkageContainer.querySelector('.link-new-provider-btn');
-    if (linkNewBtn) {
-        linkNewBtn.addEventListener('click', async () => {
-            const select = linkageContainer.querySelector(`#provider-select-${zoneId}`);
-            const providerId = select.value;
-            if (providerId) {
-                await updateZoneLinkage(zoneId, providerId);
-            } else {
-                showNotification('Please select a provider to link.', 'warning');
+    handleZoneCardClick: async function (card, detailsContainer) {
+      CPManager.ui.toggleCardDetails(card);
+      const isNowExpanded = detailsContainer.classList.contains("expanded");
+
+      if (
+        isNowExpanded &&
+        (detailsContainer.innerHTML.includes("Loading details...") ||
+          detailsContainer.innerHTML.includes("Error loading details"))
+      ) {
+        const uuid = card.dataset.uuid;
+
+        try {
+          const zoneDetailsResponse = await CPManager.api.callApi(
+            `/settings/get_zone/${uuid}`
+          );
+          let detailsHtml = "";
+
+          const createInfoRowDiv = (label, value) => {
+            const displayValue =
+              value === null ||
+              value === undefined ||
+              String(value).trim() === ""
+                ? CPManager.config.placeholderValue
+                : String(value);
+            return `<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">${label}</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${displayValue}</span></div>`;
+          };
+
+          detailsHtml += createInfoRowDiv("UUID", uuid);
+
+          if (zoneDetailsResponse && zoneDetailsResponse.zone) {
+            const zoneData = zoneDetailsResponse.zone;
+            for (const [key, value] of Object.entries(zoneData)) {
+              if (
+                key === "uuid" ||
+                key === "description" ||
+                key === "enabled" ||
+                key === "zoneid"
+              )
+                continue;
+
+              const readableKey =
+                CPManager.config.zoneFieldMappings[key] ||
+                key.charAt(0).toUpperCase() +
+                  key.slice(1).replace(/([A-Z])/g, " $1");
+              let displayValue;
+
+              if (key === "idletimeout" || key === "hardtimeout") {
+                displayValue = value
+                  ? CPManager.utils.formatDuration(parseInt(value), "minutes")
+                  : CPManager.config.placeholderValue;
+              } else if (key === "template") {
+                let selectedTemplateIdentifier = "";
+                if (typeof value === "object" && value !== null) {
+                  for (const templateKey in value) {
+                    if (
+                      value[templateKey] &&
+                      (value[templateKey].selected === 1 ||
+                        value[templateKey].selected === "1")
+                    ) {
+                      selectedTemplateIdentifier = templateKey;
+                      break;
+                    }
+                  }
+                }
+                const templateInfo = CPManager.state.zones.customTemplates.find(
+                  (t) => t.uuid === selectedTemplateIdentifier
+                );
+                displayValue = templateInfo
+                  ? templateInfo.name
+                  : selectedTemplateIdentifier
+                    ? `UUID: ${selectedTemplateIdentifier.substring(0, 8)}...`
+                    : "Default";
+              } else if (
+                [
+                  "disableRules",
+                  "alwaysSendAccountingReqs",
+                  "concurrentlogins",
+                  "extendedPreAuthData",
+                ].includes(key)
+              ) {
+                displayValue =
+                  String(value) === "1"
+                    ? "Yes"
+                    : String(value) === "0"
+                      ? "No"
+                      : String(value);
+              } else if (
+                typeof value === "object" &&
+                value !== null &&
+                Object.values(value).some(
+                  (v_obj) =>
+                    typeof v_obj === "object" &&
+                    v_obj !== null &&
+                    Object.prototype.hasOwnProperty.call(v_obj, "selected")
+                )
+              ) {
+                displayValue = CPManager.utils.formatOpnsenseSelectable(value);
+              } else if (Array.isArray(value)) {
+                displayValue =
+                  value.length > 0
+                    ? value.join(", ")
+                    : CPManager.config.placeholderValue;
+              } else {
+                displayValue = String(value);
+              }
+
+              if (
+                typeof displayValue === "string" &&
+                displayValue.length > 150
+              ) {
+                displayValue = displayValue.substring(0, 150) + "...";
+              }
+              detailsHtml += createInfoRowDiv(
+                readableKey,
+                displayValue || CPManager.config.placeholderValue
+              );
             }
-        });
-    }
-}
+          } else {
+            detailsHtml +=
+              "<div>No further detailed properties found or unexpected response format.</div>";
+          }
 
-
-async function updateZoneLinkage(zoneId, providerId) {
-    try {
-        await getAPI(`/zones/${zoneId}`, 'PATCH', { provider_id: providerId });
-        showNotification(`Zone linkage updated successfully.`, 'success');
-        // Refresh the linkage card content
-        const linkageCard = document.getElementById(`linkage-card-${zoneId}`);
-        if(linkageCard && linkageCard.style.display !== 'none') {
-            renderZoneLinkage(zoneId, linkageCard.id);
+          detailsHtml += `
+            <p class="mt-3">
+              <button class="py-2 px-4 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-gray-500 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" data-action="edit-zone" data-uuid="${uuid}">
+                <i class="fas fa-edit mr-1"></i> Edit Zone Settings
+              </button>
+            </p>
+          `;
+          detailsContainer.innerHTML = detailsHtml;
+        } catch (error) {
+          console.error(`Error loading details for zone ${uuid}:`, error);
+          detailsContainer.innerHTML =
+            '<p class="text-red-500">Error loading details. Check console.</p>';
         }
-    } catch(error) {
-        console.error('Error updating zone linkage:', error);
-        showNotification(`Error: ${error.message}`, 'error');
-    }
-}
+      }
+    },
 
+    fetchAndOpenEditZoneModal: async function (uuid) {
+      if (!CPManager.elements.editZoneModal) {
+        console.error(
+          "Edit Zone Modal element (CPManager.elements.editZoneModal) not found."
+        );
+        return;
+      }
+      try {
+        await CPManager.zones.fetchCustomTemplates();
 
-function showAddZoneModal() {
-    const modalId = 'add-zone-modal';
-    if (document.getElementById(modalId)) return;
-    const modalHTML = createZoneModal({
-        modalId: modalId,
-        title: 'Add New Zone',
-        buttonText: 'Add Zone',
-    });
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    attachModalEventListeners(modalId, handleAddZone);
-}
+        const response = await CPManager.api.callApi(
+          `/settings/get_zone/${uuid}`
+        );
+        if (response && response.zone) {
+          CPManager.state.zones.originalFullDataForEdit = response;
+          CPManager.zones.populateEditZoneModal(response.zone, uuid);
 
-function showEditZoneModal(zone) {
-    const modalId = `edit-zone-modal-${zone.id}`;
-    if (document.getElementById(modalId)) return;
-    const modalHTML = createZoneModal({
-        modalId: modalId,
-        title: `Edit Zone: ${zone.name}`,
-        buttonText: 'Save Changes',
-        zoneName: zone.name,
-    });
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    attachModalEventListeners(modalId, (name) => handleEditZone(zone.id, name));
-}
+          if (CPManager.elements.submitEditZoneBtn) {
+            CPManager.elements.submitEditZoneBtn.disabled = false;
+          } else {
+            console.error(
+              "CPManager.elements.submitEditZoneBtn not found when trying to enable it in fetchAndOpenEditZoneModal."
+            );
+          }
+          if (CPManager.elements.cancelEditZoneBtn) {
+            CPManager.elements.cancelEditZoneBtn.disabled = false;
+          }
 
-function createZoneModal({ modalId, title, buttonText, zoneName = '' }) {
-    return `
-        <div id="${modalId}" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-            <div class="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white dark:bg-gray-800">
-                <div class="mt-3">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">${title}</h3>
-                    <div class="mt-2 px-7 py-3">
-                        <label for="zone-name-input-${modalId}" class="text-left block text-sm font-medium text-gray-700 dark:text-gray-300">Zone Name</label>
-                        <input type="text" id="zone-name-input-${modalId}" value="${zoneName}" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm" required>
-                    </div>
-                    <div class="items-center px-4 py-3">
-                        <button id="submit-zone-${modalId}" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700">
-                            ${buttonText}
-                        </button>
-                        <button id="close-modal-${modalId}" class="mt-2 px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300">
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function attachModalEventListeners(modalId, submitHandler) {
-    const modal = document.getElementById(modalId);
-    const closeBtn = document.getElementById(`close-modal-${modalId}`);
-    const submitBtn = document.getElementById(`submit-zone-${modalId}`);
-    const input = document.getElementById(`zone-name-input-${modalId}`);
-
-    closeBtn.onclick = () => modal.remove();
-    submitBtn.onclick = () => {
-        const name = input.value.trim();
-        if (name) {
-            submitHandler(name);
-            modal.remove();
+          CPManager.elements.editZoneModal.classList.remove("hidden");
+          CPManager.elements.editZoneModal.classList.add("flex");
+          if (CPManager.elements.zoneEditDescriptionInput)
+            CPManager.elements.zoneEditDescriptionInput.focus();
         } else {
-            showNotification('Zone name cannot be empty.', 'error');
+          CPManager.ui.showToast(
+            `Could not load details for zone ${uuid}. API response issue.`,
+            "error"
+          );
+          CPManager.state.zones.originalFullDataForEdit = null;
         }
-    };
-    window.onclick = (event) => {
-        if (event.target == modal) {
-            modal.remove();
+      } catch (error) {
+        CPManager.state.zones.originalFullDataForEdit = null;
+        console.error("Error in fetchAndOpenEditZoneModal:", error);
+      }
+    },
+
+    populateEditZoneModal: function (zoneData, uuid) {
+      const requiredElements = [
+        "editZoneUuidInput",
+        "editZoneModalTitleName",
+        "zoneEditDescriptionInput",
+        "zoneEditEnabledCheckbox",
+        "zoneEditEnabledText",
+        "zoneEditAllowedAddressesTextarea",
+        "zoneEditAllowedMACAddressesTextarea",
+        "zoneEditHardTimeoutInput",
+        "zoneEditIdleTimeoutInput",
+        "zoneEditConcurrentLoginsCheckbox",
+        "zoneEditConcurrentLoginsText",
+        "zoneEditTemplateSelect",
+      ];
+      for (const elId of requiredElements) {
+        if (!CPManager.elements[elId]) {
+          console.error(`Edit Zone Modal element missing: ${elId}`);
+          CPManager.ui.showToast(
+            "Cannot populate edit zone dialog: form elements missing.",
+            "error"
+          );
+          return;
         }
-    };
-}
+      }
 
+      const formatForTextarea = (fieldValue) => {
+        if (
+          typeof fieldValue === "object" &&
+          fieldValue !== null &&
+          !Array.isArray(fieldValue)
+        ) {
+          const isOpnSelectableObject = Object.values(fieldValue).some(
+            (item) =>
+              typeof item === "object" &&
+              item !== null &&
+              Object.prototype.hasOwnProperty.call(item, "selected") &&
+              Object.prototype.hasOwnProperty.call(item, "value")
+          );
 
-async function handleAddZone(name) {
-    try {
-        await getAPI('/zones', 'POST', { name });
-        showNotification('Zone added successfully!', 'success');
-        await loadZones(); // Reload all zones
-        renderZonesPage(); // Re-render the zones page
-    } catch (error) {
-        console.error('Error adding zone:', error);
-        showNotification(`Error adding zone: ${error.message}`, 'error');
-    }
-}
-
-async function handleEditZone(zoneId, name) {
-     try {
-        await getAPI(`/zones/${zoneId}`, 'PATCH', { name });
-        showNotification('Zone updated successfully!', 'success');
-        await loadZones(); // Reload all zones
-        renderZonesPage(); // Re-render the zones page
-    } catch (error) {
-        console.error('Error updating zone:', error);
-        showNotification(`Error updating zone: ${error.message}`, 'error');
-    }
-}
-
-function showDeleteZoneConfirm(zone) {
-    const modalId = `delete-zone-modal-${zone.id}`;
-    if (document.getElementById(modalId)) return;
-
-    const modalHTML = `
-        <div id="${modalId}" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-            <div class="relative mx-auto p-5 border w-full max-w-sm shadow-lg rounded-md bg-white dark:bg-gray-800">
-                <div class="mt-3 text-center">
-                     <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-800">
-                        <svg class="h-6 w-6 text-red-600 dark:text-red-300" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    </div>
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mt-2">Delete Zone</h3>
-                    <div class="mt-2 px-7 py-3">
-                        <p class="text-sm text-gray-500 dark:text-gray-300">Are you sure you want to delete "${zone.name}"? This action cannot be undone.</p>
-                    </div>
-                    <div class="items-center px-4 py-3">
-                        <button id="confirm-delete-${modalId}" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-red-700">Delete</button>
-                        <button id="cancel-delete-${modalId}" class="mt-2 px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-
-    const modal = document.getElementById(modalId);
-    document.getElementById(`confirm-delete-${modalId}`).onclick = async () => {
-        await handleDeleteZone(zone.id);
-        modal.remove();
-    };
-    document.getElementById(`cancel-delete-${modalId}`).onclick = () => modal.remove();
-}
-
-async function handleDeleteZone(zoneId) {
-    try {
-        await getAPI(`/zones/${zoneId}`, 'DELETE');
-        showNotification('Zone deleted successfully!', 'success');
-        
-        // If the deleted zone was the active one, reset it
-        if (activeZoneId === zoneId) {
-            localStorage.removeItem('activeZoneId');
-            activeZoneId = null;
+          if (isOpnSelectableObject) {
+            const selectedValues = [];
+            for (const key in fieldValue) {
+              if (
+                typeof fieldValue[key] === "object" &&
+                fieldValue[key] !== null &&
+                Object.prototype.hasOwnProperty.call(
+                  fieldValue[key],
+                  "selected"
+                ) &&
+                Object.prototype.hasOwnProperty.call(fieldValue[key], "value")
+              ) {
+                if (
+                  fieldValue[key].selected === 1 ||
+                  fieldValue[key].selected === "1" ||
+                  fieldValue[key].selected === true
+                ) {
+                  selectedValues.push(fieldValue[key].value);
+                }
+              }
+            }
+            return selectedValues.join(",");
+          } else {
+            return "";
+          }
         }
+        if (typeof fieldValue === "string") {
+          return fieldValue;
+        }
+        return "";
+      };
 
-        await loadZones(); // Reload all zones
-        renderZonesPage(); // Re-render the zones page
-    } catch(error) {
-        console.error('Error deleting zone:', error);
-        showNotification(`Error deleting zone: ${error.message}`, 'error');
-    }
-}
+      CPManager.elements.editZoneUuidInput.value = uuid;
+      CPManager.elements.editZoneModalTitleName.textContent =
+        zoneData.description ||
+        `Zone ${zoneData.zoneid || uuid.substring(0, 8)}`;
+      CPManager.elements.zoneEditDescriptionInput.value =
+        zoneData.description || "";
+
+      const isEnabled = zoneData.enabled === "1";
+      CPManager.elements.zoneEditEnabledCheckbox.checked = isEnabled;
+      CPManager.elements.zoneEditEnabledText.textContent = isEnabled
+        ? "Enabled"
+        : "Disabled";
+
+      CPManager.elements.zoneEditAllowedAddressesTextarea.value =
+        formatForTextarea(zoneData.allowedAddresses);
+      CPManager.elements.zoneEditAllowedMACAddressesTextarea.value =
+        formatForTextarea(zoneData.allowedMACAddresses);
+
+      CPManager.elements.zoneEditHardTimeoutInput.value =
+        zoneData.hardtimeout || "";
+      CPManager.elements.zoneEditIdleTimeoutInput.value =
+        zoneData.idletimeout || "";
+
+      const concurrentLoginsAllowed = zoneData.concurrentlogins === "1";
+      CPManager.elements.zoneEditConcurrentLoginsCheckbox.checked =
+        concurrentLoginsAllowed;
+      CPManager.elements.zoneEditConcurrentLoginsText.textContent =
+        concurrentLoginsAllowed ? "Allowed" : "Disallowed";
+
+      const templateSelect = CPManager.elements.zoneEditTemplateSelect;
+      templateSelect.innerHTML = '<option value="">-- Default --</option>';
+
+      CPManager.state.zones.customTemplates.forEach((template) => {
+        const option = document.createElement("option");
+        option.value = template.uuid;
+        option.textContent = template.name;
+        templateSelect.appendChild(option);
+      });
+
+      let selectedTemplateIdentifierFromZoneData = "";
+      if (typeof zoneData.template === "object" && zoneData.template !== null) {
+        for (const templateKey in zoneData.template) {
+          if (
+            zoneData.template[templateKey] &&
+            (zoneData.template[templateKey].selected === 1 ||
+              zoneData.template[templateKey].selected === "1")
+          ) {
+            selectedTemplateIdentifierFromZoneData = templateKey;
+            break;
+          }
+        }
+      } else if (typeof zoneData.template === "string" && zoneData.template) {
+        selectedTemplateIdentifierFromZoneData = zoneData.template;
+      }
+
+      if (
+        selectedTemplateIdentifierFromZoneData &&
+        CPManager.state.zones.customTemplates.some(
+          (t) => t.uuid === selectedTemplateIdentifierFromZoneData
+        )
+      ) {
+        templateSelect.value = selectedTemplateIdentifierFromZoneData;
+      } else {
+        templateSelect.value = "";
+      }
+    },
+
+    saveZoneSettings: async function () {
+      if (
+        !CPManager.elements.editZoneUuidInput ||
+        !CPManager.elements.submitEditZoneBtn
+      ) {
+        CPManager.ui.showToast(
+          "Zone UUID is missing or save button not found. Cannot save.",
+          "error"
+        );
+        console.error(
+          "Missing UUID input or submit button in saveZoneSettings."
+        );
+        return;
+      }
+      const uuid = CPManager.elements.editZoneUuidInput.value;
+
+      const zoneSettingsToUpdate = {
+        description: CPManager.elements.zoneEditDescriptionInput.value.trim(),
+        enabled: CPManager.elements.zoneEditEnabledCheckbox.checked ? "1" : "0",
+        allowedAddresses:
+          CPManager.elements.zoneEditAllowedAddressesTextarea.value.replace(
+            /\s+/g,
+            ""
+          ),
+        allowedMACAddresses:
+          CPManager.elements.zoneEditAllowedMACAddressesTextarea.value
+            .replace(/\s+/g, "")
+            .toLowerCase(),
+        hardtimeout:
+          CPManager.elements.zoneEditHardTimeoutInput.value.trim() || "0",
+        idletimeout:
+          CPManager.elements.zoneEditIdleTimeoutInput.value.trim() || "0",
+        concurrentlogins: CPManager.elements.zoneEditConcurrentLoginsCheckbox
+          .checked
+          ? "1"
+          : "0",
+        template: CPManager.elements.zoneEditTemplateSelect.value || "",
+      };
+
+      const finalApiPayload = {
+        zone: zoneSettingsToUpdate,
+      };
+
+      CPManager.elements.submitEditZoneBtn.disabled = true;
+      CPManager.elements.submitEditZoneBtn.innerHTML =
+        '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+
+      try {
+        const result = await CPManager.api.callApi(
+          `/settings/set_zone/${uuid}`,
+          "POST",
+          finalApiPayload
+        );
+
+        if (result && result.result === "saved") {
+          CPManager.ui.showToast(
+            `Zone settings updated for "${zoneSettingsToUpdate.description || uuid.substring(0, 8)}".`,
+            "success"
+          );
+          CPManager.ui.hideModal(CPManager.elements.editZoneModal);
+          CPManager.state.zones.originalFullDataForEdit = null;
+          CPManager.state.zones.currentPage = 1; // Reset page
+          await CPManager.zones.loadZoneInfo(true);
+
+          CPManager.ui.showToast(
+            "Applying changes by reconfiguring service...",
+            "info",
+            7000
+          );
+          const reconfigResult = await CPManager.api.callApi(
+            "/service/reconfigure",
+            "POST",
+            {}
+          );
+          if (
+            reconfigResult &&
+            (reconfigResult.status === "ok" ||
+              (reconfigResult.message &&
+                reconfigResult.message.toLowerCase().includes("ok")))
+          ) {
+            CPManager.ui.showToast(
+              "Captive portal service reconfigured successfully.",
+              "success"
+            );
+          } else {
+            CPManager.ui.showToast(
+              `Service reconfigure status: ${
+                reconfigResult
+                  ? reconfigResult.status ||
+                    reconfigResult.message ||
+                    JSON.stringify(reconfigResult)
+                  : "Unknown"
+              }. Manual check may be needed.`,
+              "warning",
+              10000
+            );
+          }
+        } else {
+          let errorMessage = `Failed to save zone settings: ${
+            result?.message || result?.result || "Unknown API error"
+          }`;
+          if (result && result.validations) {
+            for (const key in result.validations) {
+              errorMessage += `\n- ${key}: ${result.validations[key]}`;
+            }
+          }
+          CPManager.ui.showToast(errorMessage, "error", 10000);
+        }
+      } catch (error) {
+        console.error("Error during saveZoneSettings:", error.message);
+      } finally {
+        if (CPManager.elements.submitEditZoneBtn) {
+          CPManager.elements.submitEditZoneBtn.disabled = false;
+          CPManager.elements.submitEditZoneBtn.innerHTML = "Save Changes";
+        } else {
+          console.error(
+            "submitEditZoneBtn is null in finally block of saveZoneSettings. Cannot re-enable."
+          );
+        }
+      }
+    },
+
+    initializeZoneEventListeners: function () {
+      if (CPManager.elements.zoneListContainer) {
+        CPManager.elements.zoneListContainer.addEventListener(
+          "click",
+          async (e) => {
+            const summaryElement = e.target.closest(".zone-summary");
+            if (summaryElement) {
+              const card = summaryElement.closest(".zone-info-card");
+              const detailsContent = card.querySelector(
+                ".card-details-content"
+              );
+              this.handleZoneCardClick(card, detailsContent, summaryElement);
+              return;
+            }
+
+            const editButton = e.target.closest('[data-action="edit-zone"]');
+            if (editButton) {
+              e.stopPropagation();
+              const uuid = editButton.dataset.uuid;
+              if (uuid) {
+                CPManager.zones.fetchAndOpenEditZoneModal(uuid);
+              } else {
+                console.error(
+                  "Edit button clicked but no UUID found on dataset."
+                );
+              }
+            }
+          }
+        );
+      }
+
+      if (CPManager.elements.submitEditZoneBtn) {
+        if (!CPManager.elements.submitEditZoneBtn.dataset.listenerAttached) {
+          CPManager.elements.submitEditZoneBtn.addEventListener(
+            "click",
+            function () {
+              console.log(
+                "Save Changes button clicked (via initialized listener)."
+              );
+              CPManager.zones.saveZoneSettings();
+            }
+          );
+          CPManager.elements.submitEditZoneBtn.dataset.listenerAttached =
+            "true";
+        }
+      } else {
+        console.error(
+          "Submit Edit Zone Button (CPManager.elements.submitEditZoneBtn) not found during initializeZoneEventListeners."
+        );
+      }
+
+      if (CPManager.elements.cancelEditZoneBtn) {
+        if (!CPManager.elements.cancelEditZoneBtn.dataset.listenerAttached) {
+          CPManager.elements.cancelEditZoneBtn.addEventListener("click", () => {
+            CPManager.ui.hideModal(CPManager.elements.editZoneModal);
+            CPManager.state.zones.originalFullDataForEdit = null;
+          });
+          CPManager.elements.cancelEditZoneBtn.dataset.listenerAttached =
+            "true";
+        }
+      } else {
+        console.error(
+          "Cancel Edit Zone Button (CPManager.elements.cancelEditZoneBtn) not found during initializeZoneEventListeners."
+        );
+      }
+
+      if (
+        CPManager.elements.zoneEditEnabledCheckbox &&
+        CPManager.elements.zoneEditEnabledText
+      ) {
+        if (
+          !CPManager.elements.zoneEditEnabledCheckbox.dataset.listenerAttached
+        ) {
+          CPManager.elements.zoneEditEnabledCheckbox.addEventListener(
+            "change",
+            function () {
+              CPManager.elements.zoneEditEnabledText.textContent = this.checked
+                ? "Enabled"
+                : "Disabled";
+            }
+          );
+          CPManager.elements.zoneEditEnabledCheckbox.dataset.listenerAttached =
+            "true";
+        }
+      }
+      if (
+        CPManager.elements.zoneEditConcurrentLoginsCheckbox &&
+        CPManager.elements.zoneEditConcurrentLoginsText
+      ) {
+        if (
+          !CPManager.elements.zoneEditConcurrentLoginsCheckbox.dataset
+            .listenerAttached
+        ) {
+          CPManager.elements.zoneEditConcurrentLoginsCheckbox.addEventListener(
+            "change",
+            function () {
+              CPManager.elements.zoneEditConcurrentLoginsText.textContent = this
+                .checked
+                ? "Allowed"
+                : "Disallowed";
+            }
+          );
+          CPManager.elements.zoneEditConcurrentLoginsCheckbox.dataset.listenerAttached =
+            "true";
+        }
+      }
+    },
+  };
+})(CPManager);
