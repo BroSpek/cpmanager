@@ -433,7 +433,7 @@
         } else if (isEnabled) {
           // Default enabled button style (matches card/field)
           colorClasses =
-            " bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-gray-500 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700";
+            " bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-gray-500 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700";
         } else {
           // Disabled button style
           colorClasses =

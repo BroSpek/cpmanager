@@ -581,7 +581,7 @@
       paginatedVouchers.forEach((voucher) => {
         const card = document.createElement("div");
         card.className =
-          "voucher-card p-2 rounded-lg shadow border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600";
+          "voucher-card p-2 rounded-lg shadow border bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-600";
         const stateTagColor =
           voucher.state === "valid"
             ? "bg-green-500"

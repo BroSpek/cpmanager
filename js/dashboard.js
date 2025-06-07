@@ -146,15 +146,15 @@
         });
 
         let statsHtml = `
-					<div class="p-6 rounded-lg shadow border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-active-sessions-card" title="Go to Sessions tab" role="button" tabindex="0">
+					<div class="p-6 rounded-lg shadow border bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-600 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-active-sessions-card" title="Go to Sessions tab" role="button" tabindex="0">
 						<div class="text-4xl font-bold" style="color: var(--stat-value-color);">${activeSessionCount}</div>
 						<div class="text-sm mt-1" style="color: var(--stat-label-color);">Active Sessions</div>
 					</div>
-					<div class="p-6 rounded-lg shadow border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-configured-zones-card" title="Go to Zones tab" role="button" tabindex="0">
+					<div class="p-6 rounded-lg shadow border bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-600 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-configured-zones-card" title="Go to Zones tab" role="button" tabindex="0">
 						<div class="text-4xl font-bold" style="color: var(--stat-value-color);">${totalZonesCount}</div>
 						<div class="text-sm mt-1" style="color: var(--stat-label-color);">Configured Zones</div>
 					</div>
-					<div class="p-6 rounded-lg shadow border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
+					<div class="p-6 rounded-lg shadow border bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-600 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
 						<div class="grid grid-cols-2 gap-x-2 items-center">
 							<div class="mb-0">
 								<div class="text-4xl font-bold" style="color: var(--stat-value-color);">${totalVouchers}</div>

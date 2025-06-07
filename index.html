@@ -11,7 +11,7 @@
     <link rel="manifest" href="./manifest.json" />
     <link rel="apple-touch-icon" href="./icons/icon-192x192.png" />
     <link rel="icon" type="image/x-icon" href="./icons/favicon.ico" />
-    <title>Captive Portal Manager</title>  
+    <title>Captive Portal Manager</title>
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
       rel="stylesheet"
@@ -22,7 +22,9 @@
     <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body class="font-sans">
-    <nav class="p-4 shadow-md sticky top-0 z-20 flex-shrink-0 bg-slate-800 text-white">
+    <nav
+      class="p-4 shadow-md sticky top-0 z-20 flex-shrink-0 bg-slate-800 text-white"
+    >
       <div class="container mx-auto flex justify-between items-center">
         <h1 class="text-xl font-semibold">
           <i class="fas fa-shield-alt mr-2"></i>Captive Portal Manager
@@ -46,7 +48,10 @@
       </div>
     </nav>
 
-    <div id="main-content-scroll-area" class="flex-grow overflow-y-auto bg-slate-100 dark:bg-slate-900">
+    <div
+      id="main-content-scroll-area"
+      class="flex-grow overflow-y-auto bg-slate-100 dark:bg-slate-900"
+    >
       <div class="container mx-auto p-4">
         <div
           id="config-input-section"
@@ -94,7 +99,11 @@
               />
             </div>
             <div class="mt-4 grid grid-cols-2 gap-4">
-              <button id="save-api-creds-btn" type="button" class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-green-500 text-white hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed">
+              <button
+                id="save-api-creds-btn"
+                type="button"
+                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-green-500 text-white hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 Save Credentials
               </button>
               <button
@@ -153,7 +162,10 @@
           </ul>
         </div>
 
-        <div id="tabContent" class="p-4 rounded-lg shadow bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-200">
+        <div
+          id="tabContent"
+          class="p-4 rounded-lg shadow bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-200"
+        >
           <div id="dashboard-content" class="tab-pane">
             <h2 class="text-2xl font-semibold flex items-center mb-4">
               <i
@@ -161,14 +173,18 @@
               ></i
               >Overview Dashboard
             </h2>
-            <div class="p-3 mb-6 rounded-md border flex items-start bg-blue-50 dark:bg-sky-900/50 border-blue-200 dark:border-sky-700 text-gray-700 dark:text-sky-200">
-              <i class="fas fa-info-circle mr-2 mt-1 text-blue-500 dark:text-sky-300"></i>
+            <div
+              class="p-3 mb-6 rounded-md border flex items-start bg-blue-50 dark:bg-sky-900/50 border-blue-200 dark:border-sky-700 text-gray-700 dark:text-sky-200"
+            >
+              <i
+                class="fas fa-info-circle mr-2 mt-1 text-blue-500 dark:text-sky-300"
+              ></i>
               <span>Showing aggregated data for all configured zones.</span>
             </div>
             <div class="flex flex-col sm:flex-row gap-4">
               <div class="w-full sm:w-1/2 flex flex-col">
                 <div
-                  class="rounded-lg shadow p-4 sm:p-6 flex-1 flex flex-col overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                  class="rounded-lg shadow p-4 sm:p-6 flex-1 flex flex-col overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
                 >
                   <h3
                     class="text-lg font-semibold mb-2 text-center sm:text-left"
@@ -182,20 +198,29 @@
                     <div class="new-canvas-wrapper">
                       <canvas id="dataUsageCanvas"></canvas>
                     </div>
-                    <div id="donut-total-data" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10 text-lg font-semibold text-gray-800 dark:text-slate-200">
+                    <div
+                      id="donut-total-data"
+                      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10 text-lg font-semibold text-gray-800 dark:text-slate-200"
+                    >
                       0 MB
                     </div>
                   </div>
-                  <div class="legend-items flex flex-col items-center gap-2 mt-3 xl:flex-row xl:justify-center xl:gap-4">
-                    <div class="legend-item flex items-center text-sm transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold text-gray-600 dark:text-slate-400">
-                      <span class="w-3 h-3 mr-1 rounded-sm bg-blue-500"></span>Client
-                      Upload:
+                  <div
+                    class="legend-items flex flex-col items-center gap-2 mt-3 xl:flex-row xl:justify-center xl:gap-4"
+                  >
+                    <div
+                      class="legend-item flex items-center text-sm transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold text-gray-600 dark:text-slate-400"
+                    >
+                      <span class="w-3 h-3 mr-1 rounded-sm bg-blue-500"></span
+                      >Client Upload:
                       <span id="upload-legend-value" class="ml-1">0 Bytes</span>
                       <span id="upload-percentage" class="ml-1"></span>
                     </div>
-                    <div class="legend-item flex items-center text-sm transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold text-gray-600 dark:text-slate-400">
-                      <span class="w-3 h-3 mr-1 rounded-sm bg-green-500"></span>Client
-                      Download:
+                    <div
+                      class="legend-item flex items-center text-sm transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold text-gray-600 dark:text-slate-400"
+                    >
+                      <span class="w-3 h-3 mr-1 rounded-sm bg-green-500"></span
+                      >Client Download:
                       <span id="download-legend-value" class="ml-1"
                         >0 Bytes</span
                       >
@@ -254,7 +279,11 @@
               id="session-action-btn"
               class="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-4"
             >
-              <button id="find-my-session-btn" type="button" class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-sky-500 text-white hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed">
+              <button
+                id="find-my-session-btn"
+                type="button"
+                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-sky-500 text-white hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <i class="fas fa-street-view mr-2"></i>My Session
               </button>
               <button
@@ -303,7 +332,7 @@
             </h2>
             <div
               id="provider-zone-linkage-card"
-              class="p-3 rounded-lg shadow border relative mb-4 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600"
+              class="p-3 rounded-lg shadow border relative mb-4 bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-600"
             >
               <div
                 class="voucher-summary cursor-pointer pb-1"
@@ -342,7 +371,10 @@
                   class="block text-sm font-medium mb-1"
                   >Voucher Provider:</label
                 >
-                <select id="voucher-provider-select" class="w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600">
+                <select
+                  id="voucher-provider-select"
+                  class="w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                >
                   <option value="">Loading providers...</option>
                 </select>
               </div>
@@ -352,7 +384,10 @@
                   class="block text-sm font-medium mb-1"
                   >Voucher Group:</label
                 >
-                <select id="voucher-group-select" class="w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600">
+                <select
+                  id="voucher-group-select"
+                  class="w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                >
                   <option value="">Select a provider first...</option>
                 </select>
               </div>
@@ -419,7 +454,11 @@
               >
                 <i class="fas fa-trash-alt mr-2"></i>Drop Expired
               </button>
-              <button id="drop-voucher-group-btn" type="button" class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
+              <button
+                id="drop-voucher-group-btn"
+                type="button"
+                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <i class="fas fa-trash-alt mr-2"></i>Drop Group
               </button>
             </div>
@@ -862,7 +901,9 @@
       <p id="toast-message"></p>
     </div>
 
-    <footer class="text-center p-4 text-sm flex-shrink-0 border-t bg-slate-100 dark:bg-slate-900 text-gray-600 dark:text-slate-400 border-slate-200 dark:border-slate-700">
+    <footer
+      class="text-center p-4 text-sm flex-shrink-0 border-t bg-slate-100 dark:bg-slate-900 text-gray-600 dark:text-slate-400 border-slate-200 dark:border-slate-700"
+    >
       <p id="api-status-footer">
         API Status: <span class="font-semibold">Initializing...</span>
       </p>

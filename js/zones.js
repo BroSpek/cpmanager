@@ -109,7 +109,7 @@
         paginatedZones.forEach((zoneSummary) => {
           const zoneCard = document.createElement("div");
           zoneCard.className =
-            "zone-info-card p-2 rounded-lg shadow border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600";
+            "zone-info-card p-2 rounded-lg shadow border bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-600";
           zoneCard.setAttribute("role", "listitem");
           zoneCard.setAttribute(
             "aria-label",
