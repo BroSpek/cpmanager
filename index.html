@@ -258,11 +258,30 @@
                 <i class="fas fa-street-view mr-2"></i>My Session
               </button>
               <button
-                id="disconnect-all-sessions-btn"
+                id="disconnect-selected-sessions-btn"
                 class="btn btn-danger w-full"
+                disabled
               >
-                <i class="fas fa-broadcast-tower mr-2"></i>Disconnect All
+                <i class="fas fa-times-circle mr-2"></i>Disconnect
               </button>
+            </div>
+            <!-- Select All Container -->
+            <div id="session-select-all-container" class="mb-3 pl-2 hidden">
+              <label
+                for="session-select-all-checkbox"
+                class="flex items-center text-sm font-medium cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  id="session-select-all-checkbox"
+                  class="h-5 w-5 rounded border-gray-400 text-blue-600 focus:ring-blue-500 mr-2"
+                />
+                <span id="session-select-all-label">Select All</span>
+                <span
+                  id="session-selected-count-text"
+                  class="text-sm text-gray-600 dark:text-gray-400 ml-2"
+                ></span>
+              </label>
             </div>
             <div
               id="session-card-container"

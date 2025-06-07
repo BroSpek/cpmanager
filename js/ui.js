@@ -31,8 +31,17 @@
       "session-zone-filter-select"
     ),
     findMySessionBtn: document.getElementById("find-my-session-btn"),
-    disconnectAllSessionsBtn: document.getElementById(
-      "disconnect-all-sessions-btn"
+    disconnectSelectedSessionsBtn: document.getElementById(
+      "disconnect-selected-sessions-btn"
+    ),
+    sessionSelectAllContainer: document.getElementById(
+      "session-select-all-container"
+    ),
+    sessionSelectAllCheckbox: document.getElementById(
+      "session-select-all-checkbox"
+    ),
+    sessionSelectedCountText: document.getElementById(
+      "session-selected-count-text"
     ),
 
     // Vouchers Tab Elements
