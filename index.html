@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body class="font-sans">
-    <nav class="p-4 shadow-md sticky top-0 z-20 flex-shrink-0">
+    <nav class="p-4 shadow-md sticky top-0 z-20 flex-shrink-0" style="background-color: var(--nav-bg-color); color: var(--nav-text-color);">
       <div class="container mx-auto flex justify-between items-center">
         <h1 class="text-xl font-semibold">
           <i class="fas fa-shield-alt mr-2"></i>Captive Portal Manager
@@ -67,7 +67,8 @@
               <input
                 type="text"
                 id="config-api-base-url"
-                class="form-input mt-1 block w-full"
+                class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm"
+                style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
                 placeholder="e.g., https://192.168.1.1"
                 autocomplete="api-url"
               />
@@ -79,7 +80,8 @@
               <input
                 type="text"
                 id="config-api-key"
-                class="form-input mt-1 block w-full"
+                class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm"
+                style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
                 autocomplete="username"
               />
             </div>
@@ -90,17 +92,19 @@
               <input
                 type="password"
                 id="config-api-secret"
-                class="form-input mt-1 block w-full"
+                class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm"
+                style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
                 autocomplete="current-password"
               />
             </div>
             <div class="mt-4 flex space-x-4">
-              <button id="save-api-creds-btn" class="btn btn-success sm-w-auto">
+              <button id="save-api-creds-btn" type="button" class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full sm:w-auto transition-shadow duration-200 bg-green-500 text-white hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed">
                 Save Credentials
               </button>
               <button
                 id="clear-api-creds-btn"
-                class="btn btn-secondary sm-w-auto"
+                type="button"
+                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full sm:w-auto transition-shadow duration-200 bg-gray-500 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Clear Credentials
               </button>
@@ -153,7 +157,7 @@
           </ul>
         </div>
 
-        <div id="tabContent" class="p-4 rounded-lg shadow">
+        <div id="tabContent" class="p-4 rounded-lg shadow" style="background-color: var(--bg-secondary-color); color: var(--text-color);">
           <div id="dashboard-content" class="tab-pane">
             <h2 class="text-2xl font-semibold flex items-center mb-4">
               <i
@@ -161,14 +165,15 @@
               ></i
               >Overview Dashboard
             </h2>
-            <div class="hint-box hint-box-info">
-              <i class="fas fa-info-circle"></i>
+            <div class="p-3 mb-6 rounded-md border flex items-start" style="background-color: var(--hint-info-bg); border-color: var(--hint-info-border); color: var(--hint-info-text);">
+              <i class="fas fa-info-circle mr-2 mt-1" style="color: var(--hint-info-icon);"></i>
               <span>Showing aggregated data for all configured zones.</span>
             </div>
             <div class="flex flex-col sm:flex-row gap-4">
               <div class="w-full sm:w-1/2 flex flex-col">
                 <div
-                  class="content-card rounded-lg shadow p-4 sm:p-6 flex-1 flex flex-col overflow-hidden"
+                  class="rounded-lg shadow p-4 sm:p-6 flex-1 flex flex-col overflow-hidden"
+                  style="background-color: var(--card-bg);"
                 >
                   <h3
                     class="text-lg font-semibold mb-2 text-center sm:text-left"
@@ -182,19 +187,19 @@
                     <div class="new-canvas-wrapper">
                       <canvas id="dataUsageCanvas"></canvas>
                     </div>
-                    <div id="donut-total-data" class="donut-center-text">
+                    <div id="donut-total-data" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10 text-lg font-semibold" style="color: var(--donut-center-text-color);">
                       0 MB
                     </div>
                   </div>
-                  <div class="chart-legend mt-4">
-                    <div class="legend-item">
-                      <span class="legend-color-box bg-blue-500"></span>Client
+                  <div class="legend-items flex flex-col items-center gap-2 mt-3 sm:flex-row sm:justify-center sm:gap-4">
+                    <div class="legend-item flex items-center text-sm transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold" style="color: var(--legend-item-text-color);">
+                      <span class="w-3 h-3 mr-1 rounded-sm bg-blue-500"></span>Client
                       Upload:
                       <span id="upload-legend-value" class="ml-1">0 Bytes</span>
                       <span id="upload-percentage" class="ml-1"></span>
                     </div>
-                    <div class="legend-item">
-                      <span class="legend-color-box bg-green-500"></span>Client
+                    <div class="legend-item flex items-center text-sm transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold" style="color: var(--legend-item-text-color);">
+                      <span class="w-3 h-3 mr-1 rounded-sm bg-green-500"></span>Client
                       Download:
                       <span id="download-legend-value" class="ml-1"
                         >0 Bytes</span
@@ -232,7 +237,8 @@
                 <input
                   type="text"
                   id="session-search-input"
-                  class="form-input w-full"
+                  class="w-full py-2.5 px-3 border rounded-md shadow-sm"
+                  style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
                   placeholder="Search IP, MAC, User..."
                 />
               </div>
@@ -244,7 +250,8 @@
                 >
                 <select
                   id="session-zone-filter-select"
-                  class="form-select w-full"
+                  class="w-full py-2.5 px-3 border rounded-md shadow-sm"
+                  style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
                 >
                   <option value="">All Zones</option>
                 </select>
@@ -254,12 +261,13 @@
               id="session-action-btn"
               class="mb-4 grid grid-cols-2 md:grid-cols-4 gap-4"
             >
-              <button id="find-my-session-btn" class="btn btn-info w-full">
+              <button id="find-my-session-btn" type="button" class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-sky-500 text-white hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fas fa-street-view mr-2"></i>My Session
               </button>
               <button
                 id="disconnect-selected-sessions-btn"
-                class="btn btn-danger w-full"
+                type="button"
+                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled
               >
                 <i class="fas fa-times-circle mr-2"></i>Disconnect
@@ -302,10 +310,11 @@
             </h2>
             <div
               id="provider-zone-linkage-card"
-              class="content-card p-3 rounded-lg shadow border relative mb-4"
+              class="p-3 rounded-lg shadow border relative mb-4"
+              style="background-color: var(--card-bg); border-color: var(--card-border); color: var(--card-text);"
             >
               <div
-                class="card-summary cursor-pointer pb-1"
+                class="voucher-summary cursor-pointer pb-1"
                 role="button"
                 tabindex="0"
                 aria-expanded="false"
@@ -321,7 +330,7 @@
                 </div>
               </div>
               <div
-                class="card-details-content text-sm space-y-2"
+                class="card-details-content max-h-0 overflow-hidden transition-all duration-300 ease-out text-sm space-y-2"
                 id="provider-zone-linkage-details"
                 aria-hidden="true"
               >
@@ -341,7 +350,7 @@
                   class="block text-sm font-medium mb-1"
                   >Voucher Provider:</label
                 >
-                <select id="voucher-provider-select" class="form-select w-full">
+                <select id="voucher-provider-select" class="w-full py-2.5 px-3 border rounded-md shadow-sm" style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);">
                   <option value="">Loading providers...</option>
                 </select>
               </div>
@@ -351,7 +360,7 @@
                   class="block text-sm font-medium mb-1"
                   >Voucher Group:</label
                 >
-                <select id="voucher-group-select" class="form-select w-full">
+                <select id="voucher-group-select" class="w-full py-2.5 px-3 border rounded-md shadow-sm" style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);">
                   <option value="">Select a provider first...</option>
                 </select>
               </div>
@@ -370,7 +379,8 @@
                 <input
                   type="text"
                   id="voucher-search-input"
-                  class="form-input w-full"
+                  class="w-full py-2.5 px-3 border rounded-md shadow-sm"
+                  style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
                   placeholder="Enter voucher code..."
                 />
               </div>
@@ -382,7 +392,8 @@
                 >
                 <select
                   id="voucher-state-filter-select"
-                  class="form-select w-full"
+                  class="w-full py-2.5 px-3 border rounded-md shadow-sm"
+                  style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
                 >
                   <option value="">All States</option>
                   <option value="valid">Valid</option>
@@ -398,24 +409,27 @@
             >
               <button
                 id="create-vouchers-btn"
-                class="btn btn-primary w-full whitespace-nowrap"
+                type="button"
+                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 <i class="fas fa-plus-circle mr-2"></i>Create New
               </button>
               <button
                 id="void-selected-vouchers-btn"
-                class="btn btn-warning w-full"
+                type="button"
+                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled
               >
                 <i class="fas fa-times-circle mr-2"></i>Void Selected
               </button>
               <button
                 id="drop-expired-vouchers-btn"
-                class="btn btn-warning w-full"
+                type="button"
+                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <i class="fas fa-trash-alt mr-2"></i>Drop Expired
               </button>
-              <button id="drop-voucher-group-btn" class="btn btn-danger w-full">
+              <button id="drop-voucher-group-btn" type="button" class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fas fa-trash-alt mr-2"></i>Drop Group
               </button>
             </div>
@@ -459,7 +473,8 @@
             >
               <button
                 id="apply-cp-config-btn"
-                class="btn btn-success w-full"
+                type="button"
+                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-green-500 text-white hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Apply Captive Portal Configuration"
               >
                 <i class="fas fa-rotate mr-2"></i>Apply
@@ -480,10 +495,11 @@
 
     <div
       id="generateVoucherModal"
-      class="modal modal-inactive fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-20"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-20 hidden items-center justify-center"
     >
       <div
-        class="modal-content p-6 rounded-lg shadow-xl w-full max-w-md mx-auto"
+        class="p-6 rounded-lg shadow-xl w-full max-w-md mx-auto"
+        style="background-color: var(--modal-bg); color: var(--modal-text);"
       >
         <h3 class="text-xl font-semibold mb-6">Generate Vouchers</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -493,7 +509,8 @@
             >
             <select
               id="voucher-count-select"
-              class="form-select mt-1 block w-full"
+              class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm"
+              style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
             >
               <option value="1">1</option>
               <option value="5">5</option>
@@ -507,7 +524,8 @@
             <input
               type="number"
               id="voucher-count-custom"
-              class="form-input mt-2 block w-full hidden"
+              class="mt-2 block w-full hidden py-2.5 px-3 border rounded-md shadow-sm"
+              style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
               min="1"
               value="1"
             />
@@ -520,7 +538,8 @@
             >
             <select
               id="voucher-lifetime-select"
-              class="form-select mt-1 block w-full"
+              class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm"
+              style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
             >
               <option value="240" selected>4 hours</option>
               <option value="480">8 hours</option>
@@ -538,7 +557,8 @@
               type="number"
               id="voucher-lifetime-custom"
               placeholder="Minutes (min 1)"
-              class="form-input mt-2 block w-full hidden"
+              class="mt-2 block w-full hidden py-2.5 px-3 border rounded-md shadow-sm"
+              style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
               min="1"
             />
           </div>
@@ -548,7 +568,8 @@
             >
             <select
               id="voucher-usage-select"
-              class="form-select mt-1 block w-full"
+              class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm"
+              style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
             >
               <option value="0" selected>Never</option>
               <option value="6">6 hours</option>
@@ -571,7 +592,8 @@
               type="number"
               id="voucher-usage-custom"
               placeholder="Hours (0 for Never)"
-              class="form-input mt-2 block w-full hidden"
+              class="mt-2 block w-full hidden py-2.5 px-3 border rounded-md shadow-sm"
+              style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
               min="0"
             />
           </div>
@@ -583,7 +605,8 @@
               type="text"
               id="voucher-groupname"
               placeholder="Optional (timestamp if empty)"
-              class="form-input mt-1 block w-full"
+              class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm"
+              style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
             />
           </div>
           <div class="sm:col-span-2 mt-4">
@@ -627,13 +650,15 @@
         >
           <button
             id="cancel-generate-voucher-btn"
-            class="btn btn-secondary w-full sm:w-auto"
+            type="button"
+            class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full sm:w-auto transition-shadow duration-200 bg-gray-500 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             id="submit-generate-voucher-btn"
-            class="btn btn-primary w-full sm:w-auto"
+            type="button"
+            class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full sm:w-auto transition-shadow duration-200 bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Generate
           </button>
@@ -643,10 +668,11 @@
 
     <div
       id="confirmationModal"
-      class="modal modal-inactive fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-30"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-30 hidden items-center justify-center"
     >
       <div
-        class="modal-content p-6 rounded-lg shadow-xl w-full max-w-md mx-auto"
+        class="p-6 rounded-lg shadow-xl w-full max-w-md mx-auto"
+        style="background-color: var(--modal-bg); color: var(--modal-text);"
       >
         <h3 class="text-xl font-semibold mb-4" id="confirmationTitle">
           Confirm Action
@@ -657,13 +683,15 @@
         >
           <button
             id="confirm-cancel-btn"
-            class="btn btn-secondary w-full sm:w-auto"
+            type="button"
+            class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full sm:w-auto transition-shadow duration-200 bg-gray-500 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             id="confirm-proceed-btn"
-            class="btn btn-danger w-full sm:w-auto"
+            type="button"
+            class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full sm:w-auto transition-shadow duration-200 bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Proceed
           </button>
@@ -673,10 +701,11 @@
 
     <div
       id="editZoneModal"
-      class="modal modal-inactive fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-20"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-20 hidden items-center justify-center"
     >
       <div
-        class="modal-content p-6 rounded-lg shadow-xl w-full max-w-lg mx-auto"
+        class="p-6 rounded-lg shadow-xl w-full max-w-lg mx-auto"
+        style="background-color: var(--modal-bg); color: var(--modal-text);"
       >
         <h3 class="text-xl font-semibold mb-6">
           Edit Zone:
@@ -721,7 +750,8 @@
               <input
                 type="text"
                 id="zone-edit-description"
-                class="form-input mt-1 block w-full"
+                class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm"
+                style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
               />
             </div>
           </div>
@@ -736,7 +766,8 @@
               <input
                 type="number"
                 id="zone-edit-hardtimeout"
-                class="form-input mt-1 block w-full"
+                class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm"
+                style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
                 min="0"
                 placeholder="e.g., 1440 for 1 day"
               />
@@ -750,7 +781,8 @@
               <input
                 type="number"
                 id="zone-edit-idletimeout"
-                class="form-input mt-1 block w-full"
+                class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm"
+                style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
                 min="0"
                 placeholder="e.g., 60 for 1 hour"
               />
@@ -791,7 +823,8 @@
               >
               <select
                 id="zone-edit-template"
-                class="form-select mt-1 block w-full"
+                class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm"
+                style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
               >
                 <option value="">Default</option>
               </select>
@@ -806,7 +839,8 @@
             >
             <textarea
               id="zone-edit-allowedAddresses"
-              class="form-input mt-1 block w-full"
+              class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm"
+              style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
               rows="3"
               placeholder="192.168.1.2,192.168.1.100-200,10.0.0.0/24"
             ></textarea>
@@ -819,7 +853,8 @@
             >
             <textarea
               id="zone-edit-allowedMACAddresses"
-              class="form-input mt-1 block w-full"
+              class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm"
+              style="background-color: var(--form-input-bg); color: var(--form-input-text); border-color: var(--form-input-border);"
               rows="3"
               placeholder="00:11:22:aa:bb:cc,aa:bb:cc:dd:ee:ff"
             ></textarea>
@@ -830,13 +865,15 @@
         >
           <button
             id="cancel-edit-zone-btn"
-            class="btn btn-secondary w-full sm:w-auto"
+            type="button"
+            class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full sm:w-auto transition-shadow duration-200 bg-gray-500 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             id="submit-edit-zone-btn"
-            class="btn btn-primary w-full sm:w-auto"
+            type="button"
+            class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full sm:w-auto transition-shadow duration-200 bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Save Changes
           </button>
@@ -851,7 +888,7 @@
       <p id="toast-message"></p>
     </div>
 
-    <footer class="text-center p-4 text-sm flex-shrink-0 border-t">
+    <footer class="text-center p-4 text-sm flex-shrink-0 border-t" style="background-color: var(--footer-bg-color); color: var(--footer-text-color); border-top-color: var(--border-color);">
       <p id="api-status-footer">
         API Status: <span class="font-semibold">Initializing...</span>
       </p>

@@ -54,9 +54,9 @@
       } else {
         console.log("Fetching fresh dashboard data or cache expired/forced.");
         CPManager.elements.dashboardStatsContainer.innerHTML = `
-					<div class="stat-card skeleton-card"></div>
-					<div class="stat-card skeleton-card"></div>
-					<div class="stat-card skeleton-card"></div>`;
+					<div class="skeleton-card"></div>
+					<div class="skeleton-card"></div>
+					<div class="skeleton-card"></div>`;
         CPManager.elements.donutTotalData.textContent =
           CPManager.config.placeholderValue;
         CPManager.elements.uploadLegendValue.textContent =
@@ -66,12 +66,9 @@
         CPManager.elements.uploadPercentageSpan.textContent = "";
         CPManager.elements.downloadPercentageSpan.textContent = "";
 
-        // If forcing refresh or chart doesn't exist, ensure it's ready to be recreated
-        // The actual destruction/recreation related to theme is handled by handleThemeChange
-        if (forceRefresh && !CPManager.state.dashboard.chartInstance) {
-          // This condition is a bit nuanced. forceRefresh implies data reload.
-          // Theme change is handled separately. If chartInstance is null here,
-          // it will be created later.
+        if (CPManager.state.dashboard.chartInstance) {
+          CPManager.state.dashboard.chartInstance.destroy();
+          CPManager.state.dashboard.chartInstance = null;
         }
       }
 
@@ -149,23 +146,23 @@
         });
 
         let statsHtml = `
-					<div class="stat-card interactive" id="dashboard-active-sessions-card" title="Go to Sessions tab" role="button" tabindex="0">
-						<div class="stat-value">${activeSessionCount}</div>
-						<div class="stat-label">Active Sessions</div>
+					<div class="p-6 rounded-lg shadow-md text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-active-sessions-card" title="Go to Sessions tab" role="button" tabindex="0" style="background-color: var(--card-bg);">
+						<div class="text-4xl font-bold" style="color: var(--stat-value-color);">${activeSessionCount}</div>
+						<div class="text-sm mt-1" style="color: var(--stat-label-color);">Active Sessions</div>
 					</div>
-					<div class="stat-card interactive" id="dashboard-configured-zones-card" title="Go to Zones tab" role="button" tabindex="0">
-						<div class="stat-value">${totalZonesCount}</div>
-						<div class="stat-label">Configured Zones</div>
+					<div class="p-6 rounded-lg shadow-md text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-configured-zones-card" title="Go to Zones tab" role="button" tabindex="0" style="background-color: var(--card-bg);">
+						<div class="text-4xl font-bold" style="color: var(--stat-value-color);">${totalZonesCount}</div>
+						<div class="text-sm mt-1" style="color: var(--stat-label-color);">Configured Zones</div>
 					</div>
-					<div class="stat-card interactive" id="dashboard-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
+					<div class="p-6 rounded-lg shadow-md text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0" style="background-color: var(--card-bg);">
 						<div class="grid grid-cols-2 gap-x-2 items-center">
-							<div class="voucher-stat-card-inner mb-0">
-								<div class="stat-value">${totalVouchers}</div>
-								<div class="stat-label">Total Vouchers</div>
+							<div class="mb-0">
+								<div class="text-4xl font-bold" style="color: var(--stat-value-color);">${totalVouchers}</div>
+								<div class="text-sm mt-1" style="color: var(--stat-label-color);">Total Vouchers</div>
 							</div>
-							<div class="voucher-stat-card-inner">
-								<div class="stat-value">${activeVouchers}</div>
-								<div class="stat-label">Active Vouchers</div>
+							<div>
+								<div class="text-4xl font-bold" style="color: var(--stat-value-color);">${activeVouchers}</div>
+								<div class="text-sm mt-1" style="color: var(--stat-label-color);">Active Vouchers</div>
 							</div>
 						</div>
 					</div>`;
@@ -205,12 +202,12 @@
         const currentTotalData =
           totalClientUploadBytes + totalClientDownloadBytes;
         if (
-          forceRefresh || // Always update chart if forcing refresh (data might be same, but visual aspects might need it)
+          forceRefresh ||
           totalClientUploadBytes !==
             CPManager.state.dashboard.originalUploadBytes ||
           totalClientDownloadBytes !==
             CPManager.state.dashboard.originalDownloadBytes ||
-          !CPManager.state.dashboard.chartInstance // Create if doesn't exist
+          !CPManager.state.dashboard.chartInstance
         ) {
           CPManager.dashboard.storeOriginalChartData(
             totalClientUploadBytes,
@@ -360,16 +357,7 @@
         CPManager.state.dashboard.chartInstance = null;
         console.log("Dashboard chart instance destroyed for theme change.");
       }
-      // Reset original data so chart is fully reconstructed with new theme styles
-      // This ensures that if data is fetched from cache, the chart still gets new theme styles.
-      // If loadDashboardData is called with forceRefresh=true, it will fetch new data anyway.
-      // If forceRefresh=false, it will use cached data but the chart will be new.
-      // We need to ensure storeOriginalChartData is called with the current actual data before chart recreation.
-      // This will be handled by loadDashboardData itself.
 
-      // Force a reload of dashboard data which will recreate the chart
-      // with new theme-dependent colors if necessary.
-      // Pass true to ensure chart is recreated with current theme settings
       await CPManager.dashboard.loadDashboardData(true);
     },
 

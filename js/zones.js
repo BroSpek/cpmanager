@@ -108,68 +108,48 @@
 
         paginatedZones.forEach((zoneSummary) => {
           const zoneCard = document.createElement("div");
-          zoneCard.className =
-            "zone-info-card p-3 rounded-lg shadow border relative";
+          zoneCard.className = "zone-info-card p-2 rounded-lg shadow border";
           zoneCard.setAttribute("role", "listitem");
           zoneCard.setAttribute(
             "aria-label",
             `Zone: ${zoneSummary.description || `Zone ID ${zoneSummary.zoneid}`}`
           );
+          zoneCard.style.backgroundColor = "var(--card-bg)";
+          zoneCard.style.borderColor = "var(--card-border)";
+          zoneCard.style.color = "var(--card-text)";
 
           const statusText =
             zoneSummary.enabled === "1" ? "Enabled" : "Disabled";
           const statusColor =
             zoneSummary.enabled === "1" ? "bg-green-500" : "bg-red-500";
 
+          const statusTag = `<span class="py-0.5 px-1.5 text-xs rounded-sm text-white max-w-[100px] whitespace-nowrap overflow-hidden text-ellipsis ${statusColor}" title="Status: ${statusText}">${statusText}</span>`;
+          const cardSummaryId = `zone-summary-${zoneSummary.uuid}`;
+          const cardDetailsId = `zone-details-${zoneSummary.uuid}`;
+
           zoneCard.innerHTML = `
-            <div class="tags-container">
-              <span class="info-tag ${statusColor} truncate" title="Status: ${statusText}">${statusText}</span>
+            <div class="flex justify-end items-center mb-1">
+                <div class="flex items-center gap-1">
+                    ${statusTag}
+                </div>
             </div>
-            <div class="card-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="zone-details-${
-              zoneSummary.uuid
-            }">
-              <div class="info-row"><span class="info-label">Name</span><span class="info-value summary-main-value">${
+            <div id="${cardSummaryId}" class="zone-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="${cardDetailsId}">
+              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Name</span><span class="text-sm text-right font-semibold break-all flex-grow" style="color: var(--card-info-value-main-color);">${
                 zoneSummary.description ||
                 `Unnamed Zone (ID: ${zoneSummary.zoneid})`
               }</span></div>
-              <div class="info-row"><span class="info-label">Zone ID</span><span class="info-value summary-main-value">${
+              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Zone ID</span><span class="text-sm text-right font-semibold break-all flex-grow" style="color: var(--card-info-value-main-color);">${
                 zoneSummary.zoneid
               }</span></div>
-              <div class="info-row"><span class="info-label">Short UUID</span><span class="info-value summary-main-value">${zoneSummary.uuid.substring(
+              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Short UUID</span><span class="text-sm text-right font-semibold break-all flex-grow" style="color: var(--card-info-value-main-color);">${zoneSummary.uuid.substring(
                 0,
                 8
               )}...</span></div>
             </div>
-            <div class="card-details-content text-sm space-y-1" id="zone-details-${
-              zoneSummary.uuid
-            }" aria-hidden="true">Loading details...</div>`;
+            <div class="card-details-content max-h-0 overflow-hidden transition-all duration-300 ease-out text-sm space-y-1" id="${cardDetailsId}" aria-hidden="true">Loading details...</div>`;
           zoneCard.dataset.uuid = zoneSummary.uuid;
           zoneCard.dataset.initialZoneid = zoneSummary.zoneid;
           CPManager.elements.zoneListContainer.appendChild(zoneCard);
-
-          const summaryElement = zoneCard.querySelector(".card-summary");
-          const detailsContent = zoneCard.querySelector(
-            ".card-details-content"
-          );
-          if (summaryElement && detailsContent) {
-            summaryElement.addEventListener("click", () => {
-              CPManager.zones.handleZoneCardClick(
-                zoneCard,
-                detailsContent,
-                summaryElement
-              );
-            });
-            summaryElement.addEventListener("keydown", (e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                CPManager.zones.handleZoneCardClick(
-                  zoneCard,
-                  detailsContent,
-                  summaryElement
-                );
-              }
-            });
-          }
         });
         CPManager.ui.renderPaginationControls(
           CPManager.elements.zonePaginationContainer,
@@ -192,20 +172,9 @@
       }
     },
 
-    handleZoneCardClick: async function (
-      card,
-      detailsContainer,
-      summaryElement
-    ) {
-      // const isCurrentlyExpanded = detailsContainer.classList.contains("expanded");
-      CPManager.ui.toggleCardDetails(
-        card,
-        CPManager.elements.zoneListContainer
-      );
+    handleZoneCardClick: async function (card, detailsContainer) {
+      CPManager.ui.toggleCardDetails(card);
       const isNowExpanded = detailsContainer.classList.contains("expanded");
-
-      summaryElement.setAttribute("aria-expanded", String(isNowExpanded));
-      detailsContainer.setAttribute("aria-hidden", String(!isNowExpanded));
 
       if (
         isNowExpanded &&
@@ -227,7 +196,7 @@
               String(value).trim() === ""
                 ? CPManager.config.placeholderValue
                 : String(value);
-            return `<div class="info-row"><span class="info-label">${label}</span> <span class="info-value">${displayValue}</span></div>`;
+            return `<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">${label}</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${displayValue}</span></div>`;
           };
 
           detailsHtml += createInfoRowDiv("UUID", uuid);
@@ -296,7 +265,7 @@
                   (v_obj) =>
                     typeof v_obj === "object" &&
                     v_obj !== null &&
-                    Object.prototype.hasOwnProperty.call(v_obj, "selected") // Fixed: no-prototype-builtins
+                    Object.prototype.hasOwnProperty.call(v_obj, "selected")
                 )
               ) {
                 displayValue = CPManager.utils.formatOpnsenseSelectable(value);
@@ -327,7 +296,7 @@
 
           detailsHtml += `
             <p class="mt-3">
-              <button class="btn btn-secondary btn-sm w-full" data-action="edit-zone" data-uuid="${uuid}">
+              <button class="py-2 px-4 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-gray-500 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" data-action="edit-zone" data-uuid="${uuid}">
                 <i class="fas fa-edit mr-1"></i> Edit Zone Settings
               </button>
             </p>
@@ -369,8 +338,8 @@
             CPManager.elements.cancelEditZoneBtn.disabled = false;
           }
 
-          CPManager.elements.editZoneModal.classList.remove("modal-inactive");
-          CPManager.elements.editZoneModal.classList.add("modal-active");
+          CPManager.elements.editZoneModal.classList.remove("hidden");
+          CPManager.elements.editZoneModal.classList.add("flex");
           if (CPManager.elements.zoneEditDescriptionInput)
             CPManager.elements.zoneEditDescriptionInput.focus();
         } else {
@@ -422,8 +391,8 @@
             (item) =>
               typeof item === "object" &&
               item !== null &&
-              Object.prototype.hasOwnProperty.call(item, "selected") && // Fixed: no-prototype-builtins
-              Object.prototype.hasOwnProperty.call(item, "value") // Fixed: no-prototype-builtins
+              Object.prototype.hasOwnProperty.call(item, "selected") &&
+              Object.prototype.hasOwnProperty.call(item, "value")
           );
 
           if (isOpnSelectableObject) {
@@ -435,8 +404,8 @@
                 Object.prototype.hasOwnProperty.call(
                   fieldValue[key],
                   "selected"
-                ) && // Fixed: no-prototype-builtins
-                Object.prototype.hasOwnProperty.call(fieldValue[key], "value") // Fixed: no-prototype-builtins
+                ) &&
+                Object.prototype.hasOwnProperty.call(fieldValue[key], "value")
               ) {
                 if (
                   fieldValue[key].selected === 1 ||
@@ -652,6 +621,16 @@
         CPManager.elements.zoneListContainer.addEventListener(
           "click",
           async (e) => {
+            const summaryElement = e.target.closest(".zone-summary");
+            if (summaryElement) {
+              const card = summaryElement.closest(".zone-info-card");
+              const detailsContent = card.querySelector(
+                ".card-details-content"
+              );
+              this.handleZoneCardClick(card, detailsContent, summaryElement);
+              return;
+            }
+
             const editButton = e.target.closest('[data-action="edit-zone"]');
             if (editButton) {
               e.stopPropagation();

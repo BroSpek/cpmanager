@@ -116,20 +116,22 @@
     initializeProviderZoneLinkageCard: function () {
       const card = CPManager.elements.providerZoneLinkageCard;
       if (!card || card.dataset.listenerAttached === "true") return;
-      const summaryElement = card.querySelector(".card-summary");
+
+      const summaryElement = card.querySelector(".voucher-summary"); // Corrected selector
       const detailsContent = CPManager.elements.providerZoneLinkageDetails;
-      const icon = summaryElement
-        ? summaryElement.querySelector("i.fas")
-        : null;
+
       if (summaryElement && detailsContent) {
         summaryElement.addEventListener("click", () => {
-          const isExpanded = detailsContent.classList.toggle("expanded");
-          detailsContent.setAttribute("aria-hidden", String(!isExpanded));
-          summaryElement.setAttribute("aria-expanded", String(isExpanded));
-          if (icon) icon.classList.toggle("fa-chevron-up", isExpanded);
-          if (isExpanded && detailsContent.innerHTML.includes("Loading"))
+          // Use the centralized toggle function
+          CPManager.ui.toggleCardDetails(card);
+
+          // Load content only when expanding
+          const isExpanded = detailsContent.classList.contains("expanded");
+          if (isExpanded && detailsContent.innerHTML.includes("Loading")) {
             this.displayProviderZoneLinkage();
+          }
         });
+
         summaryElement.addEventListener("keydown", (e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
@@ -579,6 +581,9 @@
       paginatedVouchers.forEach((voucher) => {
         const card = document.createElement("div");
         card.className = "voucher-card p-2 rounded-lg shadow border group";
+        card.style.backgroundColor = "var(--card-bg)";
+        card.style.borderColor = "var(--card-border)";
+        card.style.color = "var(--card-text)";
         const stateTagColor =
           voucher.state === "valid"
             ? "bg-green-500"
@@ -587,8 +592,10 @@
               : "bg-red-500";
         const isChecked = this.selectedVouchers.has(voucher.username);
         const isExpired = voucher.state === "expired";
-        const checkboxHTML = `<div class="flex-shrink-0"><input type="checkbox" class="voucher-select-checkbox form-checkbox h-5 w-5" data-voucher-username="${voucher.username}" ${isChecked ? "checked" : ""} ${isExpired ? "disabled" : ""}></div>`;
-        card.innerHTML = `<div class="flex justify-between items-center mb-1">${checkboxHTML}<div class="flex items-center"><span class="info-tag ${stateTagColor} truncate" title="State: ${voucher.state}">${voucher.state}</span></div></div><div class="card-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false"><div class="info-row"><span class="info-label text-sm">Voucher Code</span><span class="info-value summary-main-value text-sm">${voucher.username}</span></div></div><div class="card-details-content text-sm space-y-1" id="voucher-details-${voucher.username}" aria-hidden="true"><div class="info-row"><span class="info-label">Validity</span> <span class="info-value">${CPManager.utils.formatDuration(voucher.validity, "seconds")}</span></div><div class="info-row"><span class="info-label">Start Time</span> <span class="info-value">${CPManager.utils.formatVoucherTimestamp(voucher.starttime)}</span></div><div class="info-row"><span class="info-label">End Time</span> <span class="info-value">${CPManager.utils.formatVoucherTimestamp(voucher.endtime)}</span></div><div class="info-row"><span class="info-label">Expires At</span><span class="info-value">${voucher.expirytime && voucher.expirytime !== 0 ? CPManager.utils.formatVoucherTimestamp(voucher.expirytime) : "Never"}</span></div></div>`;
+        const checkboxHTML = `<div class="flex-shrink-0"><input type="checkbox" class="voucher-select-checkbox h-5 w-5 rounded border-gray-400 text-blue-600 focus:ring-blue-500" data-voucher-username="${voucher.username}" ${isChecked ? "checked" : ""} ${isExpired ? "disabled" : ""}></div>`;
+        const cardSummaryId = `voucher-summary-${voucher.username}`;
+        const cardDetailsId = `voucher-details-${voucher.username}`;
+        card.innerHTML = `<div class="flex justify-between items-center mb-1">${checkboxHTML}<div class="flex items-center"><span class="py-0.5 px-1.5 text-xs rounded-sm text-white max-w-[100px] whitespace-nowrap overflow-hidden text-ellipsis ${stateTagColor}" title="State: ${voucher.state}">${voucher.state}</span></div></div><div id="${cardSummaryId}" class="voucher-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false"><div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Voucher Code</span><span class="text-sm text-right font-semibold break-all flex-grow" style="color: var(--card-info-value-main-color);">${voucher.username}</span></div></div><div class="card-details-content max-h-0 overflow-hidden transition-all duration-300 ease-out text-sm space-y-1" id="${cardDetailsId}" aria-hidden="true"><div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Validity</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${CPManager.utils.formatDuration(voucher.validity, "seconds")}</span></div><div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Start Time</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${CPManager.utils.formatVoucherTimestamp(voucher.starttime)}</span></div><div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">End Time</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${CPManager.utils.formatVoucherTimestamp(voucher.endtime)}</span></div><div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Expires At</span><span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${voucher.expirytime && voucher.expirytime !== 0 ? CPManager.utils.formatVoucherTimestamp(voucher.expirytime) : "Never"}</span></div></div>`;
         container.appendChild(card);
       });
       CPManager.ui.renderPaginationControls(
@@ -767,10 +774,8 @@
         'input[name="voucher-output-format"][value="card"]'
       );
       if (cardOutputRadio) cardOutputRadio.checked = true;
-      CPManager.elements.generateVoucherModal.classList.remove(
-        "modal-inactive"
-      );
-      CPManager.elements.generateVoucherModal.classList.add("modal-active");
+      CPManager.elements.generateVoucherModal.classList.remove("hidden");
+      CPManager.elements.generateVoucherModal.classList.add("flex");
       if (CPManager.elements.voucherCountSelect)
         CPManager.elements.voucherCountSelect.focus();
     },
@@ -1351,14 +1356,10 @@
               this.updateSelectAllUI();
               return;
             }
-            const summary = e.target.closest(".card-summary");
+            const summary = e.target.closest(".voucher-summary");
             if (summary) {
               const card = summary.closest(".voucher-card");
-              if (card)
-                CPManager.ui.toggleCardDetails(
-                  card,
-                  CPManager.elements.voucherCardContainer
-                );
+              if (card) CPManager.ui.toggleCardDetails(card);
             }
           }
         );

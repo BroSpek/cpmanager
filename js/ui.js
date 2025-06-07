@@ -149,7 +149,7 @@
     downloadLegendValue: document.getElementById("download-legend-value"),
     uploadPercentageSpan: document.getElementById("upload-percentage"),
     downloadPercentageSpan: document.getElementById("download-percentage"),
-    legendItems: document.querySelectorAll(".chart-legend .legend-item"),
+    legendItems: document.querySelectorAll(".legend-item"),
   };
 
   // --- UI State & Helpers for Pagination Resize ---
@@ -226,8 +226,8 @@
       confirmationTitle.textContent = title;
       confirmationMessage.innerHTML = message;
       CPManager.state.confirmCallback = callback;
-      confirmationModal.classList.remove("modal-inactive");
-      confirmationModal.classList.add("modal-active");
+      confirmationModal.classList.remove("hidden");
+      confirmationModal.classList.add("flex");
     },
 
     /**
@@ -235,45 +235,65 @@
      */
     hideModal: function (modalElement) {
       if (modalElement) {
-        modalElement.classList.add("modal-inactive");
-        modalElement.classList.remove("modal-active");
+        modalElement.classList.add("hidden");
+        modalElement.classList.remove("flex");
       }
     },
 
     /**
      * Toggles card details visibility.
      */
-    toggleCardDetails: function (clickedCard, container) {
-      const cardClass = clickedCard.classList[0];
-      if (!cardClass) return;
-      const allCardsInContainer = container.querySelectorAll(`.${cardClass}`);
+    toggleCardDetails: function (clickedCard) {
+      if (!clickedCard) return;
       const detailsContent = clickedCard.querySelector(".card-details-content");
       if (!detailsContent) return;
 
-      allCardsInContainer.forEach((card) => {
-        if (card !== clickedCard) {
-          const otherDetails = card.querySelector(".card-details-content");
-          if (otherDetails && otherDetails.classList.contains("expanded")) {
-            otherDetails.classList.remove("expanded");
-            if (card.querySelector(".card-summary"))
-              card
-                .querySelector(".card-summary")
-                .setAttribute("aria-expanded", "false");
-            otherDetails.setAttribute("aria-hidden", "true");
-          }
-        }
-      });
-      detailsContent.classList.toggle("expanded");
-      const summary = clickedCard.querySelector(".card-summary");
-      if (summary)
-        summary.setAttribute(
-          "aria-expanded",
-          detailsContent.classList.contains("expanded")
+      const isCurrentlyExpanded = detailsContent.classList.contains("expanded");
+
+      // Find all cards in the same tab pane and close them
+      const activePane = clickedCard.closest(".tab-pane");
+      if (activePane) {
+        const allCards = activePane.querySelectorAll(
+          ".session-card, .voucher-card, .zone-info-card, #provider-zone-linkage-card"
         );
-      detailsContent.setAttribute(
-        "aria-hidden",
-        !detailsContent.classList.contains("expanded")
+        allCards.forEach((card) => {
+          if (card !== clickedCard) {
+            const otherDetails = card.querySelector(".card-details-content");
+            if (otherDetails && otherDetails.classList.contains("expanded")) {
+              otherDetails.classList.remove("expanded");
+              otherDetails.setAttribute("aria-hidden", "true");
+              const otherSummary = card.querySelector(
+                ".voucher-summary, .session-summary, .zone-summary"
+              );
+              if (otherSummary) {
+                otherSummary.setAttribute("aria-expanded", "false");
+                const icon = otherSummary.querySelector(
+                  "i.fas.fa-chevron-down"
+                );
+                if (icon) {
+                  icon.style.transform = ""; // Reset rotation
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // Now, toggle the clicked card's state. If it was already expanded, it will now be closed.
+      detailsContent.classList.toggle("expanded", !isCurrentlyExpanded);
+      const isNowExpanded = !isCurrentlyExpanded;
+      detailsContent.setAttribute("aria-hidden", String(!isNowExpanded));
+
+      const summary = clickedCard.querySelector(
+        ".voucher-summary, .session-summary, .zone-summary"
       );
+      if (summary) {
+        summary.setAttribute("aria-expanded", String(isNowExpanded));
+        const icon = summary.querySelector("i.fas.fa-chevron-down");
+        if (icon) {
+          icon.style.transform = isNowExpanded ? "rotate(180deg)" : "";
+        }
+      }
     },
 
     /**
@@ -366,12 +386,14 @@
       nav.className =
         "flex items-center justify-between px-4 py-3 sm:px-6 mt-6";
       nav.setAttribute("aria-label", "Pagination");
+      nav.style.backgroundColor = "var(--bg-secondary-color)";
+      nav.classList.add("rounded-md");
 
       const summaryDiv = document.createElement("div");
       summaryDiv.className = "sm:block";
       const startItem = (currentPage - 1) * itemsPerPage + 1;
       const endItem = Math.min(currentPage * itemsPerPage, totalItems);
-      summaryDiv.innerHTML = `<p class="text-sm text-gray-700 dark:text-slate-300">Showing <span class="font-medium">${startItem}</span> to <span class="font-medium">${endItem}</span> of <span class="font-medium">${totalItems}</span> results</p>`;
+      summaryDiv.innerHTML = `<p class="text-sm" style="color: var(--text-secondary-color)">Showing <span class="font-medium" style="color: var(--text-color);">${startItem}</span> to <span class="font-medium" style="color: var(--text-color);">${endItem}</span> of <span class="font-medium" style="color: var(--text-color);">${totalItems}</span> results</p>`;
       nav.appendChild(summaryDiv);
 
       const buttonsOuterDiv = document.createElement("div");
@@ -399,23 +421,33 @@
             : `Go to page ${pageNum}`
         );
         let baseClasses =
-          "relative inline-flex items-center justify-center text-sm font-medium focus:z-20 transition-colors duration-150 ease-in-out ";
-        let sizeClasses = isIcon ? "p-2.5 " : "px-4 py-2 ";
+          "relative inline-flex items-center justify-center text-sm font-medium focus:z-20 transition-all duration-150 ease-in-out border";
+        let sizeClasses = isIcon ? " p-2.5" : " px-4 py-2";
         let colorClasses = "";
+
+        button.style.borderColor = "var(--border-secondary-color)";
+
         if (isCurrent) {
-          colorClasses =
-            "bg-blue-600 text-white border-blue-600 hover:bg-blue-700 z-10 ";
+          colorClasses = " z-10";
+          button.style.backgroundColor = "var(--tab-active-border-color)";
+          button.style.color = "var(--nav-text-color)";
+          button.style.borderColor = "var(--tab-active-border-color)";
           button.setAttribute("aria-current", "page");
         } else if (isEnabled) {
-          colorClasses =
-            "bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 ";
+          button.style.backgroundColor = "var(--form-input-bg)";
+          button.style.color = "var(--text-secondary-color)";
         } else {
-          colorClasses =
-            "bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-slate-500 border-gray-300 dark:border-slate-600 cursor-not-allowed ";
+          colorClasses = " cursor-not-allowed";
+          button.style.backgroundColor = "var(--bg-color)";
+          button.style.color = "var(--border-secondary-color)";
+          button.style.opacity = "0.5";
         }
+
         button.className = baseClasses + sizeClasses + colorClasses;
-        if (isEnabled && !isCurrent)
+
+        if (isEnabled && !isCurrent) {
           button.addEventListener("click", () => onPageChangeCallback(pageNum));
+        }
         button.disabled = !isEnabled;
         return button;
       };
@@ -429,14 +461,12 @@
       prevButton.classList.add("rounded-l-lg");
       buttonsInnerDiv.appendChild(prevButton);
 
-      // Reverted pageRangeDisplayed logic to a slightly less aggressive mobile version
-      let pageRangeDisplayed = 2; // Default for larger screens
+      let pageRangeDisplayed = 2;
       if (typeof window !== "undefined" && window.innerWidth < 480) {
-        pageRangeDisplayed = 0; // Original: less buttons on very small screens
+        pageRangeDisplayed = 0;
       } else if (typeof window !== "undefined" && window.innerWidth < 640) {
-        pageRangeDisplayed = 1; // Original: few buttons on small screens
+        pageRangeDisplayed = 1;
       }
-      // else: pageRangeDisplayed remains 2 for larger screens
 
       let displayedPages = [];
       if (totalPages <= 2 * pageRangeDisplayed + 5) {
@@ -475,7 +505,10 @@
           const ellipsisSpan = document.createElement("span");
           ellipsisSpan.innerHTML = "&hellip;";
           ellipsisSpan.className =
-            "relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm font-medium text-gray-700 dark:text-slate-300";
+            "relative inline-flex items-center px-4 py-2 border text-sm font-medium";
+          ellipsisSpan.style.borderColor = "var(--border-secondary-color)";
+          ellipsisSpan.style.backgroundColor = "var(--form-input-bg)";
+          ellipsisSpan.style.color = "var(--text-secondary-color)";
           buttonsInnerDiv.appendChild(ellipsisSpan);
         } else {
           buttonsInnerDiv.appendChild(
