@@ -245,7 +245,7 @@
         const isChecked = this.selectedSessions.has(session.sessionId);
 
         const card = document.createElement("div");
-        card.className = `session-card p-3 rounded-lg shadow border relative ${
+        card.className = `session-card p-2 rounded-lg shadow border group ${
           isManagerCurrentDeviceSession
             ? "ring-2 ring-offset-1 ring-blue-500 shadow-lg is-manager-session"
             : ""
@@ -262,20 +262,26 @@
             CPManager.state.sessions.managerDetails.ipAddress || "N/A"
           })"><i class="fas fa-user-shield mr-1"></i>You</span>`;
         }
+        
+        const checkboxHTML = `
+            <div class="flex-shrink-0">
+                <input type="checkbox" class="session-select-checkbox form-checkbox h-5 w-5" data-session-id="${session.sessionId}" ${isChecked ? "checked" : ""}>
+            </div>`;
+
+        const tagsHTML = `
+            <div class="flex items-center gap-1">
+                ${managerIconHtml}
+                ${macTypeTagHtml}
+                <span class="info-tag ${authViaTagColor} truncate" title="Authenticated Via: ${readableAuthVia}">${readableAuthVia}</span>
+                <span class="info-tag ${zoneTagColor} truncate" title="Zone: ${zoneDesc}">${zoneDesc}</span>
+            </div>`;
 
         card.innerHTML = `
-                    <div class="absolute top-4 left-4 z-10">
-                        <input type="checkbox" class="session-select-checkbox form-checkbox h-5 w-5 rounded border-gray-400 dark:border-gray-500 text-blue-600 focus:ring-blue-500" data-session-id="${
-                          session.sessionId
-                        }" ${isChecked ? "checked" : ""}>
+                    <div class="flex justify-between items-center mb-1">
+                        ${checkboxHTML}
+                        ${tagsHTML}
                     </div>
-					<div class="tags-container">
-						${managerIconHtml}
-						${macTypeTagHtml}
-						<span class="info-tag ${authViaTagColor} truncate" title="Authenticated Via: ${readableAuthVia}">${readableAuthVia}</span>
-						<span class="info-tag ${zoneTagColor} truncate" title="Zone: ${zoneDesc}">${zoneDesc}</span>
-					</div>
-					<div class="session-summary card-summary cursor-pointer pb-1 pl-8" role="button" tabindex="0" aria-expanded="false" aria-controls="session-details-${
+					<div class="session-summary card-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="session-details-${
             session.sessionId
           }">
 						<div class="space-y-1">
@@ -290,7 +296,7 @@
               }</span></div>
 						</div>
 					</div>
-					<div class="card-details-content text-sm space-y-1 pl-8" id="session-details-${
+					<div class="card-details-content text-sm space-y-1" id="session-details-${
             session.sessionId
           }" aria-hidden="true">
 						<div class="info-row"><span class="info-label">Zone ID</span> <span class="info-value">${
@@ -358,9 +364,7 @@
       const button = CPManager.elements.disconnectSelectedSessionsBtn;
       if (!button) return;
       const selectedCount = this.selectedSessions.size;
-      button.innerHTML = `<i class="fas fa-times-circle mr-2"></i>Disconnect${
-        selectedCount > 0 ? ` (${selectedCount})` : ""
-      }`;
+      button.innerHTML = `<i class="fas fa-times-circle mr-2"></i>Disconnect`;
       button.disabled = selectedCount === 0;
     },
 
@@ -448,7 +452,7 @@
 
       if (isMySessionSelected) {
         title = "Warning: Disconnecting Own Session";
-        message = `<div class="hint-box hint-box-danger"><i class="fas fa-biohazard"></i><span><strong>DANGER:</strong> Your own session is included in the selection. Disconnecting it will lock you out of this manager.</span></div><p class="mt-4">Disconnect <strong>${sessionsToDisconnect.length}</strong> session(s) anyway?</p>`;
+        message = `<div class="hint-box hint-box-danger"><i class="fas fa-biohazard"></i><span><strong>DANGER:</strong> Your own session is included in the selection. Disconnecting it may lock you out of this manager.</span></div><p class="mt-4">Disconnect <strong>${sessionsToDisconnect.length}</strong> session(s) anyway?</p>`;
       }
 
       CPManager.ui.showConfirmationModal(title, message, async () => {
