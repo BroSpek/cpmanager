@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-full overflow-hidden">
   <head>
     <meta charset="UTF-8" />
     <meta
@@ -21,9 +21,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="./css/style.css" />
   </head>
-  <body class="font-sans">
+  <body
+    class="font-sans flex flex-col h-screen overflow-hidden m-0 transition-colors duration-300 ease print:bg-white print:text-black print:overflow-visible"
+  >
     <nav
-      class="p-4 shadow-md sticky top-0 z-20 flex-shrink-0 bg-slate-800 text-white"
+      class="p-4 shadow-md sticky top-0 z-20 flex-shrink-0 bg-slate-800 text-white print:hidden"
     >
       <div class="container mx-auto flex justify-between items-center">
         <h1 class="text-xl font-semibold">
@@ -50,12 +52,14 @@
 
     <div
       id="main-content-scroll-area"
-      class="flex-grow overflow-y-auto bg-slate-100 dark:bg-slate-900"
+      class="flex-grow overflow-y-auto bg-slate-100 dark:bg-slate-900 print:overflow-visible print:h-auto print:min-h-auto print:p-0 print:m-0 print:block print:bg-white"
     >
-      <div class="container mx-auto p-4">
+      <div
+        class="container mx-auto p-4 print:p-0 print:m-0 print:w-full print:max-w-none"
+      >
         <div
           id="config-input-section"
-          class="hidden p-4 mb-4 rounded-md bg-yellow-100 dark:bg-slate-800 border border-yellow-500 dark:border-yellow-700 text-yellow-800 dark:text-yellow-300"
+          class="hidden p-4 mb-4 rounded-md bg-yellow-100 dark:bg-slate-800 border border-yellow-500 dark:border-yellow-700 text-yellow-800 dark:text-yellow-300 print:hidden"
           role="alert"
         >
           <form id="api-credentials-form">
@@ -109,7 +113,7 @@
               <button
                 id="clear-api-creds-btn"
                 type="button"
-                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-gray-500 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="btn btn-secondary btn-responsive"
               >
                 Clear Credentials
               </button>
@@ -120,41 +124,25 @@
         <div class="mb-4 border-b border-slate-200 dark:border-slate-700">
           <ul class="flex -mb-px text-sm font-medium" id="mainTabs">
             <li class="flex-1 sm:flex-initial sm:mr-2">
-              <a
-                href="#"
-                class="tab-btn inline-block w-full text-center p-4 border-b-2 rounded-t-lg border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-slate-300 hover:border-gray-300 dark:hover:border-slate-500"
-                data-tab="dashboard"
-              >
+              <a href="#" class="tab-btn tab-base" data-tab="dashboard">
                 <i class="fas fa-tachometer-alt sm:mr-2"></i
                 ><span class="hidden sm:inline">Dashboard</span>
               </a>
             </li>
             <li class="flex-1 sm:flex-initial sm:mr-2">
-              <a
-                href="#"
-                class="tab-btn inline-block w-full text-center p-4 border-b-2 rounded-t-lg border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-slate-300 hover:border-gray-300 dark:hover:border-slate-500"
-                data-tab="sessions"
-              >
+              <a href="#" class="tab-btn tab-base" data-tab="sessions">
                 <i class="fas fa-users sm:mr-2"></i
                 ><span class="hidden sm:inline">Sessions</span>
               </a>
             </li>
             <li class="flex-1 sm:flex-initial sm:mr-2">
-              <a
-                href="#"
-                class="tab-btn inline-block w-full text-center p-4 border-b-2 rounded-t-lg border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-slate-300 hover:border-gray-300 dark:hover:border-slate-500"
-                data-tab="vouchers"
-              >
+              <a href="#" class="tab-btn tab-base" data-tab="vouchers">
                 <i class="fas fa-ticket-alt sm:mr-2"></i
                 ><span class="hidden sm:inline">Vouchers</span>
               </a>
             </li>
             <li class="flex-1 sm:flex-initial">
-              <a
-                href="#"
-                class="tab-btn inline-block w-full text-center p-4 border-b-2 rounded-t-lg border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-slate-300 hover:border-gray-300 dark:hover:border-slate-500"
-                data-tab="info"
-              >
+              <a href="#" class="tab-btn tab-base" data-tab="info">
                 <i class="fas fa-layer-group sm:mr-2"></i
                 ><span class="hidden sm:inline">Zones</span>
               </a>
@@ -164,7 +152,7 @@
 
         <div
           id="tabContent"
-          class="p-4 rounded-lg shadow bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-200"
+          class="p-4 rounded-lg shadow bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-200 print:p-0 print:m-0 print:shadow-none print:bg-white print:text-black"
         >
           <div id="dashboard-content" class="tab-pane">
             <h2 class="text-2xl font-semibold flex items-center mb-4">
@@ -174,7 +162,7 @@
               >Overview Dashboard
             </h2>
             <div
-              class="p-3 mb-6 rounded-md border flex items-start bg-blue-50 dark:bg-sky-900/50 border-blue-200 dark:border-sky-700 text-gray-700 dark:text-sky-200"
+              class="p-3 mb-6 rounded-md border flex items-start bg-blue-50 dark:bg-sky-900/50 border-blue-200 dark:border-sky-700 text-gray-700 dark:text-sky-200 print:hidden"
             >
               <i
                 class="fas fa-info-circle mr-2 mt-1 text-blue-500 dark:text-sky-300"
@@ -184,7 +172,7 @@
             <div class="flex flex-col sm:flex-row gap-4">
               <div class="w-full sm:w-1/2 flex flex-col">
                 <div
-                  class="cp-card p-4 sm:p-6 flex-1 flex flex-col overflow-hidden"
+                  class="cp-card p-4 sm:p-6 flex-1 flex flex-col overflow-hidden dark:border-slate-700"
                 >
                   <h3
                     class="text-lg font-semibold mb-2 text-center sm:text-left"
@@ -246,7 +234,7 @@
             </h2>
             <div
               id="session-field-container"
-              class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 items-end"
+              class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 items-end print:hidden"
             >
               <div class="min-w-0">
                 <label
@@ -257,7 +245,7 @@
                 <input
                   type="text"
                   id="session-search-input"
-                  class="w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                  class="form-input"
                   placeholder="Search IP, MAC, User..."
                 />
               </div>
@@ -267,17 +255,14 @@
                   class="block text-sm font-medium mb-1"
                   >Zone:</label
                 >
-                <select
-                  id="session-zone-filter-select"
-                  class="w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-                >
+                <select id="session-zone-filter-select" class="form-input">
                   <option value="">All Zones</option>
                 </select>
               </div>
             </div>
             <div
               id="session-action-btn"
-              class="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-4"
+              class="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-4 print:hidden"
             >
               <button
                 id="find-my-session-btn"
@@ -295,7 +280,6 @@
                 <i class="fas fa-times-circle mr-2"></i>Disconnect
               </button>
             </div>
-            <!-- Select All Container -->
             <div id="session-select-all-container" class="mb-3 pl-2 hidden">
               <label
                 for="session-select-all-checkbox"
@@ -360,10 +344,9 @@
                 </p>
               </div>
             </div>
-            <!-- Voucher Filters: Provider and Group -->
             <div
               id="voucher-provider-group-filters"
-              class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 items-end"
+              class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 items-end print:hidden"
             >
               <div class="min-w-0">
                 <label
@@ -371,10 +354,7 @@
                   class="block text-sm font-medium mb-1"
                   >Voucher Provider:</label
                 >
-                <select
-                  id="voucher-provider-select"
-                  class="w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-                >
+                <select id="voucher-provider-select" class="form-input">
                   <option value="">Loading providers...</option>
                 </select>
               </div>
@@ -384,18 +364,14 @@
                   class="block text-sm font-medium mb-1"
                   >Voucher Group:</label
                 >
-                <select
-                  id="voucher-group-select"
-                  class="w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-                >
+                <select id="voucher-group-select" class="form-input">
                   <option value="">Select a provider first...</option>
                 </select>
               </div>
             </div>
-            <!-- New Voucher Filters: Search and State -->
             <div
               id="voucher-search-state-filters"
-              class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 items-end"
+              class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 items-end print:hidden"
             >
               <div class="min-w-0">
                 <label
@@ -406,7 +382,7 @@
                 <input
                   type="text"
                   id="voucher-search-input"
-                  class="w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                  class="form-input"
                   placeholder="Enter voucher code..."
                 />
               </div>
@@ -416,10 +392,7 @@
                   class="block text-sm font-medium mb-1"
                   >Filter by State:</label
                 >
-                <select
-                  id="voucher-state-filter-select"
-                  class="w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-                >
+                <select id="voucher-state-filter-select" class="form-input">
                   <option value="">All States</option>
                   <option value="valid">Valid</option>
                   <option value="unused">Unused</option>
@@ -427,10 +400,9 @@
                 </select>
               </div>
             </div>
-            <!-- End New Voucher Filters -->
             <div
               id="voucher-action-btn"
-              class="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-4"
+              class="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-4 print:hidden"
             >
               <button
                 id="create-vouchers-btn"
@@ -462,7 +434,6 @@
                 <i class="fas fa-trash-alt mr-2"></i>Drop Group
               </button>
             </div>
-            <!-- Select All Container -->
             <div id="voucher-select-all-container" class="mb-3 pl-2 hidden">
               <label
                 for="voucher-select-all-checkbox"
@@ -498,7 +469,7 @@
             </h2>
             <div
               id="zone-action-container"
-              class="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-4"
+              class="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-4 print:hidden"
             >
               <button
                 id="apply-cp-config-btn"
@@ -524,21 +495,16 @@
 
     <div
       id="generateVoucherModal"
-      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-20 hidden items-center justify-center"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-20 hidden items-center justify-center print:hidden"
     >
-      <div
-        class="p-6 rounded-lg shadow-xl w-full max-w-md mx-auto bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200"
-      >
+      <div class="modal-base-content max-w-md">
         <h3 class="text-xl font-semibold mb-6">Generate Vouchers</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label for="voucher-count-select" class="block text-sm font-medium"
               >Number of vouchers</label
             >
-            <select
-              id="voucher-count-select"
-              class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-            >
+            <select id="voucher-count-select" class="form-modal-input">
               <option value="1">1</option>
               <option value="5">5</option>
               <option value="10" selected>10</option>
@@ -551,7 +517,7 @@
             <input
               type="number"
               id="voucher-count-custom"
-              class="mt-2 block w-full hidden py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+              class="mt-2 block w-full hidden form-modal-input"
               min="1"
               value="1"
             />
@@ -562,10 +528,7 @@
               class="block text-sm font-medium"
               >Validity</label
             >
-            <select
-              id="voucher-lifetime-select"
-              class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-            >
+            <select id="voucher-lifetime-select" class="form-modal-input">
               <option value="240" selected>4 hours</option>
               <option value="480">8 hours</option>
               <option value="1440">1 day</option>
@@ -582,7 +545,7 @@
               type="number"
               id="voucher-lifetime-custom"
               placeholder="Minutes (min 1)"
-              class="mt-2 block w-full hidden py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+              class="mt-2 block w-full hidden form-modal-input"
               min="1"
             />
           </div>
@@ -590,10 +553,7 @@
             <label for="voucher-usage-select" class="block text-sm font-medium"
               >Expires in</label
             >
-            <select
-              id="voucher-usage-select"
-              class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-            >
+            <select id="voucher-usage-select" class="form-modal-input">
               <option value="0" selected>Never</option>
               <option value="6">6 hours</option>
               <option value="12">12 hours</option>
@@ -615,7 +575,7 @@
               type="number"
               id="voucher-usage-custom"
               placeholder="Hours (0 for Never)"
-              class="mt-2 block w-full hidden py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+              class="mt-2 block w-full hidden form-modal-input"
               min="0"
             />
           </div>
@@ -627,7 +587,7 @@
               type="text"
               id="voucher-groupname"
               placeholder="Optional (timestamp if empty)"
-              class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+              class="mt-1 block w-full form-modal-input"
             />
           </div>
           <div class="sm:col-span-2 mt-4">
@@ -687,11 +647,9 @@
 
     <div
       id="confirmationModal"
-      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-30 hidden items-center justify-center"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-30 hidden items-center justify-center print:hidden"
     >
-      <div
-        class="p-6 rounded-lg shadow-xl w-full max-w-md mx-auto bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200"
-      >
+      <div class="modal-base-content max-w-md">
         <h3 class="text-xl font-semibold mb-4" id="confirmationTitle">
           Confirm Action
         </h3>
@@ -702,14 +660,14 @@
           <button
             id="confirm-cancel-btn"
             type="button"
-            class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full sm:w-auto transition-shadow duration-200 bg-gray-500 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn btn-secondary btn-responsive"
           >
             Cancel
           </button>
           <button
             id="confirm-proceed-btn"
             type="button"
-            class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full sm:w-auto transition-shadow duration-200 bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn btn-danger btn-responsive"
           >
             Proceed
           </button>
@@ -719,11 +677,9 @@
 
     <div
       id="editZoneModal"
-      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-20 hidden items-center justify-center"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-20 hidden items-center justify-center print:hidden"
     >
-      <div
-        class="p-6 rounded-lg shadow-xl w-full max-w-lg mx-auto bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200"
-      >
+      <div class="modal-base-content max-w-lg">
         <h3 class="text-xl font-semibold mb-6">
           Edit Zone:
           <span id="editZoneModalTitleName" class="font-normal"></span>
@@ -763,7 +719,7 @@
               <input
                 type="text"
                 id="zone-edit-description"
-                class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                class="form-input"
               />
             </div>
           </div>
@@ -778,7 +734,7 @@
               <input
                 type="number"
                 id="zone-edit-hardtimeout"
-                class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                class="form-input"
                 min="0"
                 placeholder="e.g., 1440 for 1 day"
               />
@@ -792,7 +748,7 @@
               <input
                 type="number"
                 id="zone-edit-idletimeout"
-                class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                class="form-input"
                 min="0"
                 placeholder="e.g., 60 for 1 hour"
               />
@@ -827,10 +783,7 @@
               <label for="zone-edit-template" class="block text-sm font-medium"
                 >Custom Template:</label
               >
-              <select
-                id="zone-edit-template"
-                class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-              >
+              <select id="zone-edit-template" class="form-input">
                 <option value="">Default</option>
               </select>
             </div>
@@ -844,7 +797,7 @@
             >
             <textarea
               id="zone-edit-allowedAddresses"
-              class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+              class="form-input"
               rows="3"
               placeholder="192.168.1.2,192.168.1.100-200,10.0.0.0/24"
             ></textarea>
@@ -857,7 +810,7 @@
             >
             <textarea
               id="zone-edit-allowedMACAddresses"
-              class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+              class="form-input"
               rows="3"
               placeholder="00:11:22:aa:bb:cc,aa:bb:cc:dd:ee:ff"
             ></textarea>
@@ -867,14 +820,14 @@
           <button
             id="cancel-edit-zone-btn"
             type="button"
-            class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full sm:w-auto transition-shadow duration-200 bg-gray-500 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn btn-secondary btn-responsive"
           >
             Cancel
           </button>
           <button
             id="submit-edit-zone-btn"
             type="button"
-            class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full sm:w-auto transition-shadow duration-200 bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn btn-primary btn-responsive"
           >
             Save Changes
           </button>
@@ -884,13 +837,13 @@
 
     <div
       id="toast-notification"
-      class="fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 max-w-xs z-50"
+      class="fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 max-w-xs z-50 print:hidden"
     >
       <p id="toast-message"></p>
     </div>
 
     <footer
-      class="text-center p-4 text-sm flex-shrink-0 border-t bg-slate-100 dark:bg-slate-900 text-gray-600 dark:text-slate-400 border-slate-200 dark:border-slate-700"
+      class="text-center p-4 text-sm flex-shrink-0 border-t bg-slate-100 dark:bg-slate-900 text-gray-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 print:hidden"
     >
       <p id="api-status-footer">
         API Status: <span class="font-semibold">Initializing...</span>
