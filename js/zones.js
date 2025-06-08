@@ -294,7 +294,7 @@
           detailsHtml += `
             <div class="mt-3 grid grid-cols-2 gap-4">
               <button class="btn btn-base btn-secondary" data-action="edit-zone" data-uuid="${uuid}">
-                <i class="fas fa-edit mr-1"></i> Edit Zone Settings
+                <i class="fas fa-edit mr-1"></i> Edit Settings
               </button>
             </div>
           `;
