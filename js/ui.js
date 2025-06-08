@@ -176,8 +176,10 @@
         return;
       }
       toastMessage.textContent = message;
+      // Reset classes and ensure pointer-events are disabled initially for safety
       toastNotification.className =
-        "fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 max-w-xs z-50";
+        "fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 max-w-xs z-50 print:hidden";
+      toastNotification.style.pointerEvents = "none"; // Ensure it's not interactive when hidden
 
       switch (type) {
         case "success":
@@ -194,11 +196,16 @@
           toastNotification.classList.add("bg-gray-800");
           break;
       }
+
+      // Show the toast
       toastNotification.classList.add("opacity-100");
+      toastNotification.style.pointerEvents = "auto"; // Enable interaction when visible
+
       if (toastNotification.timer) clearTimeout(toastNotification.timer);
       toastNotification.timer = setTimeout(() => {
         toastNotification.classList.remove("opacity-100");
         toastNotification.classList.add("opacity-0");
+        toastNotification.style.pointerEvents = "none"; // Disable interaction when hidden again
       }, duration);
     },
 
