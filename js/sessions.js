@@ -451,7 +451,7 @@
 
       if (isMySessionSelected) {
         title = "Warning: Disconnecting Own Session";
-        message = `<div class="p-3 mb-6 rounded-md border flex items-start" style="background-color: var(--hint-danger-bg); border-color: var(--hint-danger-border); color: var(--hint-danger-text);"><i class="fas fa-biohazard mr-2 mt-1" style="color: var(--hint-danger-icon);"></i><span><strong>DANGER:</strong> Your own session is included in the selection. Disconnecting it will lock you out of this manager.</span></div><p class="mt-4">Disconnect <strong>${sessionsToDisconnect.length}</strong> session(s) anyway?</p>`;
+        message = `<div class="p-3 mb-6 rounded-md border flex items-start" style="background-color: var(--hint-danger-bg); border-color: var(--hint-danger-border); color: var(--hint-danger-text);"><i class="fas fa-biohazard mr-2 mt-1" style="color: var(--hint-danger-icon);"></i><span><strong>DANGER:</strong> Your own session is included in the selection. Disconnecting it may lock you out of this manager.</span></div><p class="mt-4">Disconnect <strong>${sessionsToDisconnect.length}</strong> session(s) anyway?</p>`;
       }
 
       CPManager.ui.showConfirmationModal(title, message, async () => {
