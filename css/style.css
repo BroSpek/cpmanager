@@ -44,7 +44,7 @@
 
   .form-radio,
   .form-checkbox {
-    @apply h-5 w-5 rounded border-gray-400 text-blue-600 focus:ring-blue-500;
+    @apply h-5 w-5 rounded border-gray-400 text-blue-600 focus:ring-blue-500 transition-opacity opacity-20 hover:opacity-100 checked:opacity-100;
   }
 }
 
@@ -160,23 +160,6 @@ body {
 }
 .toggle-dot {
   @apply absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform peer-checked:translate-x-6;
-}
-/* General Checkbox and Radio styling for UI improvement */
-input[type="checkbox"],
-input[type="radio"] {
-  transition: opacity 0.2s ease-in-out;
-}
-input[type="checkbox"]:not(:checked),
-input[type="radio"]:not(:checked) {
-  opacity: 0.2;
-}
-input[type="checkbox"]:not(:checked):hover,
-input[type="radio"]:not(:checked):hover {
-  opacity: 1;
-}
-input[type="checkbox"]:checked,
-input[type="radio"]:checked {
-  opacity: 1;
 }
 
 /* Print-specific styles */

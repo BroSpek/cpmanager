@@ -265,7 +265,7 @@
 
         const checkboxHTML = `
             <div class="flex-shrink-0">
-                <input type="checkbox" class="session-select-checkbox h-5 w-5 rounded border-gray-400 text-blue-600 focus:ring-blue-500" data-session-id="${session.sessionId}" ${isChecked ? "checked" : ""}>
+                <input type="checkbox" class="session-select-checkbox form-checkbox" data-session-id="${session.sessionId}" ${isChecked ? "checked" : ""}>
             </div>`;
 
         const tagsHTML = `
