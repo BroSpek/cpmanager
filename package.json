@@ -4,7 +4,7 @@
   "scripts": {
     "start": "parcel index.html",
     "build": "parcel build index.html --public-url ./ && npm run copy-assets",
-    "copy-assets": "copyfiles \"icons/**/*\" dist && copyfiles app-config.json dist/",
+    "copy-assets": "copyfiles \"icons/**/*.png\" dist && copyfiles app-config.json dist/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

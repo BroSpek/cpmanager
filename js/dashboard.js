@@ -29,7 +29,8 @@
       }
 
       let sessionDataRows = null;
-      let voucherStats = null; // This will now hold totalVouchers, activeVouchers, expiredVouchers, and totalProviders
+      // voucherStats will now hold totalVouchers, activeVouchers, expiredVouchers, unusedVouchers (NEW), and totalProviders
+      let voucherStats = null;
       let totalZonesCount = 0;
 
       // Define cache parameters
@@ -41,8 +42,11 @@
         CPManager.state.dashboard.apiDataCache.sessions &&
         now - CPManager.state.dashboard.apiDataCache.sessionsLastFetched <
           cacheTTL;
+      // Check for unusedVouchers in cache, as it's a new metric
       const isVoucherStatsCacheValid =
         CPManager.state.dashboard.apiDataCache.voucherStats !== null &&
+        CPManager.state.dashboard.apiDataCache.voucherStats.unusedVouchers !==
+          undefined && // NEW check
         now - CPManager.state.dashboard.apiDataCache.voucherStatsLastFetched <
           cacheTTL;
 
@@ -64,8 +68,7 @@
           <div class="skeleton-card"></div>
           <div class="skeleton-card"></div>
           <div class="skeleton-card"></div>
-                    <div class="skeleton-card"></div> <!-- For the new combined card -->
-                    `;
+                    <div class="skeleton-card"></div> `;
         // Reset donut chart and legends to placeholder values
         CPManager.elements.donutTotalData.textContent =
           CPManager.config.placeholderValue;
@@ -110,6 +113,7 @@
           let totalVouchers = 0,
             activeVouchers = 0,
             expiredVouchers = 0, // Initialize counter for expired vouchers
+            unusedVouchers = 0, // Initialize counter for unused vouchers (NEW)
             totalProviders = 0; // Initialize counter for total providers
 
           try {
@@ -140,6 +144,10 @@
                       expiredVouchers += vouchersInGroup.filter(
                         (v) => v.state === "expired"
                       ).length;
+                      // Filter and count unused vouchers (NEW)
+                      unusedVouchers += vouchersInGroup.filter(
+                        (v) => v.state === "unused"
+                      ).length;
                     }
                   }
                 }
@@ -160,6 +168,7 @@
             totalVouchers,
             activeVouchers,
             expiredVouchers,
+            unusedVouchers, // NEW
             totalProviders,
           };
           CPManager.state.dashboard.apiDataCache.voucherStats = voucherStats;
@@ -173,7 +182,7 @@
           totalVouchers,
           activeVouchers,
           expiredVouchers,
-          totalProviders,
+          unusedVouchers,
         } = voucherStats;
 
         let totalClientUploadBytes = 0,
@@ -208,9 +217,7 @@
           <div class="cp-card p-6 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-providers-expired-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
               <div class="grid grid-cols-2 gap-x-2 items-center">
                   <div>
-                      <div class="text-4xl font-bold" style="color: var(--stat-value-color);">${totalProviders}</div>
-                      <div class="text-sm mt-1" style="color: var(--stat-label-color);">Total Providers</div>
-                  </div>
+                      <div class="text-4xl font-bold" style="color: var(--stat-value-color);">${unusedVouchers}</div> <div class="text-sm mt-1" style="color: var(--stat-label-color);">Unused Vouchers</div> </div>
                   <div>
                       <div class="text-4xl font-bold" style="color: var(--stat-value-color);">${expiredVouchers}</div>
                       <div class="text-sm mt-1" style="color: var(--stat-label-color);">Expired Vouchers</div>

@@ -394,7 +394,7 @@
                 >
                 <select id="voucher-state-filter-select" class="form-input">
                   <option value="">All States</option>
-                  <option value="valid">Valid</option>
+                  <option value="valid">Active</option>
                   <option value="unused">Unused</option>
                   <option value="expired">Expired</option>
                 </select>
@@ -517,7 +517,7 @@
             <input
               type="number"
               id="voucher-count-custom"
-              class="mt-2 block w-full hidden form-modal-input"
+              class="mt-2 block w-full print:hidden form-modal-input"
               min="1"
               value="1"
             />
@@ -545,7 +545,7 @@
               type="number"
               id="voucher-lifetime-custom"
               placeholder="Minutes (min 1)"
-              class="mt-2 block w-full hidden form-modal-input"
+              class="mt-2 block w-full print:hidden form-modal-input"
               min="1"
             />
           </div>
@@ -575,7 +575,7 @@
               type="number"
               id="voucher-usage-custom"
               placeholder="Hours (0 for Never)"
-              class="mt-2 block w-full hidden form-modal-input"
+              class="mt-2 block w-full print:hidden form-modal-input"
               min="0"
             />
           </div>
