@@ -1,316 +1,114 @@
-/* General body and HTML styling for full height and layout */
-:root {
-  --bg-color: #f3f4f6; /* Light mode default: gray-100 */
-  --text-color: #1f2937; /* Light mode default: gray-800 */
-  --bg-secondary-color: #ffffff; /* Light mode default: white */
-  --text-secondary-color: #374151; /* Light mode default: gray-700 */
-  --border-color: #e5e7eb; /* Light mode default: gray-200 */
-  --border-secondary-color: #d1d5db; /* Light mode default: gray-300 */
-  --nav-bg-color: #1e293b; /* slate-800 */
-  --nav-text-color: #ffffff;
-  --footer-bg-color: #f3f4f6; /* gray-100 */
-  --footer-text-color: #4b5563; /* gray-600 */
-  --link-hover-color: #374151; /* gray-700 */
-  --link-hover-border-color: #9ca3af; /* gray-400 */
-  --tab-active-text-color: #2563eb; /* blue-600 */
-  --tab-active-border-color: #2563eb; /* blue-600 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  --form-input-bg: #ffffff;
-  --form-input-text: #1f2937;
-  --form-input-border: #d1d5db;
-  --form-input-focus-border: #2563eb;
-  --form-input-focus-ring: rgba(59, 130, 246, 0.3);
+/* --- NEW COMPONENT STYLES --- */
+@layer components {
+  /* Card Component */
+  .cp-card {
+    @apply p-2 rounded-lg shadow bg-slate-100 dark:bg-slate-900;
+  }
 
-  --card-bg: #f9fafb; /* gray-50 */
-  --card-text: #374151; /* gray-700 */
-  --card-border: #e5e7eb; /* gray-200 */
-  --card-info-label-color: #374151; /* text-gray-700 */
-  --card-info-value-color: #4b5563; /* text-gray-600 */
-  --card-info-value-main-color: #1d4ed8; /* text-blue-700 */
+  /* Pagination Components */
+  .pagination-btn-base {
+    @apply shadow bg-slate-100 dark:bg-slate-900 text-gray-500 dark:text-slate-300;
+  }
+  .pagination-btn-current {
+    @apply z-10 bg-blue-500 text-white dark:bg-blue-600;
+  }
+  .pagination-btn-disabled {
+    @apply bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed;
+  }
+  .pagination-btn-hover {
+    @apply hover:bg-slate-50 dark:hover:bg-slate-700;
+  }
 
-  --modal-bg: #ffffff;
-  --modal-text: #1f2937;
+  /* New: Base style for main navigation tab buttons */
+  .tab-base {
+    @apply inline-block w-full text-center p-4 border-b-2 rounded-t-lg border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-slate-300 hover:border-gray-300 dark:hover:border-slate-500;
+  }
 
-  --skeleton-card-bg: #e5e7eb; /* bg-gray-200 */
-  --stat-card-bg: #f9fafb; /* bg-gray-50 */
-  --stat-value-color: #1d4ed8; /* text-blue-700 */
-  --stat-label-color: #6b7280; /* text-gray-500 */
-  --donut-center-text-color: #1f2937; /* text-gray-800 */
-  --legend-item-text-color: #4b5563; /* text-gray-600 */
+  /* New: Base style for modal content containers */
+  .modal-base-content {
+    @apply p-6 rounded-lg shadow-xl w-full mx-auto bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200;
+  }
 
-  /* Global Hint Box Variables - Light Mode */
-  --hint-info-bg: #eff6ff; /* bg-blue-50 */
-  --hint-info-border: #bfdbfe; /* border-blue-200 */
-  --hint-info-text: #374151; /* text-gray-700 */
-  --hint-info-icon: #3b82f6; /* text-blue-500 */
+  /* New: Form input style specific to modals (with dark:bg-slate-700) */
+  .form-modal-input {
+    @apply mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600;
+  }
 
-  --hint-warning-bg: #fffbeb; /* bg-yellow-50 */
-  --hint-warning-border: #fde68a; /* border-yellow-200 */
-  --hint-warning-text: #78350f; /* text-yellow-800 */
-  --hint-warning-icon: #f59e0b; /* text-yellow-500 */
+  /* Button Components */
+  .btn {
+    @apply py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply bg-blue-500 text-white hover:bg-blue-600;
+  }
+  .btn-secondary {
+    @apply bg-gray-500 text-white hover:bg-gray-600;
+  }
+  .btn-danger {
+    @apply bg-red-500 text-white hover:bg-red-600;
+  }
+  .btn-warning {
+    @apply bg-yellow-500 text-white hover:bg-yellow-600;
+  }
+  .btn-success {
+    @apply bg-green-500 text-white hover:bg-green-600;
+  }
+  .btn-sky {
+    @apply bg-sky-500 text-white hover:bg-sky-600;
+  }
+  .btn-responsive {
+    @apply sm:w-auto;
+  }
 
-  --hint-danger-bg: #fef2f2; /* bg-red-50 */
-  --hint-danger-border: #fecaca; /* border-red-200 */
-  --hint-danger-text: #991b1b; /* text-red-800 */
-  --hint-danger-icon: #ef4444; /* text-red-500 */
+  /* Form Components */
+  .form-input,
+  .form-select,
+  .form-textarea {
+    @apply mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600 focus:ring-blue-500 focus:border-blue-500;
+  }
 
-  --hint-success-bg: #f0fdf4; /* bg-green-50 */
-  --hint-success-border: #bbf7d0; /* border-green-200 */
-  --hint-success-text: #166534; /* text-green-800 */
-  --hint-success-icon: #22c55e; /* text-green-500 */
-
-  --config-input-section-bg: #fef3c7; /* yellow-100 */
-  --config-input-section-border: #fbbf24; /* yellow-500 */
-  --config-input-section-text: #b45309; /* yellow-700 */
-
-  --placeholder-text-color: #9ca3af; /* text-gray-400 */
+  .form-radio,
+  .form-checkbox {
+    @apply h-5 w-5 rounded border-gray-400 text-blue-600 focus:ring-blue-500 transition-opacity opacity-20 hover:opacity-100 checked:opacity-100;
+  }
 }
 
-.dark-mode {
-  --bg-color: #0f172a; /* Dark mode default: slate-900 */
-  --text-color: #e2e8f0; /* Dark mode default: slate-200 */
-  --bg-secondary-color: #1e293b; /* Dark mode default: slate-800 */
-  --text-secondary-color: #94a3b8; /* Dark mode default: slate-400 */
-  --border-color: #334155; /* Dark mode default: slate-700 */
-  --border-secondary-color: #475569; /* Dark mode default: slate-600 */
-  --footer-bg-color: #0f172a; /* slate-900 */
-  --footer-text-color: #94a3b8; /* slate-400 */
-  --link-hover-color: #cbd5e1; /* slate-300 */
-  --link-hover-border-color: #64748b; /* slate-500 */
-
-  --form-input-bg: #1e293b; /* slate-800 or 700 */
-  --form-input-text: #e2e8f0; /* slate-200 */
-  --form-input-border: #475569; /* slate-600 */
-  --form-input-focus-border: #3b82f6; /* blue-500 */
-  --form-input-focus-ring: rgba(59, 130, 246, 0.4);
-
-  --card-bg: #0f172a; /* slate-900 */
-  --card-text: #cbd5e1; /* slate-300 */
-  --card-border: #334155; /* slate-700 */
-  --card-info-label-color: #cbd5e1; /* slate-300 */
-  --card-info-value-color: #94a3b8; /* slate-400 */
-  --card-info-value-main-color: #60a5fa; /* blue-400 */
-
-  --modal-bg: #1e293b; /* slate-800 */
-  --modal-text: #e2e8f0; /* slate-200 */
-
-  --skeleton-card-bg: #334155; /* bg-slate-700 */
-  --stat-card-bg: #0f172a; /* slate-900 */
-  --stat-value-color: #60a5fa; /* text-blue-400 */
-  --stat-label-color: #94a3b8; /* text-slate-400 */
-  --donut-center-text-color: #e2e8f0; /* text-slate-200 */
-  --legend-item-text-color: #94a3b8; /* text-slate-400 */
-
-  /* Global Hint Box Variables - Dark Mode */
-  --hint-info-bg: #172554; /* bg-sky-900 */
-  --hint-info-border: #075985; /* border-sky-700 */
-  --hint-info-text: #bae6fd; /* text-sky-200 */
-  --hint-info-icon: #7dd3fc; /* text-sky-300 */
-
-  --hint-warning-bg: #453800; /* Darker yellow */
-  --hint-warning-border: #785b00;
-  --hint-warning-text: #fef3c7; /* light yellow */
-  --hint-warning-icon: #facc15; /* lighter yellow */
-
-  --hint-danger-bg: #5f1818; /* Darker red */
-  --hint-danger-border: #902c2c;
-  --hint-danger-text: #fecaca; /* light red */
-  --hint-danger-icon: #f87171; /* lighter red */
-
-  --hint-success-bg: #144222; /* Darker green */
-  --hint-success-border: #1d6334;
-  --hint-success-text: #bbf7d0; /* light green */
-  --hint-success-icon: #4ade80; /* lighter green */
-
-  --config-input-section-bg: #374151; /* gray-700, example, adjust as needed */
-  --config-input-section-border: #4b5563; /* gray-600 */
-  --config-input-section-text: #fde047; /* yellow-300 */
-
-  --placeholder-text-color: #6b7280; /* Tailwind gray-500 for dark mode */
-}
-
-html {
-  height: 100%;
-  overflow: hidden; /* Prevent scroll on html to manage scrolling within #main-content-scroll-area */
-}
-body {
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* Full viewport height */
-  overflow: hidden; /* Prevent scroll on body */
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  margin: 0; /* Reset default margin */
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
-}
-
-/* Custom scrollbar styling for the main content scroll area */
+/* Custom scrollbar styling for the main content scroll area (cannot be Tailwind utilities) */
 #main-content-scroll-area::-webkit-scrollbar {
   display: none; /* Hide scrollbar for WebKit browsers */
 }
 #main-content-scroll-area {
   -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
   scrollbar-width: none; /* Hide scrollbar for Firefox */
-  background-color: var(--bg-color); /* Ensure scroll area bg matches body */
 }
 
-/* General scrollbar styling (if not hidden or for other elements) */
+/* General scrollbar styling (if not hidden or for other elements, cannot be Tailwind utilities) */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--border-color); /* Use themed background */
-  border-radius: 10px;
+  background: #e5e7eb; /* gray-200 */
+}
+.dark ::-webkit-scrollbar-track {
+  background: #334155; /* slate-700 */
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--text-secondary-color); /* Use themed thumb */
+  background: #374151; /* gray-700 */
   border-radius: 10px;
 }
+.dark ::-webkit-scrollbar-thumb {
+  background: #94a3b8; /* slate-400 */
+}
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-color); /* Darker on hover */
+  background: #1f2937; /* gray-800 */
 }
-
-/* Tab content visibility */
-.tab-content > .active {
-  display: block;
-}
-.tab-content > .hidden {
-  display: none;
-}
-
-/* Modal styling */
-.modal {
-  transition: opacity 0.25s ease;
-}
-.modal-active {
-  display: flex; /* Use flex to center content */
-  align-items: center;
-  justify-content: center;
-}
-.modal-inactive {
-  display: none;
-}
-/* Modal content background and text */
-.modal > div {
-  /* Assuming the direct child is the modal content box */
-  background-color: var(--modal-bg);
-  color: var(--modal-text);
-}
-/* Labels within modals */
-.modal label {
-  color: var(--text-secondary-color);
-}
-.dark-mode .modal label {
-  /* Specific for dark mode if needed */
-  color: var(--text-secondary-color); /* slate-300 or 400 */
-}
-.modal h3 {
-  color: var(--text-color);
-}
-
-/* Custom button styling (base class .btn) -  Button colors are generally okay as they define their own bg/text */
-.btn {
-  padding: 0.75rem 1.5rem; /* py-3 px-6 */
-  font-size: 0.875rem; /* text-sm */
-  font-weight: 600; /* font-semibold */
-  border-radius: 0.375rem; /* rounded-md */
-  transition:
-    background-color 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
-  box-shadow:
-    0 1px 3px 0 rgba(0, 0, 0, 0.1),
-    0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow-md */
-  width: 100%; /* Default to full width for mobile */
-}
-.btn:hover {
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
-}
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-/* Responsive button width */
-@media (min-width: 640px) {
-  /* sm breakpoint */
-  .btn.sm-w-auto {
-    /* Custom class for auto width on small screens and up */
-    width: auto;
-  }
-}
-
-/* Button color variants - these should remain as they are specific */
-.btn-primary {
-  background-color: #3b82f6;
-  color: white;
-} /* bg-blue-500 */
-.btn-primary:hover:not(:disabled) {
-  background-color: #2563eb;
-} /* hover:bg-blue-600 */
-.btn-secondary {
-  background-color: #6b7280;
-  color: white;
-} /* bg-gray-500 */
-.btn-secondary:hover:not(:disabled) {
-  background-color: #4b5563;
-} /* hover:bg-gray-600 */
-.btn-danger {
-  background-color: #ef4444;
-  color: white;
-} /* bg-red-500 */
-.btn-danger:hover:not(:disabled) {
-  background-color: #dc2626;
-} /* hover:bg-red-600 */
-.btn-warning {
-  background-color: #f59e0b;
-  color: white;
-} /* bg-yellow-500 */
-.btn-warning:hover:not(:disabled) {
-  background-color: #d97706;
-} /* hover:bg-yellow-600 */
-.btn-success {
-  background-color: #10b981;
-  color: white;
-} /* bg-green-500 */
-.btn-success:hover:not(:disabled) {
-  background-color: #059669;
-} /* hover:bg-green-600 */
-.btn-info {
-  background-color: #0ea5e9;
-  color: white;
-} /* bg-sky-500 */
-.btn-info:hover:not(:disabled) {
-  background-color: #0284c7;
-} /* hover:bg-sky-600 */
-
-/* Form input and select styling */
-.form-input,
-.form-select {
-  padding: 0.625rem 0.75rem; /* py-2.5 px-3 */
-  border: 1px solid var(--form-input-border);
-  background-color: var(--form-input-bg);
-  color: var(--form-input-text);
-  border-radius: 0.375rem; /* rounded-md */
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
-  transition:
-    border-color 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
-  width: 100%; /* Default to full width */
-}
-.form-input:focus,
-.form-select:focus {
-  outline: none;
-  border-color: var(--form-input-focus-border);
-  box-shadow: 0 0 0 3px var(--form-input-focus-ring);
-}
-/* Options in select */
-.form-select option {
-  background-color: var(--form-input-bg); /* Might not work in all browsers */
-  color: var(--form-input-text);
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #e2e8f0; /* slate-200 */
 }
 
 /* Card details content (for expandable sections) */
@@ -325,91 +123,22 @@ body {
 }
 .card-details-content.expanded {
   max-height: 1000px; /* Large enough to accommodate content */
-  padding-top: 0.5rem; /* Adjust as needed */
-  padding-bottom: 0.5rem; /* Adjust as needed */
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
-
-/* Tags container for info tags on cards */
-.tags-container {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  display: flex;
-  gap: 0.25rem; /* space-x-1 */
-  justify-content: flex-end;
-  align-items: center;
-}
-.info-tag {
-  padding: 0.125rem 0.375rem; /* py-0.5 px-1.5 */
-  font-size: 0.7rem; /* Smaller text for tags */
-  border-radius: 0.25rem; /* rounded-sm */
-  color: white; /* Most tags have dark bg and white text */
-  line-height: 1.2;
-  max-width: 100px; /* Prevent very long tags from breaking layout */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Card summary section styling */
-.card-summary {
-  cursor: pointer;
-  padding-top: 0.5rem; /* Default top padding for summary */
-}
-/* Specific top padding for cards that have tags, to avoid overlap */
-.session-card > .card-summary,
-.zone-info-card > .card-summary {
-  padding-top: 1.8rem; /* Increased padding to make space for absolutely positioned tags */
-}
-/* Because of checkbox: */
-.voucher-card > .card-summary {
-  padding-top: 0.6rem;
-}
-
-/* Info row styling for key-value pairs in cards */
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start; /* Align items to the start for potentially multi-line values */
-  padding: 0.2rem 0;
-  line-height: 1.4;
-}
-.info-label {
-  font-weight: 600; /* font-semibold */
-  color: var(--card-info-label-color);
-  margin-right: 0.75rem; /* mr-3 */
-  white-space: nowrap;
-  font-size: 0.875rem; /* text-sm */
-  flex-shrink: 0; /* Prevent label from shrinking */
-}
-.info-value {
-  color: var(--card-info-value-color);
-  text-align: right;
-  word-break: break-all; /* Allow long values to wrap */
-  font-size: 0.875rem; /* text-sm */
-  flex-grow: 1; /* Allow value to take remaining space */
-}
-.info-value.summary-main-value {
-  /* For prominent values in the summary */
-  color: var(--card-info-value-main-color);
-  font-weight: 600; /* font-semibold */
-}
-
-/* Placeholder text styling */
-.placeholder-text {
-  color: var(--placeholder-text-color);
-  font-style: italic;
-}
-/* .dark-mode .placeholder-text is handled by the --placeholder-text-color variable in .dark-mode scope */
 
 /* Skeleton card styling for loading states */
 .skeleton-card {
-  background-color: var(--skeleton-card-bg);
   border-radius: 0.5rem; /* rounded-lg */
   padding: 1rem; /* p-4 */
   min-height: 80px;
   animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: #e5e7eb; /* bg-gray-200 */
 }
+.dark .skeleton-card {
+  background-color: #334155; /* bg-slate-700 */
+}
+
 @keyframes pulse {
   0%,
   100% {
@@ -420,80 +149,14 @@ body {
   }
 }
 
-/* Style for the main content card holding elements like the dashboard chart */
-.content-card {
-  background-color: var(--card-bg); /* Use the standard card background */
-  /* Tailwind classes like rounded-lg, shadow, p-6 will still apply */
-}
-
-/* Dashboard Stat Card Styling */
-.stat-card {
-  background-color: var(--stat-card-bg);
-  padding: 1.5rem; /* p-6 */
-  border-radius: 0.5rem; /* rounded-lg */
-  box-shadow:
-    0 1px 3px 0 rgba(0, 0, 0, 0.1),
-    0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow-md */
-  text-align: center;
-}
-.stat-card.interactive {
-  /* For clickable stat cards */
-  cursor: pointer;
-  transition:
-    transform 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
-}
-.stat-card.interactive:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 4px 8px 0 rgba(0, 0, 0, 0.12),
-    0 2px 4px 0 rgba(0, 0, 0, 0.08); /* shadow-lg */
-}
-.stat-value {
-  font-size: 2.25rem; /* text-4xl */
-  font-weight: 700; /* font-bold */
-  color: var(--stat-value-color);
-}
-.stat-label {
-  font-size: 0.875rem; /* text-sm */
-  color: var(--stat-label-color);
-  margin-top: 0.25rem; /* mt-1 */
-}
-
 /* Donut Chart Specific Styling */
-.donut-chart-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 1.5rem; /* mt-6 */
-  position: relative; /* For positioning center text */
-}
-.donut-center-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  z-index: 10; /* Ensure it's above the chart */
-  font-size: 1.125rem; /* text-lg */
-  font-weight: 600; /* font-semibold */
-  color: var(--donut-center-text-color);
-}
 #dataUsageCanvasContainer {
-  position: relative; /* For canvas positioning if needed */
-  margin-bottom: 0.5rem; /* mb-2 */
+  position: relative;
+  margin-bottom: 0.5rem;
   animation: fadeInScaleUp 0.8s ease-out forwards;
-  opacity: 0; /* Start hidden for animation */
-}
-dataUsageCanvasContainer > .new-canvas-wrapper > canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important; /* This forces the canvas to try and fill its parent's height */
-  max-width: 100%;
-  max-height: 100%; /* This ensures it doesn't exceed its parent's height */
+  opacity: 0;
 }
 @keyframes fadeInScaleUp {
-  /* Animation for chart appearance */
   0% {
     opacity: 0;
     transform: scale(0.8);
@@ -504,521 +167,10 @@ dataUsageCanvasContainer > .new-canvas-wrapper > canvas {
   }
 }
 
-/* Chart Legend Styling */
-.chart-legend {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem; /* gap-2 */
-  margin-top: 0.75rem; /* mt-3 */
-}
-@media (min-width: 1280px) {
-  /* sm breakpoint */
-  .chart-legend {
-    flex-direction: row;
-    justify-content: center;
-    gap: 1rem; /* gap-4 */
-  }
-}
-.legend-item {
-  display: flex;
-  align-items: center;
-  font-size: 0.875rem; /* text-sm */
-  color: var(--legend-item-text-color);
-  transition:
-    transform 0.2s ease-out,
-    font-weight 0.2s ease-out;
-  cursor: default; /* Or pointer if interactive */
-}
-.legend-item:hover {
-  transform: scale(1.05); /* Slight scale on hover */
-  font-weight: 600; /* font-semibold */
-}
-.legend-color-box {
-  width: 12px;
-  height: 12px;
-  margin-right: 0.25rem; /* mr-1 */
-  border-radius: 0.125rem; /* rounded-sm */
-}
-
-/* --- Global Hint Box Styling --- */
-.hint-box {
-  padding: 0.75rem; /* p-3 */
-  border-radius: 0.375rem; /* rounded-md */
-  font-size: 0.875rem; /* text-sm */
-  margin-bottom: 1.5rem; /* mb-6, standardized margin */
-  display: flex;
-  align-items: flex-start;
-  border: 1px solid; /* Border color will be set by modifier */
-}
-
-.hint-box i {
-  /* Icon styling */
-  margin-right: 0.5rem; /* mr-2 */
-  margin-top: 0.125rem; /* Small top margin for alignment */
-  flex-shrink: 0; /* Prevent icon from shrinking */
-}
-
-.hint-box > div, /* If content is wrapped in a div for lists etc. */
-.hint-box > span {
-  /* If content is a direct span */
-  flex-grow: 1; /* Allow text content to take remaining space */
-}
-
-.hint-box ul {
-  list-style-type: disc;
-  padding-left: 1.25rem; /* pl-5 */
-  margin-top: 0.25rem; /* mt-1 */
-  margin-bottom: 0;
-}
-.hint-box li {
-  margin-bottom: 0.125rem; /* mb-0.5 */
-}
-
-/* Info Hint Box */
-.hint-box-info {
-  background-color: var(--hint-info-bg);
-  border-color: var(--hint-info-border);
-  color: var(--hint-info-text);
-}
-.hint-box-info i {
-  color: var(--hint-info-icon);
-}
-
-/* Warning Hint Box */
-.hint-box-warning {
-  background-color: var(--hint-warning-bg);
-  border-color: var(--hint-warning-border);
-  color: var(--hint-warning-text);
-}
-.hint-box-warning i {
-  color: var(--hint-warning-icon);
-}
-
-/* Danger Hint Box */
-.hint-box-danger {
-  background-color: var(--hint-danger-bg);
-  border-color: var(--hint-danger-border);
-  color: var(--hint-danger-text);
-}
-.hint-box-danger i {
-  color: var(--hint-danger-icon);
-}
-
-/* Success Hint Box */
-.hint-box-success {
-  background-color: var(--hint-success-bg);
-  border-color: var(--hint-success-border);
-  color: var(--hint-success-text);
-}
-.hint-box-success i {
-  color: var(--hint-success-icon);
-}
-
 /* Zone Edit Toggle Switch */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
+.toggle-bg {
+  @apply block w-14 h-8 rounded-full transition-colors bg-gray-300 dark:bg-slate-600 peer-checked:bg-blue-500;
 }
-
-/* Default (Light Mode) Toggle Background */
-input[type="checkbox"].peer + .toggle-bg {
-  background-color: var(--border-color); /* gray-200 */
-}
-input[type="checkbox"].peer:checked + .toggle-bg {
-  background-color: var(--tab-active-border-color); /* blue-600 */
-}
-
-/* Dark Mode Toggle Background */
-.dark-mode input[type="checkbox"].peer + .toggle-bg {
-  background-color: #475569; /* bg-slate-600 for unchecked toggle in dark */
-}
-.dark-mode input[type="checkbox"].peer:checked + .toggle-bg {
-  background-color: #2563eb; /* bg-blue-600 for checked toggle in dark */
-}
-
-/* Navigation bar theming */
-nav {
-  background-color: var(--nav-bg-color);
-  color: var(--nav-text-color);
-}
-nav #theme-toggle-btn {
-  color: var(--nav-text-color); /* Ensure icon color matches text */
-}
-nav #theme-toggle-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1); /* Slight hover effect */
-}
-.dark-mode nav #theme-toggle-btn:hover {
-  background-color: rgba(0, 0, 0, 0.2); /* Slight hover effect for dark */
-}
-
-/* Tabs theming */
-#mainTabs .tab-btn {
-  color: var(--text-secondary-color);
-}
-#mainTabs .tab-btn:hover {
-  color: var(--link-hover-color);
-  border-color: var(--link-hover-border-color);
-}
-#mainTabs .tab-btn.active {
-  color: var(--tab-active-text-color);
-  border-color: var(--tab-active-border-color);
-}
-
-/* Main tab content area */
-#tabContent {
-  background-color: var(--bg-secondary-color);
-  color: var(--text-color); /* Text within tab content */
-}
-#tabContent h2 {
-  /* Titles within tabs */
-  color: var(--text-color);
-}
-
-/* Card theming */
-.session-card,
-.voucher-card,
-.zone-info-card {
-  background-color: var(--card-bg);
-  border-color: var(--card-border);
-  color: var(--card-text); /* General text inside cards */
-}
-
-/* Footer theming */
-footer {
-  background-color: var(--footer-bg-color);
-  color: var(--footer-text-color);
-  border-top-color: var(--border-color);
-}
-footer #api-status-footer span.text-green-600 {
-  color: #16a34a;
-} /* Ensure high contrast green */
-.dark-mode footer #api-status-footer span.text-green-600 {
-  color: #4ade80;
-} /* Lighter green for dark mode */
-footer #api-status-footer span.text-red-500 {
-  color: #ef4444;
-}
-.dark-mode footer #api-status-footer span.text-red-500 {
-  color: #f87171;
-} /* Lighter red */
-footer #api-status-footer span.text-yellow-500 {
-  color: #f59e0b;
-}
-.dark-mode footer #api-status-footer span.text-yellow-500 {
-  color: #facc15;
-} /* Lighter yellow */
-
-/* Config Input Section Theming */
-#config-input-section {
-  background-color: var(--config-input-section-bg);
-  border-left-color: var(
-    --config-input-section-border
-  ) !important; /* Ensure this overrides Tailwind if direct classes are used */
-  color: var(--config-input-section-text);
-}
-#config-input-section p,
-#config-input-section label {
-  color: var(--config-input-section-text);
-}
-/* More specific if Tailwind direct classes cause issues: */
-.dark-mode #config-input-section {
-  background-color: var(
-    --config-input-section-bg
-  ); /* e.g., dark yellow or neutral dark */
-  border-left-color: var(--config-input-section-border) !important;
-  color: var(--config-input-section-text);
-}
-.dark-mode #config-input-section label {
-  color: var(
-    --config-input-section-text
-  ); /* Or slightly lighter text for dark */
-}
-
-/* Toast Notification Styling */
-#toast-notification {
-  position: fixed;
-  bottom: 1.25rem; /* bottom-5 */
-  right: 1.25rem; /* right-5 */
-  color: white;
-  padding-top: 0.75rem; /* py-3 */
-  padding-bottom: 0.75rem; /* py-3 */
-  padding-left: 1.25rem; /* px-5 */
-  padding-right: 1.25rem; /* px-5 */
-  border-radius: 0.5rem; /* rounded-lg */
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
-  opacity: 0;
-  transition-property: opacity;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
-  max-width: 20rem; /* max-w-xs */
-  z-index: 50; /* Ensure it's above most content */
-  /* Default to pointer-events: none when hidden */
-  pointer-events: none;
-}
-
-#toast-notification.opacity-100 {
-  opacity: 1;
-  pointer-events: auto; /* Allow clicks when visible */
-}
-
-/* Print-specific styles */
-@media print {
-  body {
-    background-color: #fff !important; /* Force white background for printing */
-    color: #000 !important; /* Force black text for printing */
-    -webkit-print-color-adjust: exact; /* For background colors and images */
-    print-color-adjust: exact;
-  }
-
-  /* Hide elements not needed in print */
-  nav,
-	footer,
-	#mainTabs,
-	#config-input-section,
-	#session-field-container,
-	#session-action-btn,
-	.hint-box, /* Hide all hint boxes */
-	#voucher-field-container,
-	#voucher-action-btn,
-	#voucher-group-actions,
-	#zone-action-container,
-	#toast-notification,
-	.modal {
-    display: none !important;
-  }
-
-  /* Show only the content for PDF generation */
-  #main-content-scroll-area {
-    overflow: visible !important;
-    height: auto !important;
-    min-height: auto !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    display: block !important;
-    background-color: #fff !important;
-  }
-
-  .container.mx-auto.p-4 {
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100% !important;
-    max-width: none !important;
-  }
-
-  #tabContent {
-    padding: 0 !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-    background-color: #fff !important;
-    color: #000 !important;
-  }
-}
-
-#provider-zone-linkage-card .card-summary i.fas {
-  transition: transform 0.3s ease;
-}
-
-#provider-zone-linkage-card .card-summary[aria-expanded="true"] i.fas {
-  transform: rotate(180deg);
-}
-
-#provider-zone-linkage-details ul {
-  list-style-type: none; /* Or 'disc' if you prefer bullets */
-  padding-left: 0;
-}
-
-#provider-zone-linkage-details ul ul {
-  /* Styles for nested list of zones */
-  padding-left: 1rem; /* Indent nested list */
-  margin-top: 0.25rem;
-}
-#provider-zone-linkage-details li {
-  font-size: 0.875rem; /* text-sm */
-}
-
-/* --- Pagination Styling --- */
-
-nav[aria-label="Pagination"] {
-  background-color: var(--bg-secondary-color);
-  border-radius: 0.375rem; /* rounded-md */
-  box-shadow: none; /* Removed shadow from pagination container */
-  /* Padding is handled by JS (px-4 py-3 sm:px-6) */
-}
-
-nav[aria-label="Pagination"] > div:first-child p {
-  color: var(--text-secondary-color);
-  font-size: 0.875rem;
-}
-nav[aria-label="Pagination"] > div:first-child p span.font-medium {
-  color: var(--text-color);
-  font-weight: 600;
-  border: none !important;
-  background-color: transparent !important;
-  padding: 0 !important;
-  display: inline;
-}
-
-/* General button styling for pagination */
-nav[aria-label="Pagination"] button {
-  border: 1px solid var(--border-secondary-color); /* Default border */
-  transition:
-    background-color 0.15s ease-in-out,
-    border-color 0.15s ease-in-out,
-    box-shadow 0.15s ease-in-out,
-    transform 0.15s ease-in-out;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Base shadow for enabled buttons */
-}
-nav[aria-label="Pagination"] button:focus-visible {
-  /* Better focus outline for accessibility */
-  outline: 2px solid var(--form-input-focus-border);
-  outline-offset: 1px;
-  z-index: 15; /* Ensure focus outline is visible */
-}
-
-/* Enabled, non-current buttons */
-nav[aria-label="Pagination"] button:not([aria-current="page"]):not(:disabled) {
-  background-color: var(--form-input-bg);
-  color: var(--text-secondary-color);
-}
-nav[aria-label="Pagination"]
-  button:not([aria-current="page"]):not(:disabled)
-  i {
-  color: var(--text-secondary-color);
-}
-
-/* Hover state for enabled, non-current buttons */
-nav[aria-label="Pagination"]
-  button:not([aria-current="page"]):not(:disabled):hover {
-  background-color: var(--bg-color);
-  border-color: var(--link-hover-border-color);
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.07);
-  transform: translateY(-1px);
-}
-
-/* Current page button */
-nav[aria-label="Pagination"] button[aria-current="page"] {
-  background-color: var(--tab-active-border-color);
-  color: var(--nav-text-color);
-  border-color: var(--tab-active-border-color);
-  box-shadow:
-    0 1px 3px 0 rgba(0, 0, 0, 0.1),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
-  z-index: 10;
-}
-nav[aria-label="Pagination"] button[aria-current="page"]:hover {
-  background-color: var(--tab-active-text-color);
-}
-nav[aria-label="Pagination"] button[aria-current="page"] i {
-  color: var(--nav-text-color);
-}
-
-/* Disabled button state */
-nav[aria-label="Pagination"] button:disabled {
-  background-color: var(--bg-color);
-  color: var(--border-secondary-color);
-  border-color: var(--border-color);
-  opacity: 0.5;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-nav[aria-label="Pagination"] button:disabled i {
-  color: var(--border-secondary-color);
-  opacity: 0.5;
-}
-
-/* Ellipsis (...) span specific styling */
-nav[aria-label="Pagination"]
-  > div:last-child
-  > div[aria-label="Pagination"]
-  > span {
-  border: 1px solid var(--border-secondary-color);
-  background-color: var(--form-input-bg);
-  color: var(--text-secondary-color);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 1rem; /* Tailwind: py-2 px-4 */
-  font-size: 0.875rem; /* Tailwind: text-sm */
-  font-weight: 500; /* Tailwind: font-medium */
-  line-height: 1.25rem; /* Tailwind: leading-tight */
-  min-height: calc(1.25rem + 1rem + 2px);
-}
-
-@media (max-width: 640px) {
-  /* Below sm breakpoint */
-  nav[aria-label="Pagination"] {
-    flex-direction: column;
-    gap: 0.75rem; /* space-y-3 when stacked */
-    align-items: center;
-    /* Padding classes (px-4 py-3) from JS will apply for overall nav */
-  }
-  nav[aria-label="Pagination"] > div:first-child {
-    /* Summary Text */
-    display: block !important;
-    text-align: center;
-    width: 100%;
-    order: 2;
-    margin-top: 0.5rem;
-  }
-  nav[aria-label="Pagination"] > div.flex-1 {
-    /* Button Group Container */
-    justify-content: center;
-    width: 100%;
-    order: 1;
-  }
-  nav[aria-label="Pagination"] div.inline-flex {
-    /* Actual Button Group */
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.25rem; /* Tailwind space-x-1 / space-y-1 equivalent for wrapped items */
-  }
-}
-
-nav[aria-label="Pagination"]
-  > div:last-child
-  > div[aria-label="Pagination"]
-  > :first-child {
-  border-top-left-radius: 0.375rem;
-  border-bottom-left-radius: 0.375rem;
-}
-nav[aria-label="Pagination"]
-  > div:last-child
-  > div[aria-label="Pagination"]
-  > :last-child {
-  border-top-right-radius: 0.375rem;
-  border-bottom-right-radius: 0.375rem;
-}
-
-/* General Checkbox and Radio styling for UI improvement */
-input[type="checkbox"],
-input[type="radio"] {
-  transition: opacity 0.2s ease-in-out;
-}
-
-/* Make unchecked controls barely visible */
-input[type="checkbox"]:not(:checked),
-input[type="radio"]:not(:checked) {
-  opacity: 0.2;
-}
-
-/* On hover, make them fully visible for better interaction */
-input[type="checkbox"]:not(:checked):hover,
-input[type="radio"]:not(:checked):hover {
-  opacity: 1;
-}
-
-/* Ensure checked controls are fully visible */
-input[type="checkbox"]:checked,
-input[type="radio"]:checked {
-  opacity: 1;
+.toggle-dot {
+  @apply absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform peer-checked:translate-x-6;
 }

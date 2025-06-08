@@ -25,15 +25,7 @@ export default defineConfig([
       },
     },
     rules: {
-      // You can add this rule to explicitly ignore the 'isCurrentlyExpanded' unused variable,
-      // although removing the variable directly from the code is cleaner.
-      // 'no-unused-vars': ['warn', { 'argsIgnorePattern': '^_', 'varsIgnorePattern': '^isCurrentlyExpanded$' }],
-
-      // This rule helps enforce using Object.prototype.hasOwnProperty.call()
-      // If you're okay with the direct .hasOwnProperty() call and just want to suppress the error,
-      // you could disable it, but it's generally better to fix the code as previously suggested.
       "no-prototype-builtins": "off", // You can turn this off if you don't want to fix it.
-      // But the previous suggestion was to fix the code using Object.prototype.hasOwnProperty.call()
     },
   },
   {

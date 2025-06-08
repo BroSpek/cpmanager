@@ -1,7 +1,7 @@
 // sw.js - Service Worker for Caching App Shell with Automatic Updates and Notification Handling
 
 // Increment the version when you change urlsToCache or the SW logic itself.
-const CACHE_NAME = "captive-portal-manager-cache-v1.0.1"; // << Cache version updated
+const CACHE_NAME = "cpm-cache-v1.0.0"; // << Cache version updated
 const urlsToCache = [
   "index.html",
   "icons/icon-192x192.png",

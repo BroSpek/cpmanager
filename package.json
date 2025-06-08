@@ -3,24 +3,38 @@
   "version": "1.0.0",
   "scripts": {
     "start": "parcel index.html",
-    "build": "parcel build index.html --public-url ./ && npm run copy-config",
-    "copy-config": "copyfiles app-config.json dist/",
+    "build": "parcel build index.html --public-url ./ && npm run copy-assets",
+    "copy-assets": "copyfiles \"icons/**/*.png\" dist && copyfiles app-config.json dist/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "**OPNsense Captive Portal Manager** is a web-based tool designed to manage the OPNsense Captive Portal, providing a user-friendly interface for monitoring and controlling various aspects of the portal.",
   "devDependencies": {
     "@eslint/css": "^0.8.1",
     "@eslint/js": "^9.28.0",
     "@eslint/json": "^0.12.0",
     "@eslint/markdown": "^6.5.0",
+    "@parcel/packager-raw-url": "^2.15.2",
+    "@parcel/transformer-webmanifest": "^2.15.2",
+    "autoprefixer": "^10.4.21",
+    "copyfiles": "^2.4.1",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
     "globals": "^16.2.0",
-    "prettier": "^3.5.3",
     "parcel": "^2.12.0",
-    "copyfiles": "^2.4.1"
-  }
+    "postcss": "^8.5.4",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.12",
+    "tailwindcss": "^3.4.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/halimstt/cpmanager.git"
+  },
+  "bugs": {
+    "url": "https://github.com/halimstt/cpmanager/issues"
+  },
+  "homepage": "https://github.com/halimstt/cpmanager#readme"
 }
