@@ -71,7 +71,7 @@
               <input
                 type="text"
                 id="config-api-base-url"
-                class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-200 border-gray-300 dark:border-slate-700 focus:ring-blue-500 focus:border-blue-500"
+                class="form-input"
                 placeholder="e.g., https://192.168.1.1"
                 autocomplete="api-url"
               />
@@ -83,7 +83,7 @@
               <input
                 type="text"
                 id="config-api-key"
-                class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-200 border-gray-300 dark:border-slate-700 focus:ring-blue-500 focus:border-blue-500"
+                class="form-input"
                 autocomplete="username"
               />
             </div>
@@ -94,7 +94,7 @@
               <input
                 type="password"
                 id="config-api-secret"
-                class="mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-200 border-gray-300 dark:border-slate-700 focus:ring-blue-500 focus:border-blue-500"
+                class="form-input"
                 autocomplete="current-password"
               />
             </div>
@@ -102,7 +102,7 @@
               <button
                 id="save-api-creds-btn"
                 type="button"
-                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-green-500 text-white hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="btn btn-base btn-success"
               >
                 Save Credentials
               </button>
@@ -282,14 +282,14 @@
               <button
                 id="find-my-session-btn"
                 type="button"
-                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-sky-500 text-white hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="btn btn-base btn-sky"
               >
                 <i class="fas fa-street-view mr-2"></i>My Session
               </button>
               <button
                 id="disconnect-selected-sessions-btn"
                 type="button"
-                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="btn btn-base btn-danger"
                 disabled
               >
                 <i class="fas fa-times-circle mr-2"></i>Disconnect
@@ -435,14 +435,14 @@
               <button
                 id="create-vouchers-btn"
                 type="button"
-                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                class="btn btn-base btn-primary whitespace-nowrap"
               >
                 <i class="fas fa-plus-circle mr-2"></i>Create New
               </button>
               <button
                 id="void-selected-vouchers-btn"
                 type="button"
-                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="btn btn-base btn-warning"
                 disabled
               >
                 <i class="fas fa-times-circle mr-2"></i>Void Selected
@@ -450,14 +450,14 @@
               <button
                 id="drop-expired-vouchers-btn"
                 type="button"
-                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="btn btn-base btn-warning"
               >
                 <i class="fas fa-trash-alt mr-2"></i>Drop Expired
               </button>
               <button
                 id="drop-voucher-group-btn"
                 type="button"
-                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="btn btn-base btn-danger"
               >
                 <i class="fas fa-trash-alt mr-2"></i>Drop Group
               </button>
@@ -503,7 +503,7 @@
               <button
                 id="apply-cp-config-btn"
                 type="button"
-                class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-green-500 text-white hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="btn btn-base btn-success"
                 title="Apply Captive Portal Configuration"
               >
                 <i class="fas fa-rotate mr-2"></i>Apply
@@ -666,20 +666,18 @@
             </div>
           </div>
         </div>
-        <div
-          class="mt-8 flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-2 sm:space-y-0"
-        >
+        <div class="mt-8 grid grid-cols-2 gap-4">
           <button
             id="cancel-generate-voucher-btn"
             type="button"
-            class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full sm:w-auto transition-shadow duration-200 bg-gray-500 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn btn-secondary btn-responsive"
           >
             Cancel
           </button>
           <button
             id="submit-generate-voucher-btn"
             type="button"
-            class="py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full sm:w-auto transition-shadow duration-200 bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn btn-primary btn-responsive"
           >
             Generate
           </button>
@@ -750,7 +748,7 @@
                     class="toggle-bg block w-14 h-8 rounded-full transition-colors"
                   ></div>
                   <div
-                    class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform"
+                    class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform peer-checked:translate-x-6"
                   ></div>
                 </div>
                 <span
@@ -823,7 +821,7 @@
                     class="toggle-bg block w-14 h-8 rounded-full transition-colors"
                   ></div>
                   <div
-                    class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform"
+                    class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform peer-checked:translate-x-6"
                   ></div>
                 </div>
                 <span
@@ -873,9 +871,7 @@
             ></textarea>
           </div>
         </form>
-        <div
-          class="mt-8 flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-2 sm:space-y-0"
-        >
+        <div class="mt-8 grid grid-cols-2 gap-4">
           <button
             id="cancel-edit-zone-btn"
             type="button"

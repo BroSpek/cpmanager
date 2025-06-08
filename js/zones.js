@@ -108,8 +108,7 @@
 
         paginatedZones.forEach((zoneSummary) => {
           const zoneCard = document.createElement("div");
-          zoneCard.className =
-            "zone-info-card p-2 rounded-lg shadow border bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-600";
+          zoneCard.className = "zone-info-card cp-card";
           zoneCard.setAttribute("role", "listitem");
           zoneCard.setAttribute(
             "aria-label",
@@ -293,11 +292,11 @@
           }
 
           detailsHtml += `
-            <p class="mt-3">
-              <button class="py-2 px-4 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 bg-gray-500 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" data-action="edit-zone" data-uuid="${uuid}">
+            <div class="mt-3 grid grid-cols-2 gap-4">
+              <button class="btn btn-base btn-secondary" data-action="edit-zone" data-uuid="${uuid}">
                 <i class="fas fa-edit mr-1"></i> Edit Zone Settings
               </button>
-            </p>
+            </div>
           `;
           detailsContainer.innerHTML = detailsHtml;
         } catch (error) {

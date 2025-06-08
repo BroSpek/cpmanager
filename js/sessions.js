@@ -245,7 +245,7 @@
         const isChecked = this.selectedSessions.has(session.sessionId);
 
         const card = document.createElement("div");
-        card.className = `session-card p-2 rounded-lg shadow border bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-600 ${
+        card.className = `session-card cp-card ${
           isManagerCurrentDeviceSession
             ? "ring-2 ring-offset-1 ring-blue-500 shadow-lg"
             : ""

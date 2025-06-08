@@ -1,10 +1,52 @@
-/*
-  The @tailwind directives must be at the top of the file
-  for PostCSS to process them correctly.
-*/
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* --- NEW COMPONENT STYLES --- */
+@layer components {
+  /* Card Component */
+  .cp-card {
+    @apply p-2 rounded-lg shadow border bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-600;
+  }
+
+  /* Button Components */
+  .btn {
+    @apply py-3 px-6 text-sm font-semibold rounded-md shadow-md w-full transition-shadow duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply bg-blue-500 text-white hover:bg-blue-600;
+  }
+  .btn-secondary {
+    @apply bg-gray-500 text-white hover:bg-gray-600;
+  }
+  .btn-danger {
+    @apply bg-red-500 text-white hover:bg-red-600;
+  }
+  .btn-warning {
+    @apply bg-yellow-500 text-white hover:bg-yellow-600;
+  }
+  .btn-success {
+    @apply bg-green-500 text-white hover:bg-green-600;
+  }
+  .btn-sky {
+    @apply bg-sky-500 text-white hover:bg-sky-600;
+  }
+  .btn-responsive {
+    @apply sm:w-auto;
+  }
+
+  /* Form Components */
+  .form-input,
+  .form-select,
+  .form-textarea {
+    @apply mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600 focus:ring-blue-500 focus:border-blue-500;
+  }
+
+  .form-radio,
+  .form-checkbox {
+    @apply h-5 w-5 rounded border-gray-400 text-blue-600 focus:ring-blue-500;
+  }
+}
 
 /* General body and HTML styling for full height and layout */
 html {
