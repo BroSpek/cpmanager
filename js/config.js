@@ -32,6 +32,11 @@ CPManager.config = {
     Voucher: "Voucher",
     "": "Anon",
   },
+  voucherStateMapping: {
+    unused: "Unused",
+    valid: "Active",
+    expired: "Expired",
+  },
   zoneFieldMappings: {
     enabled: "Enabled",
     zoneid: "Zone ID",
