@@ -19,7 +19,7 @@
         }
         if (CPManager.state.vouchers.cachedProviders.length === 0) {
           const providers = await CPManager.api.callApi(
-            "/voucher/list_providers"
+            "/voucher/list_providers",
           );
           CPManager.state.vouchers.cachedProviders = Array.isArray(providers)
             ? providers
@@ -36,7 +36,7 @@
             if (!zoneSummary.uuid) continue;
             try {
               const zoneDetailsResponse = await CPManager.api.callApi(
-                `/settings/get_zone/${zoneSummary.uuid}`
+                `/settings/get_zone/${zoneSummary.uuid}`,
               );
               if (zoneDetailsResponse?.zone?.authservers) {
                 const authServersField = zoneDetailsResponse.zone.authservers;
@@ -81,13 +81,13 @@
             } catch (detailError) {
               console.warn(
                 `Could not fetch details for zone ${zoneSummary.uuid} for linkage card:`,
-                detailError
+                detailError,
               ); // Added error logging
             }
           }
         }
         const providersActuallyUsedByZones = Object.keys(
-          providerToZonesMap
+          providerToZonesMap,
         ).filter((providerName) => providerToZonesMap[providerName].size > 0);
         if (providersActuallyUsedByZones.length === 0) {
           detailsContainer.innerHTML =
@@ -98,7 +98,7 @@
             const zonesList = Array.from(providerToZonesMap[providerName])
               .map(
                 (zn) =>
-                  `<li><i class="fas fa-layer-group text-xs mr-1 text-gray-400 dark:text-gray-500"></i>${zn}</li>`
+                  `<li><i class="fas fa-layer-group text-xs mr-1 text-gray-400 dark:text-gray-500"></i>${zn}</li>`,
               )
               .join("");
             listHtml += `<li class="border-b border-gray-200 dark:border-gray-700 border-dashed pb-2 last:border-b-0 last:pb-0"><span class="font-semibold text-gray-700 dark:text-gray-300">${providerName}</span> is linked to:<ul class="list-none pl-4 mt-1 text-xs space-y-1">${zonesList}</ul></li>`;
@@ -161,11 +161,11 @@
           CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000
       ) {
         this.populateVoucherProviderSelect(
-          CPManager.state.vouchers.cachedProviders
+          CPManager.state.vouchers.cachedProviders,
         );
         if (CPManager.elements.voucherProviderSelect.value) {
           this.handleProviderSelection(
-            CPManager.elements.voucherProviderSelect.value
+            CPManager.elements.voucherProviderSelect.value,
           );
         }
         return;
@@ -178,7 +178,7 @@
       if (CPManager.elements.voucherCardContainer)
         CPManager.ui.clearContainer(
           CPManager.elements.voucherCardContainer,
-          "voucher-pagination"
+          "voucher-pagination",
         );
       if (CPManager.elements.voucherSearchInput)
         CPManager.elements.voucherSearchInput.value = "";
@@ -188,7 +188,7 @@
       this.updateVoidSelectedButton();
       try {
         const providers = await CPManager.api.callApi(
-          "/voucher/list_providers"
+          "/voucher/list_providers",
         );
         if (Array.isArray(providers)) {
           CPManager.state.vouchers.cachedProviders = providers;
@@ -204,11 +204,11 @@
           CPManager.state.vouchers.cachedProviders = [];
           CPManager.ui.showToast(
             "Could not load voucher providers: unexpected format.",
-            "error"
+            "error",
           );
           console.error(
             "Voucher providers API returned unexpected format:",
-            providers
+            providers,
           ); // Added error logging
         }
       } catch (error) {
@@ -217,7 +217,7 @@
           '<option value="">Error loading providers.</option>';
         CPManager.ui.showToast(
           "Error loading voucher providers: " + error.message,
-          "error"
+          "error",
         );
         console.error("Error fetching voucher providers:", error); // Added error logging
       }
@@ -230,7 +230,7 @@
           '<option value="">No providers found.</option>';
         CPManager.ui.showToast(
           "No voucher providers configured on OPNsense.",
-          "warning"
+          "warning",
         );
         CPManager.ui.disableVoucherActionButtons(true, true, true);
         this.updateVoidSelectedButton();
@@ -239,7 +239,7 @@
       CPManager.elements.voucherProviderSelect.innerHTML =
         '<option value="">-- Select Provider --</option>';
       const savedProvider = localStorage.getItem(
-        CPManager.config.localStorageKeys.selectedVoucherProvider
+        CPManager.config.localStorageKeys.selectedVoucherProvider,
       );
       let providerToSelect = null;
       providers.forEach((provider) => {
@@ -253,7 +253,7 @@
         CPManager.elements.voucherProviderSelect.value = providers[0];
         localStorage.setItem(
           CPManager.config.localStorageKeys.selectedVoucherProvider,
-          providers[0]
+          providers[0],
         );
         this.handleProviderSelection(providers[0]);
       } else if (providerToSelect) {
@@ -276,12 +276,12 @@
       if (providerId) {
         localStorage.setItem(
           CPManager.config.localStorageKeys.selectedVoucherProvider,
-          providerId
+          providerId,
         );
         this.loadVoucherGroups(providerId, forceRefreshGroups);
       } else {
         localStorage.removeItem(
-          CPManager.config.localStorageKeys.selectedVoucherProvider
+          CPManager.config.localStorageKeys.selectedVoucherProvider,
         );
         if (CPManager.elements.voucherGroupSelect)
           CPManager.elements.voucherGroupSelect.innerHTML =
@@ -289,7 +289,7 @@
         if (CPManager.elements.voucherCardContainer)
           CPManager.ui.clearContainer(
             CPManager.elements.voucherCardContainer,
-            "voucher-pagination"
+            "voucher-pagination",
           );
         CPManager.ui.disableVoucherActionButtons(true, true, true);
         this.updateVoidSelectedButton();
@@ -311,7 +311,7 @@
         if (CPManager.elements.voucherCardContainer)
           CPManager.ui.clearContainer(
             CPManager.elements.voucherCardContainer,
-            "voucher-pagination"
+            "voucher-pagination",
           );
         CPManager.ui.disableVoucherActionButtons(true, true, true);
         this.updateVoidSelectedButton();
@@ -326,7 +326,7 @@
       ) {
         this.populateVoucherGroupSelect(
           providerId,
-          CPManager.state.vouchers.cachedGroups[cacheKey]
+          CPManager.state.vouchers.cachedGroups[cacheKey],
         );
         return;
       }
@@ -343,14 +343,14 @@
           CPManager.elements.voucherCardContainer,
           1,
           '<div class="skeleton-card"></div>',
-          "voucher-pagination"
+          "voucher-pagination",
         );
       }
       CPManager.ui.disableVoucherActionButtons(false, true, true);
       this.updateVoidSelectedButton();
       try {
         const groups = await CPManager.api.callApi(
-          `/voucher/list_voucher_groups/${providerId}`
+          `/voucher/list_voucher_groups/${providerId}`,
         );
         if (Array.isArray(groups)) {
           CPManager.state.vouchers.cachedGroups[cacheKey] = groups;
@@ -367,13 +367,13 @@
               CPManager.elements.voucherCardContainer,
               "Error loading groups.",
               "fas fa-exclamation-triangle",
-              "voucher-pagination"
+              "voucher-pagination",
             );
           CPManager.ui.disableVoucherActionButtons(false, true, true);
           this.updateVoidSelectedButton();
           console.error(
             "Voucher groups API returned unexpected format:",
-            groups
+            groups,
           ); // Added error logging
         }
       } catch (error) {
@@ -386,7 +386,7 @@
             CPManager.elements.voucherCardContainer,
             "Error loading groups.",
             "fas fa-exclamation-triangle",
-            "voucher-pagination"
+            "voucher-pagination",
           );
         CPManager.ui.disableVoucherActionButtons(false, true, true);
         this.updateVoidSelectedButton();
@@ -421,7 +421,7 @@
         CPManager.ui.disableVoucherActionButtons(false, false, false);
         await this.loadVouchersForGroup(
           providerId,
-          CPManager.elements.voucherGroupSelect.value
+          CPManager.elements.voucherGroupSelect.value,
         );
       } else {
         if (CPManager.elements.voucherCardContainer) {
@@ -430,14 +430,14 @@
               CPManager.elements.voucherCardContainer,
               `No voucher groups for provider: <strong>${providerId}</strong>.`,
               "fas fa-folder-open",
-              "voucher-pagination"
+              "voucher-pagination",
             );
           } else {
             CPManager.ui.showNoDataMessage(
               CPManager.elements.voucherCardContainer,
               "Select a group to see its vouchers.",
               "fas fa-ticket-alt",
-              "voucher-pagination"
+              "voucher-pagination",
             );
           }
         }
@@ -450,7 +450,7 @@
     loadVouchersForGroup: async function (
       providerId,
       groupName,
-      forceRefresh = false
+      forceRefresh = false,
     ) {
       CPManager.state.vouchers.currentPage = 1;
       this.selectedVouchers.clear();
@@ -465,7 +465,7 @@
             CPManager.elements.voucherCardContainer,
             "Provider or group not selected.",
             "fas fa-info-circle",
-            "voucher-pagination"
+            "voucher-pagination",
           );
         CPManager.state.vouchers.current = [];
         this.renderVouchers([], groupName);
@@ -484,7 +484,7 @@
           CPManager.elements.voucherCardContainer,
           CPManager.config.itemsPerPage,
           '<div class="skeleton-card"></div>',
-          "voucher-pagination"
+          "voucher-pagination",
         );
       }
 
@@ -494,7 +494,7 @@
             CPManager.state.vouchers.cachedData[cacheKey].data;
         } else {
           const vouchers = await CPManager.api.callApi(
-            `/voucher/list_vouchers/${providerId}/${groupName}`
+            `/voucher/list_vouchers/${providerId}/${groupName}`,
           );
           const data = Array.isArray(vouchers) ? vouchers : [];
           CPManager.state.vouchers.cachedData[cacheKey] = {
@@ -506,7 +506,7 @@
       } catch (error) {
         CPManager.ui.showToast(
           "Error loading vouchers for group: " + error.message,
-          "error"
+          "error",
         );
         CPManager.state.vouchers.current = [];
         if (CPManager.state.vouchers.cachedData[cacheKey]) {
@@ -530,11 +530,11 @@
       let filteredVouchers = CPManager.state.vouchers.current;
       if (searchTerm)
         filteredVouchers = filteredVouchers.filter(
-          (v) => v.username && v.username.toLowerCase().includes(searchTerm)
+          (v) => v.username && v.username.toLowerCase().includes(searchTerm),
         );
       if (selectedState)
         filteredVouchers = filteredVouchers.filter(
-          (v) => v.state === selectedState
+          (v) => v.state === selectedState,
         );
       this.currentlyVisibleVouchers = filteredVouchers;
       this.renderVouchers(filteredVouchers, groupName);
@@ -568,7 +568,7 @@
           container,
           message,
           "fas fa-folder-open",
-          "voucher-pagination"
+          "voucher-pagination",
         );
         return;
       }
@@ -576,7 +576,7 @@
       const paginatedVouchers = vouchersToRender.slice(
         (CPManager.state.vouchers.currentPage - 1) *
           CPManager.config.itemsPerPage,
-        CPManager.state.vouchers.currentPage * CPManager.config.itemsPerPage
+        CPManager.state.vouchers.currentPage * CPManager.config.itemsPerPage,
       );
       paginatedVouchers.forEach((voucher) => {
         const card = document.createElement("div");
@@ -587,12 +587,14 @@
             : voucher.state === "unused"
               ? "bg-sky-500"
               : "bg-red-500";
+        const stateText =
+          CPManager.config.voucherStateMapping[voucher.state] || voucher.state;
         const isChecked = this.selectedVouchers.has(voucher.username);
         const isExpired = voucher.state === "expired";
         const checkboxHTML = `<div class="flex-shrink-0"><input type="checkbox" class="voucher-select-checkbox form-checkbox" data-voucher-username="${voucher.username}" ${isChecked ? "checked" : ""} ${isExpired ? "disabled" : ""}></div>`;
         const cardSummaryId = `voucher-summary-${voucher.username}`;
         const cardDetailsId = `voucher-details-${voucher.username}`;
-        card.innerHTML = `<div class="flex justify-between items-center mb-1">${checkboxHTML}<div class="flex items-center"><span class="info-tag ${stateTagColor}" title="State: ${voucher.state}">${voucher.state}</span></div></div><div id="${cardSummaryId}" class="voucher-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false"><div class="card-detail-row"><span class="card-detail-label">Voucher Code</span><span class="card-detail-value">${voucher.username}</span></div></div><div class="card-details-content max-h-0 overflow-hidden transition-all duration-300 ease-out text-sm space-y-1" id="${cardDetailsId}" aria-hidden="true"><div class="card-detail-row"><span class="card-detail-label">Validity</span> <span class="card-detail-value-secondary">${CPManager.utils.formatDuration(voucher.validity, "seconds")}</span></div><div class="card-detail-row"><span class="card-detail-label">Start Time</span> <span class="card-detail-value-secondary">${CPManager.utils.formatVoucherTimestamp(voucher.starttime)}</span></div><div class="card-detail-row"><span class="card-detail-label">End Time</span> <span class="card-detail-value-secondary">${CPManager.utils.formatVoucherTimestamp(voucher.endtime)}</span></div><div class="card-detail-row"><span class="card-detail-label">Expires At</span><span class="card-detail-value-secondary">${voucher.expirytime && voucher.expirytime !== 0 ? CPManager.utils.formatVoucherTimestamp(voucher.expirytime) : "Never"}</span></div></div>`;
+        card.innerHTML = `<div class="flex justify-between items-center mb-1">${checkboxHTML}<div class="flex items-center"><span class="info-tag ${stateTagColor}" title="State: ${stateText}">${stateText}</span></div></div><div id="${cardSummaryId}" class="voucher-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false"><div class="card-detail-row"><span class="card-detail-label">Voucher Code</span><span class="card-detail-value">${voucher.username}</span></div></div><div class="card-details-content max-h-0 overflow-hidden transition-all duration-300 ease-out text-sm space-y-1" id="${cardDetailsId}" aria-hidden="true"><div class="card-detail-row"><span class="card-detail-label">Validity</span> <span class="card-detail-value-secondary">${CPManager.utils.formatDuration(voucher.validity, "seconds")}</span></div><div class="card-detail-row"><span class="card-detail-label">Start Time</span> <span class="card-detail-value-secondary">${CPManager.utils.formatVoucherTimestamp(voucher.starttime)}</span></div><div class="card-detail-row"><span class="card-detail-label">End Time</span> <span class="card-detail-value-secondary">${CPManager.utils.formatVoucherTimestamp(voucher.endtime)}</span></div><div class="card-detail-row"><span class="card-detail-label">Expires At</span><span class="card-detail-value-secondary">${voucher.expirytime && voucher.expirytime !== 0 ? CPManager.utils.formatVoucherTimestamp(voucher.expirytime) : "Never"}</span></div></div>`;
         container.appendChild(card);
       });
       CPManager.ui.renderPaginationControls(
@@ -603,7 +605,7 @@
         (newPage) => {
           CPManager.state.vouchers.currentPage = newPage;
           this.renderVouchers(vouchersToRender, groupName);
-        }
+        },
       );
     },
 
@@ -623,7 +625,7 @@
     },
 
     updateSelectAllUI: function (
-      vouchersToRender = this.currentlyVisibleVouchers
+      vouchersToRender = this.currentlyVisibleVouchers,
     ) {
       const {
         voucherSelectAllContainer,
@@ -640,7 +642,7 @@
       const selectedCount = this.selectedVouchers.size;
       voucherSelectedCountText.textContent = `(${selectedCount} voucher${selectedCount === 1 ? "" : "s"} selected)`;
       const eligibleVouchers = vouchersToRender.filter(
-        (v) => v.state !== "expired"
+        (v) => v.state !== "expired",
       );
       const allEligibleVisibleSelected =
         eligibleVouchers.length > 0 &&
@@ -653,7 +655,7 @@
 
     handleSelectAll: function (isChecked) {
       const eligibleVouchers = this.currentlyVisibleVouchers.filter(
-        (v) => v.state !== "expired"
+        (v) => v.state !== "expired",
       );
       eligibleVouchers.forEach((voucher) => {
         if (isChecked) {
@@ -664,7 +666,7 @@
       });
       this.renderVouchers(
         this.currentlyVisibleVouchers,
-        CPManager.elements.voucherGroupSelect.value
+        CPManager.elements.voucherGroupSelect.value,
       );
     },
 
@@ -678,7 +680,7 @@
       if (!providerId || !groupName) {
         CPManager.ui.showToast(
           "Cannot void: Provider or Group not selected.",
-          "error"
+          "error",
         );
         return;
       }
@@ -690,7 +692,7 @@
           CPManager.ui.showToast(
             `Voiding ${selectedVouchers.length} voucher(s)...`,
             "info",
-            5000
+            5000,
           );
           let successCount = 0;
           let failureCount = 0;
@@ -702,13 +704,13 @@
               .then((result) =>
                 result && result.status !== "error"
                   ? successCount++
-                  : failureCount++
+                  : failureCount++,
               )
               .catch((error) => {
                 // Added error logging
                 console.error(`Failed to void voucher ${voucherCode}:`, error);
                 failureCount++;
-              })
+              }),
           );
           await Promise.all(voidPromises);
           let summaryMessage =
@@ -723,13 +725,13 @@
               ? successCount > 0
                 ? "warning"
                 : "error"
-              : "success"
+              : "success",
           );
           this.selectedVouchers.clear();
           this.updateVoidSelectedButton();
           CPManager.state.vouchers.currentPage = 1;
           await this.loadVouchersForGroup(providerId, groupName, true);
-        }
+        },
       );
     },
 
@@ -743,7 +745,7 @@
       if (!selectedProvider) {
         CPManager.ui.showToast(
           "Please select a voucher provider before generating vouchers.",
-          "error"
+          "error",
         );
         return;
       }
@@ -768,7 +770,7 @@
         CPManager.elements.voucherUsageCustom.value = "";
       }
       const cardOutputRadio = document.querySelector(
-        'input[name="voucher-output-format"][value="card"]'
+        'input[name="voucher-output-format"][value="card"]',
       );
       if (cardOutputRadio) cardOutputRadio.checked = true;
       CPManager.elements.generateVoucherModal.classList.remove("hidden");
@@ -787,7 +789,7 @@
       if (!selectedProvider) {
         CPManager.ui.showToast(
           "Voucher provider not selected. Cannot generate vouchers.",
-          "error"
+          "error",
         );
         return;
       }
@@ -798,19 +800,19 @@
       if (isNaN(count) || count < 1) {
         CPManager.ui.showToast(
           "Number of vouchers must be at least 1.",
-          "error"
+          "error",
         );
         return;
       }
       let lifetimeInSeconds;
       if (CPManager.elements.voucherLifetimeSelect.value === "custom") {
         const customMinutes = parseInt(
-          CPManager.elements.voucherLifetimeCustom.value
+          CPManager.elements.voucherLifetimeCustom.value,
         );
         if (isNaN(customMinutes) || customMinutes < 1) {
           CPManager.ui.showToast(
             "Custom Validity (minutes) must be at least 1.",
-            "error"
+            "error",
           );
           return;
         }
@@ -822,19 +824,19 @@
       let usageInSeconds;
       if (CPManager.elements.voucherUsageSelect.value === "custom") {
         const customHours = parseInt(
-          CPManager.elements.voucherUsageCustom.value
+          CPManager.elements.voucherUsageCustom.value,
         );
         if (isNaN(customHours) || customHours < 0) {
           CPManager.ui.showToast(
             "Custom Expires In (hours) must be non-negative.",
-            "error"
+            "error",
           );
           return;
         }
         usageInSeconds = customHours * 3600;
       } else {
         const selectedUsageHours = parseInt(
-          CPManager.elements.voucherUsageSelect.value
+          CPManager.elements.voucherUsageSelect.value,
         );
         if (isNaN(selectedUsageHours)) {
           CPManager.ui.showToast("Invalid Expires In selection.", "error");
@@ -860,7 +862,7 @@
         const result = await CPManager.api.callApi(
           `/voucher/generate_vouchers/${selectedProvider}`,
           "POST",
-          payload
+          payload,
         );
         if (
           result &&
@@ -870,7 +872,7 @@
         ) {
           CPManager.state.vouchers.lastGenerated = result;
           const outputFormat = document.querySelector(
-            'input[name="voucher-output-format"]:checked'
+            'input[name="voucher-output-format"]:checked',
           ).value;
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF({
@@ -882,25 +884,25 @@
             this.generateVouchersAsCardPDF(
               CPManager.state.vouchers.lastGenerated,
               groupname,
-              doc
+              doc,
             );
           } else if (outputFormat === "table") {
             this.generateVouchersAsTablePDF(
               CPManager.state.vouchers.lastGenerated,
               groupname,
-              doc
+              doc,
             );
           } else if (outputFormat === "both") {
             this.generateVouchersAsCardPDF(
               CPManager.state.vouchers.lastGenerated,
               groupname,
-              doc
+              doc,
             );
             doc.addPage();
             this.generateVouchersAsTablePDF(
               CPManager.state.vouchers.lastGenerated,
               groupname,
-              doc
+              doc,
             );
           }
           const timestamp = new Date()
@@ -918,11 +920,11 @@
         } else {
           CPManager.ui.showToast(
             `Failed to generate vouchers: ${result?.message || (result?.status === "error" ? "API error." : "Unknown error.")}`,
-            "error"
+            "error",
           );
           console.error(
             "Voucher generation API returned unexpected result:",
-            result
+            result,
           ); // Added error logging
           CPManager.state.vouchers.lastGenerated = [];
         }
@@ -930,7 +932,7 @@
         CPManager.state.vouchers.lastGenerated = [];
         CPManager.ui.showToast(
           "Error during voucher generation or PDF creation: " + error.message,
-          "error"
+          "error",
         );
         console.error("Error generating vouchers:", error); // Added error logging
       } finally {
@@ -970,7 +972,7 @@
         `Vouchers for Group: ${groupName} (Card Style)`,
         pageWidth / 2,
         currentY + 5,
-        { align: "center" }
+        { align: "center" },
       );
       currentY += titleHeight;
 
@@ -989,7 +991,7 @@
             currentY + 5,
             {
               align: "center",
-            }
+            },
           );
           currentY += titleHeight;
         }
@@ -1008,7 +1010,7 @@
           voucherHeight,
           2,
           2,
-          "S"
+          "S",
         );
 
         doc.setFontSize(8);
@@ -1018,7 +1020,7 @@
           "Voucher Code",
           voucherAbsX + voucherWidth / 2,
           voucherAbsY + 6,
-          { align: "center" }
+          { align: "center" },
         );
 
         doc.setFontSize(16);
@@ -1027,7 +1029,7 @@
           voucher.username || CPManager.config.placeholderValue,
           voucherAbsX + voucherWidth / 2,
           voucherAbsY + 16,
-          { align: "center" }
+          { align: "center" },
         );
 
         let detailLineY = voucherAbsY + 22;
@@ -1040,7 +1042,7 @@
             detailLineY,
             {
               align: "center",
-            }
+            },
           );
           detailLineY += 4;
         }
@@ -1051,7 +1053,7 @@
           `Validity: ${CPManager.utils.formatDuration(voucher.validity, "seconds")}`,
           voucherAbsX + voucherWidth / 2,
           detailLineY + 3,
-          { align: "center" }
+          { align: "center" },
         );
         doc.text(
           `Expires: ${
@@ -1061,13 +1063,13 @@
           }`,
           voucherAbsX + voucherWidth / 2,
           detailLineY + 6,
-          { align: "center" }
+          { align: "center" },
         );
         doc.text(
           `Group: ${voucher.vouchergroup || CPManager.config.placeholderValue}`,
           voucherAbsX + voucherWidth / 2,
           detailLineY + 9,
-          { align: "center" }
+          { align: "center" },
         );
       });
     },
@@ -1082,7 +1084,7 @@
         startY,
         {
           align: "center",
-        }
+        },
       );
 
       const tableHeaders = [
@@ -1123,7 +1125,7 @@
           doc.text(
             str,
             doc.internal.pageSize.width - data.settings.margin.right,
-            doc.internal.pageSize.height - 5
+            doc.internal.pageSize.height - 5,
           );
         },
       });
@@ -1153,37 +1155,37 @@
             const result = await CPManager.api.callApi(
               `/voucher/drop_expired_vouchers/${selectedProvider}/${selectedGroup}`,
               "POST",
-              {}
+              {},
             );
             if (result && result.status === "drop") {
               CPManager.ui.showToast(
                 `Expired vouchers from group "${selectedGroup}" (Provider: ${selectedProvider}) cleaned. Count: ${result.count || 0}`,
-                "success"
+                "success",
               );
             } else {
               CPManager.ui.showToast(
                 `Cleanup for group "${selectedGroup}" (Provider: ${selectedProvider}) processed. Status: ${result.status || "unknown"}. Count: ${result.count || 0}`,
-                "info"
+                "info",
               );
               console.warn(
                 "Drop expired vouchers API returned unexpected status:",
-                result
+                result,
               ); // Added warning log
             }
             CPManager.state.vouchers.currentPage = 1;
             await this.loadVouchersForGroup(
               selectedProvider,
               selectedGroup,
-              true
+              true,
             );
           } catch (error) {
             CPManager.ui.showToast(
               "Error dropping expired vouchers: " + error.message,
-              "error"
+              "error",
             );
             console.error("Error dropping expired vouchers:", error); // Added error logging
           }
-        }
+        },
       );
     },
 
@@ -1211,12 +1213,12 @@
             const result = await CPManager.api.callApi(
               `/voucher/drop_voucher_group/${selectedProvider}/${selectedGroup}`,
               "POST",
-              {}
+              {},
             );
             if (result && result.status !== "error") {
               CPManager.ui.showToast(
                 `Voucher group "${selectedGroup}" (Provider: ${selectedProvider}) deleted.`,
-                "success"
+                "success",
               );
               if (CPManager.state.vouchers.cachedGroups[selectedProvider]) {
                 CPManager.state.vouchers.cachedGroups[selectedProvider] =
@@ -1238,7 +1240,7 @@
                     CPManager.elements.voucherCardContainer,
                     "Select a group to see its vouchers.",
                     "fas fa-ticket-alt",
-                    "voucher-pagination"
+                    "voucher-pagination",
                   );
                 }
                 CPManager.state.vouchers.current = [];
@@ -1247,21 +1249,21 @@
             } else {
               CPManager.ui.showToast(
                 `Failed to delete voucher group "${selectedGroup}". API: ${result ? result.message : "Unknown error."}`,
-                "error"
+                "error",
               );
               console.error(
                 "Drop voucher group API returned error or unexpected result:",
-                result
+                result,
               ); // Added error logging
             }
           } catch (error) {
             CPManager.ui.showToast(
               "Error dropping voucher group: " + error.message,
-              "error"
+              "error",
             );
             console.error("Error dropping voucher group:", error); // Added error logging
           }
-        }
+        },
       );
     },
 
@@ -1269,7 +1271,7 @@
       if (CPManager.elements.voucherProviderSelect) {
         CPManager.elements.voucherProviderSelect.addEventListener(
           "change",
-          (e) => this.handleProviderSelection(e.target.value)
+          (e) => this.handleProviderSelection(e.target.value),
         );
       }
       if (CPManager.elements.voucherGroupSelect) {
@@ -1302,13 +1304,13 @@
                   CPManager.elements.voucherCardContainer,
                   "Select a group to see its vouchers.",
                   "fas fa-ticket-alt",
-                  "voucher-pagination"
+                  "voucher-pagination",
                 );
               CPManager.state.vouchers.current = [];
               this.renderVouchers([], "");
               CPManager.ui.disableVoucherActionButtons(false, true, true);
             }
-          }
+          },
         );
       }
 
@@ -1319,24 +1321,24 @@
       if (CPManager.elements.voucherSearchInput)
         CPManager.elements.voucherSearchInput.addEventListener(
           "input",
-          applyFilters
+          applyFilters,
         );
       if (CPManager.elements.voucherStateFilterSelect)
         CPManager.elements.voucherStateFilterSelect.addEventListener(
           "change",
-          applyFilters
+          applyFilters,
         );
 
       if (CPManager.elements.voidSelectedVouchersBtn) {
         CPManager.elements.voidSelectedVouchersBtn.addEventListener(
           "click",
-          () => this.handleVoidSelectedVouchers()
+          () => this.handleVoidSelectedVouchers(),
         );
       }
       if (CPManager.elements.voucherSelectAllCheckbox) {
         CPManager.elements.voucherSelectAllCheckbox.addEventListener(
           "change",
-          (e) => this.handleSelectAll(e.target.checked)
+          (e) => this.handleSelectAll(e.target.checked),
         );
       }
       if (CPManager.elements.voucherCardContainer) {
@@ -1358,32 +1360,32 @@
               const card = summary.closest(".voucher-card");
               if (card) CPManager.ui.toggleCardDetails(card);
             }
-          }
+          },
         );
       }
 
       if (CPManager.elements.createVouchersBtn)
         CPManager.elements.createVouchersBtn.addEventListener("click", () =>
-          this.openGenerateVoucherModal()
+          this.openGenerateVoucherModal(),
         );
       if (CPManager.elements.dropExpiredVouchersBtn)
         CPManager.elements.dropExpiredVouchersBtn.addEventListener(
           "click",
-          () => this.handleDropExpiredVouchers()
+          () => this.handleDropExpiredVouchers(),
         );
       if (CPManager.elements.dropVoucherGroupBtn)
         CPManager.elements.dropVoucherGroupBtn.addEventListener("click", () =>
-          this.handleDropVoucherGroup()
+          this.handleDropVoucherGroup(),
         );
       if (CPManager.elements.submitGenerateVoucherBtn)
         CPManager.elements.submitGenerateVoucherBtn.addEventListener(
           "click",
-          () => this.handleSubmitGenerateVoucher()
+          () => this.handleSubmitGenerateVoucher(),
         );
       if (CPManager.elements.cancelGenerateVoucherBtn)
         CPManager.elements.cancelGenerateVoucherBtn.addEventListener(
           "click",
-          () => CPManager.ui.hideModal(CPManager.elements.generateVoucherModal)
+          () => CPManager.ui.hideModal(CPManager.elements.generateVoucherModal),
         );
 
       if (
@@ -1395,9 +1397,9 @@
           (e) => {
             CPManager.elements.voucherCountCustom.classList.toggle(
               "hidden",
-              e.target.value !== "custom"
+              e.target.value !== "custom",
             );
-          }
+          },
         );
       }
       if (
@@ -1409,9 +1411,9 @@
           (e) => {
             CPManager.elements.voucherLifetimeCustom.classList.toggle(
               "hidden",
-              e.target.value !== "custom"
+              e.target.value !== "custom",
             );
-          }
+          },
         );
       }
       if (
@@ -1423,9 +1425,9 @@
           (e) => {
             CPManager.elements.voucherUsageCustom.classList.toggle(
               "hidden",
-              e.target.value !== "custom"
+              e.target.value !== "custom",
             );
-          }
+          },
         );
       }
     },
