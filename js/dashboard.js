@@ -195,32 +195,32 @@
         // Construct the HTML for dashboard statistics cards
         let statsHtml = `
           <div class="cp-card p-6 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-active-sessions-card" title="Go to Sessions tab" role="button" tabindex="0">
-            <div class="text-4xl font-bold" style="color: var(--stat-value-color);">${activeSessionCount}</div>
-            <div class="text-sm mt-1" style="color: var(--stat-label-color);">Active Sessions</div>
+            <div class="text-4xl font-bold text-slate-800 dark:text-slate-100">${activeSessionCount}</div>
+            <div class="text-sm mt-1 text-slate-500 dark:text-slate-400">Active Sessions</div>
           </div>
           <div class="cp-card p-6 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-configured-zones-card" title="Go to Zones tab" role="button" tabindex="0">
-            <div class="text-4xl font-bold" style="color: var(--stat-value-color);">${totalZonesCount}</div>
-            <div class="text-sm mt-1" style="color: var(--stat-label-color);">Configured Zones</div>
+            <div class="text-4xl font-bold text-slate-800 dark:text-slate-100">${totalZonesCount}</div>
+            <div class="text-sm mt-1 text-slate-500 dark:text-slate-400">Configured Zones</div>
           </div>
           <div class="cp-card p-6 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
             <div class="grid grid-cols-2 gap-x-2 items-center">
               <div class="mb-0">
-                <div class="text-4xl font-bold" style="color: var(--stat-value-color);">${totalVouchers}</div>
-                <div class="text-sm mt-1" style="color: var(--stat-label-color);">Total Vouchers</div>
+                <div class="text-4xl font-bold text-slate-800 dark:text-slate-100">${totalVouchers}</div>
+                <div class="text-sm mt-1 text-slate-500 dark:text-slate-400">Total Vouchers</div>
               </div>
               <div>
-                <div class="text-4xl font-bold" style="color: var(--stat-value-color);">${activeVouchers}</div>
-                <div class="text-sm mt-1" style="color: var(--stat-label-color);">Active Vouchers</div>
+                <div class="text-4xl font-bold text-slate-800 dark:text-slate-100">${activeVouchers}</div>
+                <div class="text-sm mt-1 text-slate-500 dark:text-slate-400">Active Vouchers</div>
               </div>
             </div>
           </div>
           <div class="cp-card p-6 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-providers-expired-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
               <div class="grid grid-cols-2 gap-x-2 items-center">
                   <div>
-                      <div class="text-4xl font-bold" style="color: var(--stat-value-color);">${unusedVouchers}</div> <div class="text-sm mt-1" style="color: var(--stat-label-color);">Unused Vouchers</div> </div>
+                      <div class="text-4xl font-bold text-slate-800 dark:text-slate-100">${unusedVouchers}</div> <div class="text-sm mt-1 text-slate-500 dark:text-slate-400">Unused Vouchers</div> </div>
                   <div>
-                      <div class="text-4xl font-bold" style="color: var(--stat-value-color);">${expiredVouchers}</div>
-                      <div class="text-sm mt-1" style="color: var(--stat-label-color);">Expired Vouchers</div>
+                      <div class="text-4xl font-bold text-slate-800 dark:text-slate-100">${expiredVouchers}</div>
+                      <div class="text-sm mt-1 text-slate-500 dark:text-slate-400">Expired Vouchers</div>
                   </div>
               </div>
           </div>
@@ -288,10 +288,10 @@
           if (CPManager.elements.donutTotalData) {
             // Display total data in the center of the donut chart
             CPManager.elements.donutTotalData.innerHTML = `
-              <span style="font-weight: bold; display: block; font-size: 1.2em;">${CPManager.utils.formatBytes(
+              <span class="font-bold block text-lg">${CPManager.utils.formatBytes(
                 currentTotalData
               )}</span>
-              <span style="font-size: 0.8em;" class="text-gray-500 dark:text-gray-400">(100.0%)</span>`;
+              <span class="text-xs text-gray-500 dark:text-gray-400">(100.0%)</span>`;
           }
           // Update legend values for upload and download
           if (CPManager.elements.uploadLegendValue)
@@ -466,22 +466,23 @@
       // Add mouseover and mouseleave events for legend items
       CPManager.elements.legendItems.forEach((item) => {
         item.addEventListener("mouseenter", () => {
-          let segmentValue, segmentColor;
+          let segmentValue;
+          let segmentColorClass, segmentPercentageColorClass;
           const currentTotalForPercentage =
             CPManager.state.dashboard.originalTotalBytes;
           const isDarkMode =
-            document.documentElement.classList.contains("dark"); // Check html element for 'dark' class
-          const segmentPercentageColor = isDarkMode
+            document.documentElement.classList.contains("dark");
+          segmentPercentageColorClass = isDarkMode
             ? "text-slate-400"
             : "text-gray-500";
 
           // Determine segment value and color based on the hovered legend item
           if (item.textContent.includes("Client Upload")) {
             segmentValue = CPManager.state.dashboard.originalUploadBytes;
-            segmentColor = "#3B82F6"; // Match upload color
+            segmentColorClass = "text-blue-500";
           } else if (item.textContent.includes("Client Download")) {
             segmentValue = CPManager.state.dashboard.originalDownloadBytes;
-            segmentColor = "#10B981"; // Match download color
+            segmentColorClass = "text-green-500";
           }
 
           // Update the donut total display with specific segment data on hover
@@ -492,10 +493,12 @@
                 (segmentValue / currentTotalForPercentage) * 100;
             }
             CPManager.elements.donutTotalData.innerHTML = `
-              <span style="color: ${segmentColor}; font-weight: bold; display: block; font-size: 1.2em;">${CPManager.utils.formatBytes(
+              <span class="font-bold block text-lg ${segmentColorClass}">${CPManager.utils.formatBytes(
                 segmentValue
               )}</span>
-              <span style="font-size: 0.8em;" class="${segmentPercentageColor}">(${segmentPercentage.toFixed(1)}%)</span>`;
+              <span class="text-xs ${segmentPercentageColorClass}">(${segmentPercentage.toFixed(
+                1
+              )}%)</span>`;
           }
         });
 
@@ -503,15 +506,15 @@
           // Revert the donut total display to show overall total when mouse leaves legend item
           if (CPManager.elements.donutTotalData) {
             const isDarkMode =
-              document.documentElement.classList.contains("dark"); // Check html element for 'dark' class
-            const totalPercentageColor = isDarkMode
+              document.documentElement.classList.contains("dark");
+            const totalPercentageColorClass = isDarkMode
               ? "text-slate-400"
               : "text-gray-500";
             CPManager.elements.donutTotalData.innerHTML = `
-              <span style="font-weight: bold; display: block; font-size: 1.2em;">${CPManager.utils.formatBytes(
+              <span class="font-bold block text-lg">${CPManager.utils.formatBytes(
                 CPManager.state.dashboard.originalTotalBytes
               )}</span>
-              <span style="font-size: 0.8em;" class="${totalPercentageColor}">(100.0%)</span>`;
+              <span class="text-xs ${totalPercentageColorClass}">(100.0%)</span>`;
           }
         });
       });
