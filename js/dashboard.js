@@ -183,6 +183,7 @@
           activeVouchers,
           expiredVouchers,
           unusedVouchers,
+          totalProviders,
         } = voucherStats;
 
         let totalClientUploadBytes = 0,
@@ -194,33 +195,43 @@
 
         // Construct the HTML for dashboard statistics cards
         let statsHtml = `
-          <div class="cp-card p-6 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-active-sessions-card" title="Go to Sessions tab" role="button" tabindex="0">
-            <div class="text-4xl font-bold text-slate-800 dark:text-slate-100">${activeSessionCount}</div>
-            <div class="text-sm mt-1 text-slate-500 dark:text-slate-400">Active Sessions</div>
+          <div class="dashboard-card" id="dashboard-active-sessions-card" title="Go to Sessions tab" role="button" tabindex="0">
+            <div class="dashboard-stat-number">${activeSessionCount}</div>
+            <div class="dashboard-stat-label">Active Sessions</div>
           </div>
-          <div class="cp-card p-6 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-configured-zones-card" title="Go to Zones tab" role="button" tabindex="0">
-            <div class="text-4xl font-bold text-slate-800 dark:text-slate-100">${totalZonesCount}</div>
-            <div class="text-sm mt-1 text-slate-500 dark:text-slate-400">Configured Zones</div>
-          </div>
-          <div class="cp-card p-6 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
-            <div class="grid grid-cols-2 gap-x-2 items-center">
-              <div class="mb-0">
-                <div class="text-4xl font-bold text-slate-800 dark:text-slate-100">${totalVouchers}</div>
-                <div class="text-sm mt-1 text-slate-500 dark:text-slate-400">Total Vouchers</div>
+          <div class="dashboard-card" id="dashboard-zones-providers-card" title="Go to Zones or Vouchers tab" role="button" tabindex="0">
+            <div class="dashboard-card-2-column">
+              <div>
+                <div class="dashboard-stat-number">${totalZonesCount}</div>
+                <div class="dashboard-stat-label">Configured Zones</div>
               </div>
               <div>
-                <div class="text-4xl font-bold text-slate-800 dark:text-slate-100">${activeVouchers}</div>
-                <div class="text-sm mt-1 text-slate-500 dark:text-slate-400">Active Vouchers</div>
+                <div class="dashboard-stat-number">${totalProviders}</div>
+                <div class="dashboard-stat-label">Voucher Providers</div>
               </div>
             </div>
           </div>
-          <div class="cp-card p-6 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg" id="dashboard-providers-expired-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
-              <div class="grid grid-cols-2 gap-x-2 items-center">
+          <div class="dashboard-card" id="dashboard-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
+            <div class="dashboard-card-2-column">
+              <div>
+                <div class="dashboard-stat-number">${totalVouchers}</div>
+                <div class="dashboard-stat-label">Total Vouchers</div>
+              </div>
+              <div>
+                <div class="dashboard-stat-number text-green-500 dark:text-green-500">${activeVouchers}</div>
+                <div class="dashboard-stat-label">Active Vouchers</div>
+              </div>
+            </div>
+          </div>
+          <div class="dashboard-card" id="dashboard-unused-expired-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
+              <div class="dashboard-card-2-column">
                   <div>
-                      <div class="text-4xl font-bold text-slate-800 dark:text-slate-100">${unusedVouchers}</div> <div class="text-sm mt-1 text-slate-500 dark:text-slate-400">Unused Vouchers</div> </div>
+                      <div class="dashboard-stat-number text-blue-500 dark:text-blue-500">${unusedVouchers}</div>
+                      <div class="dashboard-stat-label">Unused Vouchers</div>
+                  </div>
                   <div>
-                      <div class="text-4xl font-bold text-slate-800 dark:text-slate-100">${expiredVouchers}</div>
-                      <div class="text-sm mt-1 text-slate-500 dark:text-slate-400">Expired Vouchers</div>
+                      <div class="dashboard-stat-number text-red-500 dark:text-red-500">${expiredVouchers}</div>
+                      <div class="dashboard-stat-label">Expired Vouchers</div>
                   </div>
               </div>
           </div>
@@ -234,7 +245,7 @@
             CPManager.tabs.setActiveTab("sessions")
           );
         document
-          .getElementById("dashboard-configured-zones-card")
+          .getElementById("dashboard-zones-providers-card")
           ?.addEventListener("click", () =>
             CPManager.tabs.setActiveTab("info")
           );
@@ -245,7 +256,7 @@
           );
         // Add event listener for the new combined card
         document
-          .getElementById("dashboard-providers-expired-vouchers-card")
+          .getElementById("dashboard-unused-expired-vouchers-card")
           ?.addEventListener("click", () =>
             CPManager.tabs.setActiveTab("vouchers")
           );
@@ -253,9 +264,9 @@
         // Add keyboard navigation for dashboard cards
         [
           "dashboard-active-sessions-card",
-          "dashboard-configured-zones-card",
+          "dashboard-zones-providers-card",
           "dashboard-vouchers-card",
-          "dashboard-providers-expired-vouchers-card", // Updated to the new combined card ID
+          "dashboard-unused-expired-vouchers-card",
         ].forEach((id) => {
           const card = document.getElementById(id);
           if (card) {

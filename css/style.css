@@ -23,17 +23,17 @@
     @apply hover:bg-slate-50 dark:hover:bg-slate-700;
   }
 
-  /* New: Base style for main navigation tab buttons */
+  /* Base style for main navigation tab buttons */
   .tab-base {
     @apply inline-block w-full text-center p-4 border-b-2 rounded-t-lg border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-slate-300 hover:border-gray-300 dark:hover:border-slate-500;
   }
 
-  /* New: Base style for modal content containers */
+  /* Base style for modal content containers */
   .modal-base-content {
     @apply p-6 rounded-lg shadow-xl w-full mx-auto bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200;
   }
 
-  /* New: Form input style specific to modals (with dark:bg-slate-700) */
+  /* Form input style specific to modals (with dark:bg-slate-700) */
   .form-modal-input {
     @apply mt-1 block w-full py-2.5 px-3 border rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200 border-slate-300 dark:border-slate-600;
   }
@@ -74,6 +74,74 @@
   .form-radio,
   .form-checkbox {
     @apply h-5 w-5 rounded border-gray-400 text-blue-600 focus:ring-blue-500 transition-opacity opacity-20 hover:opacity-100 checked:opacity-100;
+  }
+
+  /* --- Added Components --- */
+
+  /* Card Detail Styles */
+  .card-detail-row {
+    @apply flex justify-between items-start py-1;
+  }
+  .card-detail-label {
+    @apply font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400;
+  }
+  .card-detail-value {
+    @apply text-sm text-right font-semibold break-all flex-grow text-slate-800 dark:text-slate-200;
+  }
+  .card-detail-value-secondary {
+    @apply text-sm text-right break-all flex-grow text-slate-600 dark:text-slate-300;
+  }
+
+  /* Reusable Info Tag */
+  .info-tag {
+    @apply py-0.5 px-1.5 text-xs rounded-sm text-white max-w-[100px] whitespace-nowrap overflow-hidden text-ellipsis;
+  }
+
+  /* Dashboard Card Styles */
+  .dashboard-card {
+    @apply cp-card p-6 text-center cursor-pointer transition-transform duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg;
+  }
+  .dashboard-card-2-column {
+    @apply grid grid-cols-2 gap-x-2 items-center;
+  }
+  .dashboard-stat-number {
+    @apply text-4xl font-bold text-slate-600 dark:text-slate-400;
+  }
+  .dashboard-stat-label {
+    @apply text-sm mt-1 text-slate-500;
+  }
+
+  /* General Form & Content Styles */
+  .form-label {
+    @apply block text-sm font-medium;
+  }
+  .modal-title {
+    @apply text-xl font-semibold mb-6;
+  }
+  .section-header {
+    @apply text-2xl font-semibold flex items-center mb-4;
+  }
+
+  /* Alert Box Styles */
+  .alert-box {
+    @apply p-3 mb-4 rounded-md border flex items-start;
+  }
+  .alert-box-info {
+    @apply bg-blue-50 dark:bg-sky-900/50 border-blue-200 dark:border-sky-700 text-gray-700 dark:text-sky-200;
+  }
+  .alert-box-danger {
+    @apply bg-red-50 dark:bg-red-900/50 border-red-200 dark:border-red-700 text-red-700 dark:text-red-200;
+  }
+
+  /* Toggle Switch */
+  .toggle-switch-label {
+    @apply flex items-center cursor-pointer w-full;
+  }
+  .toggle-bg {
+    @apply block w-14 h-8 rounded-full transition-colors bg-gray-300 dark:bg-slate-600 peer-checked:bg-blue-500;
+  }
+  .toggle-dot {
+    @apply absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform peer-checked:translate-x-6;
   }
 }
 
@@ -165,12 +233,4 @@
     opacity: 1;
     transform: scale(1);
   }
-}
-
-/* Zone Edit Toggle Switch */
-.toggle-bg {
-  @apply block w-14 h-8 rounded-full transition-colors bg-gray-300 dark:bg-slate-600 peer-checked:bg-blue-500;
-}
-.toggle-dot {
-  @apply absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform peer-checked:translate-x-6;
 }
