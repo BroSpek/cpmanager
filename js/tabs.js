@@ -20,19 +20,21 @@
         .querySelectorAll(".tab-btn")
         .forEach((btn) => {
           if (btn.dataset.tab === tabId) {
-            btn.classList.add("active", "text-blue-600", "border-blue-600");
+            btn.classList.add("active", "text-primary", "border-primary");
             btn.classList.remove(
               "border-transparent",
-              "hover:text-gray-700",
-              "hover:border-gray-400",
+              "text-muted-foreground",
+              "hover:text-foreground",
+              "hover:border-muted",
             );
             btn.setAttribute("aria-selected", "true"); // Accessibility
           } else {
-            btn.classList.remove("active", "text-blue-600", "border-blue-600");
+            btn.classList.remove("active", "text-primary", "border-primary");
             btn.classList.add(
               "border-transparent",
-              "hover:text-gray-700",
-              "hover:border-gray-400",
+              "text-muted-foreground",
+              "hover:text-foreground",
+              "hover:border-muted",
             );
             btn.setAttribute("aria-selected", "false"); // Accessibility
           }

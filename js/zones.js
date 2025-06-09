@@ -117,8 +117,9 @@
 
           const statusText =
             zoneSummary.enabled === "1" ? "Enabled" : "Disabled";
+          // UPDATED: Use semantic colors
           const statusColor =
-            zoneSummary.enabled === "1" ? "bg-green-500" : "bg-red-500";
+            zoneSummary.enabled === "1" ? "bg-success" : "bg-danger";
 
           const statusTag = `<span class="info-tag ${statusColor}" title="Status: ${statusText}">${statusText}</span>`;
           const cardSummaryId = `zone-summary-${zoneSummary.uuid}`;
@@ -293,7 +294,7 @@
 
           detailsHtml += `
             <div class="mt-3 grid grid-cols-2 gap-4">
-              <button class="btn btn-base btn-secondary" data-action="edit-zone" data-uuid="${uuid}">
+              <button class="btn btn-base btn-primary" data-action="edit-zone" data-uuid="${uuid}">
                 <i class="fas fa-edit mr-1"></i> Edit Settings
               </button>
             </div>
@@ -302,7 +303,7 @@
         } catch (error) {
           console.error(`Error loading details for zone ${uuid}:`, error);
           detailsContainer.innerHTML =
-            '<p class="text-red-500">Error loading details. Check console.</p>';
+            '<p class="text-destructive">Error loading details. Check console.</p>';
         }
       }
     },

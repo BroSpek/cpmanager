@@ -1,4 +1,6 @@
 // js/vouchers.js
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 (function (CPManager) {
   CPManager.vouchers = {
@@ -12,7 +14,7 @@
         return;
       }
       detailsContainer.innerHTML =
-        '<p class="text-gray-500 dark:text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>Loading linkage information...</p>';
+        '<p class="text-muted-foreground"><i class="fas fa-spinner fa-spin mr-2"></i>Loading linkage information...</p>';
       try {
         if (CPManager.state.zones.allConfigured.length === 0) {
           await CPManager.zones.fetchAllZoneData();
@@ -91,17 +93,17 @@
         ).filter((providerName) => providerToZonesMap[providerName].size > 0);
         if (providersActuallyUsedByZones.length === 0) {
           detailsContainer.innerHTML =
-            '<p class="text-gray-500 dark:text-gray-400">No voucher providers are currently linked to any active zones.</p>';
+            '<p class="text-muted-foreground">No voucher providers are currently linked to any active zones.</p>';
         } else {
           let listHtml = '<ul class="space-y-3">';
           providersActuallyUsedByZones.forEach((providerName) => {
             const zonesList = Array.from(providerToZonesMap[providerName])
               .map(
                 (zn) =>
-                  `<li><i class="fas fa-layer-group text-xs mr-1 text-gray-400 dark:text-gray-500"></i>${zn}</li>`,
+                  `<li><i class="fas fa-layer-group text-xs mr-1 text-muted"></i>${zn}</li>`,
               )
               .join("");
-            listHtml += `<li class="border-b border-gray-200 dark:border-gray-700 border-dashed pb-2 last:border-b-0 last:pb-0"><span class="font-semibold text-gray-700 dark:text-gray-300">${providerName}</span> is linked to:<ul class="list-none pl-4 mt-1 text-xs space-y-1">${zonesList}</ul></li>`;
+            listHtml += `<li class="border-b border-border border-dashed pb-2 last:border-b-0 last:pb-0"><span class="font-semibold text-foreground">${providerName}</span> is linked to:<ul class="list-none pl-4 mt-1 text-xs space-y-1">${zonesList}</ul></li>`;
           });
           listHtml += "</ul>";
           detailsContainer.innerHTML = listHtml;
@@ -109,7 +111,7 @@
       } catch (error) {
         console.error("Error displaying provider-zone linkage:", error); // Added error logging
         detailsContainer.innerHTML =
-          '<p class="text-red-500">Could not load linkage information. Check console.</p>';
+          '<p class="text-destructive">Could not load linkage information. Check console.</p>';
       }
     },
 
@@ -117,15 +119,12 @@
       const card = CPManager.elements.providerZoneLinkageCard;
       if (!card || card.dataset.listenerAttached === "true") return;
 
-      const summaryElement = card.querySelector(".voucher-summary"); // Corrected selector
+      const summaryElement = card.querySelector(".voucher-summary");
       const detailsContent = CPManager.elements.providerZoneLinkageDetails;
 
       if (summaryElement && detailsContent) {
         summaryElement.addEventListener("click", () => {
-          // Use the centralized toggle function
           CPManager.ui.toggleCardDetails(card);
-
-          // Load content only when expanding
           const isExpanded = detailsContent.classList.contains("expanded");
           if (isExpanded && detailsContent.innerHTML.includes("Loading")) {
             this.displayProviderZoneLinkage();
@@ -209,7 +208,7 @@
           console.error(
             "Voucher providers API returned unexpected format:",
             providers,
-          ); // Added error logging
+          );
         }
       } catch (error) {
         CPManager.state.vouchers.cachedProviders = [];
@@ -219,7 +218,7 @@
           "Error loading voucher providers: " + error.message,
           "error",
         );
-        console.error("Error fetching voucher providers:", error); // Added error logging
+        console.error("Error fetching voucher providers:", error);
       }
     },
 
@@ -374,7 +373,7 @@
           console.error(
             "Voucher groups API returned unexpected format:",
             groups,
-          ); // Added error logging
+          );
         }
       } catch (error) {
         CPManager.state.vouchers.cachedGroups[cacheKey] = [];
@@ -390,7 +389,7 @@
           );
         CPManager.ui.disableVoucherActionButtons(false, true, true);
         this.updateVoidSelectedButton();
-        console.error("Error fetching voucher groups:", error); // Added error logging
+        console.error("Error fetching voucher groups:", error);
       }
     },
 
@@ -512,7 +511,7 @@
         if (CPManager.state.vouchers.cachedData[cacheKey]) {
           CPManager.state.vouchers.cachedData[cacheKey].lastFetched = 0;
         }
-        console.error("Error fetching vouchers for group:", error); // Added error logging
+        console.error("Error fetching vouchers for group:", error);
       } finally {
         this.applyVoucherFiltersAndRender(groupName);
       }
@@ -581,12 +580,13 @@
       paginatedVouchers.forEach((voucher) => {
         const card = document.createElement("div");
         card.className = "voucher-card cp-card";
+        // UPDATED: Use semantic colors
         const stateTagColor =
           voucher.state === "valid"
-            ? "bg-green-500"
+            ? "bg-success"
             : voucher.state === "unused"
-              ? "bg-sky-500"
-              : "bg-red-500";
+              ? "bg-primary" // Changed from sky
+              : "bg-danger";
         const stateText =
           CPManager.config.voucherStateMapping[voucher.state] || voucher.state;
         const isChecked = this.selectedVouchers.has(voucher.username);
@@ -707,7 +707,6 @@
                   : failureCount++,
               )
               .catch((error) => {
-                // Added error logging
                 console.error(`Failed to void voucher ${voucherCode}:`, error);
                 failureCount++;
               }),
@@ -874,7 +873,6 @@
           const outputFormat = document.querySelector(
             'input[name="voucher-output-format"]:checked',
           ).value;
-          const { jsPDF } = window.jspdf;
           const doc = new jsPDF({
             orientation: "portrait",
             unit: "mm",
@@ -925,7 +923,7 @@
           console.error(
             "Voucher generation API returned unexpected result:",
             result,
-          ); // Added error logging
+          );
           CPManager.state.vouchers.lastGenerated = [];
         }
       } catch (error) {
@@ -934,7 +932,7 @@
           "Error during voucher generation or PDF creation: " + error.message,
           "error",
         );
-        console.error("Error generating vouchers:", error); // Added error logging
+        console.error("Error generating vouchers:", error);
       } finally {
         CPManager.elements.submitGenerateVoucherBtn.disabled = false;
         CPManager.elements.submitGenerateVoucherBtn.innerHTML = "Generate";
@@ -1170,7 +1168,7 @@
               console.warn(
                 "Drop expired vouchers API returned unexpected status:",
                 result,
-              ); // Added warning log
+              );
             }
             CPManager.state.vouchers.currentPage = 1;
             await this.loadVouchersForGroup(
@@ -1183,7 +1181,7 @@
               "Error dropping expired vouchers: " + error.message,
               "error",
             );
-            console.error("Error dropping expired vouchers:", error); // Added error logging
+            console.error("Error dropping expired vouchers:", error);
           }
         },
       );
@@ -1254,14 +1252,14 @@
               console.error(
                 "Drop voucher group API returned error or unexpected result:",
                 result,
-              ); // Added error logging
+              );
             }
           } catch (error) {
             CPManager.ui.showToast(
               "Error dropping voucher group: " + error.message,
               "error",
             );
-            console.error("Error dropping voucher group:", error); // Added error logging
+            console.error("Error dropping voucher group:", error);
           }
         },
       );
