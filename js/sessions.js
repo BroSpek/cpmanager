@@ -228,8 +228,9 @@
         );
         let macTypeTagHtml = "";
         if (macAddressType) {
+          // UPDATED: Using a consistent color from the palette
           const macTypeTagColor =
-            macAddressType === "device" ? "bg-slate-500" : "bg-purple-500";
+            macAddressType === "device" ? "bg-accent" : "bg-purple-500";
           const macTypeReadable =
             macAddressType.charAt(0).toUpperCase() + macAddressType.slice(1);
           macTypeTagHtml = `<span class="info-tag ${macTypeTagColor}" title="MAC Type: ${macTypeReadable}">${macTypeReadable}</span>`;
@@ -247,7 +248,7 @@
         const card = document.createElement("div");
         card.className = `session-card cp-card ${
           isManagerCurrentDeviceSession
-            ? "ring-2 ring-offset-1 ring-blue-500 shadow-lg"
+            ? "ring-2 ring-offset-1 ring-primary" // UPDATED: ring-blue-500 -> ring-primary
             : ""
         }`;
         card.setAttribute("role", "listitem");
@@ -258,7 +259,8 @@
 
         let managerIconHtml = "";
         if (isManagerCurrentDeviceSession) {
-          managerIconHtml = `<span class="info-tag bg-blue-600 flex items-center" title="This is your current device's session (IP: ${
+          // UPDATED: bg-blue-600 -> bg-primary
+          managerIconHtml = `<span class="info-tag bg-primary flex items-center" title="This is your current device's session (IP: ${
             CPManager.state.sessions.managerDetails.ipAddress || "N/A"
           })"><i class="fas fa-user-shield mr-1"></i>You</span>`;
         }
@@ -451,7 +453,7 @@
 
       if (isMySessionSelected) {
         title = "Warning: Disconnecting Own Session";
-        message = `<div class="alert-box bg-red-50 dark:bg-red-900/50 border-red-200 dark:border-red-700 text-red-700 dark:text-red-200"><i class="fas fa-biohazard mr-2 mt-1 text-red-500 dark:text-red-300"></i><span><strong>DANGER:</strong> Your own session is included in the selection. Disconnecting it may lock you out of this manager.</span></div><p class="mt-4">Disconnect <strong>${sessionsToDisconnect.length}</strong> session(s) anyway?</p>`;
+        message = `<div class="alert-box alert-box-danger"><i class="fas fa-biohazard mr-2 mt-1 text-destructive"></i><span><strong>DANGER:</strong> Your own session is included in the selection. Disconnecting it may lock you out of this manager.</span></div><p class="mt-4">Disconnect <strong>${sessionsToDisconnect.length}</strong> session(s) anyway?</p>`;
       }
 
       CPManager.ui.showConfirmationModal(title, message, async () => {

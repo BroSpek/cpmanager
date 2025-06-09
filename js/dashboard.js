@@ -1,4 +1,5 @@
 // js/dashboard.js
+import Chart from "chart.js/auto";
 
 (function (CPManager) {
   CPManager.dashboard = {
@@ -24,7 +25,7 @@
         );
         // Display an error message if critical elements are missing
         if (CPManager.elements.dashboardStatsContainer)
-          CPManager.elements.dashboardStatsContainer.innerHTML = `<p class="text-red-500 col-span-full text-center">Error: Dashboard UI elements missing.</p>`;
+          CPManager.elements.dashboardStatsContainer.innerHTML = `<p class="text-destructive col-span-full text-center">Error: Dashboard UI elements missing.</p>`;
         return;
       }
 
@@ -194,6 +195,7 @@
         });
 
         // Construct the HTML for dashboard statistics cards
+        // UPDATED: Using semantic color classes
         let statsHtml = `
           <div class="dashboard-card" id="dashboard-active-sessions-card" title="Go to Sessions tab" role="button" tabindex="0">
             <div class="dashboard-stat-number">${activeSessionCount}</div>
@@ -218,7 +220,7 @@
                 <div class="dashboard-stat-label">Total Vouchers</div>
               </div>
               <div>
-                <div class="dashboard-stat-number text-green-500 dark:text-green-500">${activeVouchers}</div>
+                <div class="dashboard-stat-number text-success">${activeVouchers}</div>
                 <div class="dashboard-stat-label">Active Vouchers</div>
               </div>
             </div>
@@ -226,11 +228,11 @@
           <div class="dashboard-card" id="dashboard-unused-expired-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
               <div class="dashboard-card-2-column">
                   <div>
-                      <div class="dashboard-stat-number text-blue-500 dark:text-blue-500">${unusedVouchers}</div>
+                      <div class="dashboard-stat-number text-primary">${unusedVouchers}</div>
                       <div class="dashboard-stat-label">Unused Vouchers</div>
                   </div>
                   <div>
-                      <div class="dashboard-stat-number text-red-500 dark:text-red-500">${expiredVouchers}</div>
+                      <div class="dashboard-stat-number text-destructive">${expiredVouchers}</div>
                       <div class="dashboard-stat-label">Expired Vouchers</div>
                   </div>
               </div>
@@ -302,7 +304,7 @@
               <span class="font-bold block text-lg">${CPManager.utils.formatBytes(
                 currentTotalData,
               )}</span>
-              <span class="text-xs text-gray-500 dark:text-gray-400">(100.0%)</span>`;
+              <span class="text-xs text-muted-foreground">(100.0%)</span>`;
           }
           // Update legend values for upload and download
           if (CPManager.elements.uploadLegendValue)
@@ -417,7 +419,7 @@
         console.error("Error loading dashboard data:", error);
         // Display generic error message if data fetching fails
         if (CPManager.elements.dashboardStatsContainer)
-          CPManager.elements.dashboardStatsContainer.innerHTML = `<p class="text-red-500 col-span-full text-center">Error loading dashboard data. Check console.</p>`;
+          CPManager.elements.dashboardStatsContainer.innerHTML = `<p class="text-destructive col-span-full text-center">Error loading dashboard data. Check console.</p>`;
         if (CPManager.elements.donutTotalData)
           CPManager.elements.donutTotalData.textContent =
             CPManager.config.placeholderValue;
@@ -481,11 +483,8 @@
           let segmentColorClass, segmentPercentageColorClass;
           const currentTotalForPercentage =
             CPManager.state.dashboard.originalTotalBytes;
-          const isDarkMode =
-            document.documentElement.classList.contains("dark");
-          segmentPercentageColorClass = isDarkMode
-            ? "text-slate-400"
-            : "text-gray-500";
+
+          segmentPercentageColorClass = "text-muted-foreground";
 
           // Determine segment value and color based on the hovered legend item
           if (item.textContent.includes("Client Upload")) {
@@ -516,11 +515,7 @@
         item.addEventListener("mouseleave", () => {
           // Revert the donut total display to show overall total when mouse leaves legend item
           if (CPManager.elements.donutTotalData) {
-            const isDarkMode =
-              document.documentElement.classList.contains("dark");
-            const totalPercentageColorClass = isDarkMode
-              ? "text-slate-400"
-              : "text-gray-500";
+            const totalPercentageColorClass = "text-muted-foreground";
             CPManager.elements.donutTotalData.innerHTML = `
               <span class="font-bold block text-lg">${CPManager.utils.formatBytes(
                 CPManager.state.dashboard.originalTotalBytes,
