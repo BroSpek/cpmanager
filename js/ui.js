@@ -28,20 +28,20 @@
     sessionPaginationContainer: document.getElementById("session-pagination"),
     sessionSearchInput: document.getElementById("session-search-input"),
     sessionZoneFilterSelect: document.getElementById(
-      "session-zone-filter-select"
+      "session-zone-filter-select",
     ),
     findMySessionBtn: document.getElementById("find-my-session-btn"),
     disconnectSelectedSessionsBtn: document.getElementById(
-      "disconnect-selected-sessions-btn"
+      "disconnect-selected-sessions-btn",
     ),
     sessionSelectAllContainer: document.getElementById(
-      "session-select-all-container"
+      "session-select-all-container",
     ),
     sessionSelectAllCheckbox: document.getElementById(
-      "session-select-all-checkbox"
+      "session-select-all-checkbox",
     ),
     sessionSelectedCountText: document.getElementById(
-      "session-selected-count-text"
+      "session-selected-count-text",
     ),
 
     // Vouchers Tab Elements
@@ -52,29 +52,29 @@
     createVouchersBtn: document.getElementById("create-vouchers-btn"),
     dropVoucherGroupBtn: document.getElementById("drop-voucher-group-btn"),
     dropExpiredVouchersBtn: document.getElementById(
-      "drop-expired-vouchers-btn"
+      "drop-expired-vouchers-btn",
     ),
     providerZoneLinkageCard: document.getElementById(
-      "provider-zone-linkage-card"
+      "provider-zone-linkage-card",
     ),
     providerZoneLinkageDetails: document.getElementById(
-      "provider-zone-linkage-details"
+      "provider-zone-linkage-details",
     ),
     voucherSearchInput: document.getElementById("voucher-search-input"),
     voucherStateFilterSelect: document.getElementById(
-      "voucher-state-filter-select"
+      "voucher-state-filter-select",
     ),
     voidSelectedVouchersBtn: document.getElementById(
-      "void-selected-vouchers-btn"
+      "void-selected-vouchers-btn",
     ),
     voucherSelectAllContainer: document.getElementById(
-      "voucher-select-all-container"
+      "voucher-select-all-container",
     ),
     voucherSelectAllCheckbox: document.getElementById(
-      "voucher-select-all-checkbox"
+      "voucher-select-all-checkbox",
     ),
     voucherSelectedCountText: document.getElementById(
-      "voucher-selected-count-text"
+      "voucher-selected-count-text",
     ),
 
     // Voucher Generation Modal Elements
@@ -87,10 +87,10 @@
     voucherUsageCustom: document.getElementById("voucher-usage-custom"),
     voucherGroupNameInput: document.getElementById("voucher-groupname"),
     cancelGenerateVoucherBtn: document.getElementById(
-      "cancel-generate-voucher-btn"
+      "cancel-generate-voucher-btn",
     ),
     submitGenerateVoucherBtn: document.getElementById(
-      "submit-generate-voucher-btn"
+      "submit-generate-voucher-btn",
     ),
 
     // Zone Info Tab Elements
@@ -105,18 +105,18 @@
     zoneEditEnabledCheckbox: document.getElementById("zone-edit-enabled"),
     zoneEditEnabledText: document.getElementById("zone-edit-enabled-text"),
     zoneEditAllowedAddressesTextarea: document.getElementById(
-      "zone-edit-allowedAddresses"
+      "zone-edit-allowedAddresses",
     ),
     zoneEditAllowedMACAddressesTextarea: document.getElementById(
-      "zone-edit-allowedMACAddresses"
+      "zone-edit-allowedMACAddresses",
     ),
     zoneEditHardTimeoutInput: document.getElementById("zone-edit-hardtimeout"),
     zoneEditIdleTimeoutInput: document.getElementById("zone-edit-idletimeout"),
     zoneEditConcurrentLoginsCheckbox: document.getElementById(
-      "zone-edit-concurrentlogins"
+      "zone-edit-concurrentlogins",
     ),
     zoneEditConcurrentLoginsText: document.getElementById(
-      "zone-edit-concurrentlogins-text"
+      "zone-edit-concurrentlogins-text",
     ),
     zoneEditTemplateSelect: document.getElementById("zone-edit-template"),
     cancelEditZoneBtn: document.getElementById("cancel-edit-zone-btn"),
@@ -135,13 +135,14 @@
     toastMessage: document.getElementById("toast-message"),
 
     // Footer Elements
+    apiStatusFooter: document.getElementById("api-status-footer"),
     apiStatusFooterText: document
       .getElementById("api-status-footer")
       ?.querySelector("span"),
 
     // Dashboard Elements
     dashboardStatsContainer: document.getElementById(
-      "dashboard-stats-container"
+      "dashboard-stats-container",
     ),
     dataUsageCanvas: document.getElementById("dataUsageCanvas"),
     donutTotalData: document.getElementById("donut-total-data"),
@@ -223,7 +224,7 @@
               "\n" +
               message
                 .replace(/<br\/>/g, "\n")
-                .replace(/<strong>|<\/strong>/g, "")
+                .replace(/<strong>|<\/strong>/g, ""),
           )
         ) {
           if (callback) callback();
@@ -261,7 +262,7 @@
       const activePane = clickedCard.closest(".tab-pane");
       if (activePane) {
         const allCards = activePane.querySelectorAll(
-          ".session-card, .voucher-card, .zone-info-card, #provider-zone-linkage-card"
+          ".session-card, .voucher-card, .zone-info-card, #provider-zone-linkage-card",
         );
         allCards.forEach((card) => {
           if (card !== clickedCard) {
@@ -270,12 +271,12 @@
               otherDetails.classList.remove("expanded");
               otherDetails.setAttribute("aria-hidden", "true");
               const otherSummary = card.querySelector(
-                ".voucher-summary, .session-summary, .zone-summary"
+                ".voucher-summary, .session-summary, .zone-summary",
               );
               if (otherSummary) {
                 otherSummary.setAttribute("aria-expanded", "false");
                 const icon = otherSummary.querySelector(
-                  "i.fas.fa-chevron-down"
+                  "i.fas.fa-chevron-down",
                 );
                 if (icon) {
                   icon.classList.remove("rotate-180");
@@ -292,7 +293,7 @@
       detailsContent.setAttribute("aria-hidden", String(!isNowExpanded));
 
       const summary = clickedCard.querySelector(
-        ".voucher-summary, .session-summary, .zone-summary"
+        ".voucher-summary, .session-summary, .zone-summary",
       );
       if (summary) {
         summary.setAttribute("aria-expanded", String(isNowExpanded));
@@ -321,7 +322,7 @@
       container,
       count = 2,
       skeletonHtml = '<div class="skeleton-card"></div>',
-      paginationContainerId = null
+      paginationContainerId = null,
     ) {
       if (container) {
         let skeletons = "";
@@ -352,7 +353,7 @@
       container,
       message = "No data available.",
       iconClass = "fas fa-info-circle",
-      paginationContainerId = null
+      paginationContainerId = null,
     ) {
       if (container) {
         container.innerHTML = `<div class="text-center p-4 text-gray-500 dark:text-slate-400"><i class="${iconClass} fa-3x mb-2"></i><p>${message}</p></div>`;
@@ -371,7 +372,7 @@
       currentPage,
       totalItems,
       itemsPerPage,
-      onPageChangeCallback
+      onPageChangeCallback,
     ) {
       if (container && container.id) {
         CPManager.ui.paginationStates[container.id] = {
@@ -414,7 +415,7 @@
         pageNum,
         isIcon = false,
         isEnabled = true,
-        isCurrent = false
+        isCurrent = false,
       ) => {
         const button = document.createElement("button");
         button.innerHTML = content;
@@ -424,7 +425,7 @@
             ? pageNum < currentPage
               ? "Previous page"
               : "Next page"
-            : `Go to page ${pageNum}`
+            : `Go to page ${pageNum}`,
         );
 
         // Define base classes
@@ -458,7 +459,7 @@
         '<i class="fas fa-chevron-left"></i>',
         currentPage - 1,
         true,
-        currentPage > 1
+        currentPage > 1,
       );
       prevButton.classList.add("rounded-l-md");
       buttonsInnerDiv.appendChild(prevButton);
@@ -479,7 +480,7 @@
         let startPage = Math.max(2, currentPage - pageRangeDisplayed);
         let endPage = Math.min(
           totalPages - 1,
-          currentPage + pageRangeDisplayed
+          currentPage + pageRangeDisplayed,
         );
         if (currentPage <= pageRangeDisplayed + 1)
           endPage = Math.min(totalPages - 1, 1 + 2 * pageRangeDisplayed);
@@ -516,8 +517,8 @@
               pageNum,
               false,
               true,
-              pageNum === currentPage
-            )
+              pageNum === currentPage,
+            ),
           );
         }
       });
@@ -526,7 +527,7 @@
         '<i class="fas fa-chevron-right"></i>',
         currentPage + 1,
         true,
-        currentPage < totalPages
+        currentPage < totalPages,
       );
       nextButton.classList.add("rounded-r-md");
       buttonsInnerDiv.appendChild(nextButton);
@@ -591,7 +592,7 @@
                 args.currentPage,
                 args.totalItems,
                 args.itemsPerPage,
-                args.onPageChangeCallback
+                args.onPageChangeCallback,
               );
             }
           }

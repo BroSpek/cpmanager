@@ -21,13 +21,13 @@
           CPManager.state.zones.allConfigured = [];
           console.warn(
             "No zones found or unexpected data format from /settings/search_zones.",
-            data
+            data,
           );
         }
       } catch (error) {
         console.error(
           "Failed to fetch all zone data for descriptions:",
-          error.message
+          error.message,
         );
         CPManager.state.zones.allConfigured = [];
       }
@@ -51,7 +51,7 @@
           CPManager.state.zones.customTemplates = [];
           console.warn(
             "No custom templates found or unexpected data format.",
-            data
+            data,
           );
         }
       } catch (error) {
@@ -73,7 +73,7 @@
           CPManager.elements.zoneListContainer,
           CPManager.config.itemsPerPage,
           '<div class="skeleton-card"></div>',
-          "zone-pagination"
+          "zone-pagination",
         );
       }
 
@@ -83,7 +83,7 @@
 
         CPManager.ui.clearContainer(
           CPManager.elements.zoneListContainer,
-          "zone-pagination"
+          "zone-pagination",
         );
 
         if (
@@ -94,7 +94,7 @@
             CPManager.elements.zoneListContainer,
             "No captive portal zones configured on OPNsense.",
             "fas fa-folder-open",
-            "zone-pagination"
+            "zone-pagination",
           );
           return;
         }
@@ -112,7 +112,7 @@
           zoneCard.setAttribute("role", "listitem");
           zoneCard.setAttribute(
             "aria-label",
-            `Zone: ${zoneSummary.description || `Zone ID ${zoneSummary.zoneid}`}`
+            `Zone: ${zoneSummary.description || `Zone ID ${zoneSummary.zoneid}`}`,
           );
 
           const statusText =
@@ -140,7 +140,7 @@
               }</span></div>
               <div class="card-detail-row"><span class="card-detail-label">Short UUID</span><span class="card-detail-value">${zoneSummary.uuid.substring(
                 0,
-                8
+                8,
               )}...</span></div>
             </div>
             <div class="card-details-content max-h-0 overflow-hidden transition-all duration-300 ease-out text-sm space-y-1" id="${cardDetailsId}" aria-hidden="true">Loading details...</div>`;
@@ -156,7 +156,7 @@
           (newPage) => {
             CPManager.state.zones.currentPage = newPage;
             CPManager.zones.loadZoneInfo(); // Re-call to render the new page
-          }
+          },
         );
       } catch (error) {
         console.error("Error in loadZoneInfo:", error);
@@ -164,7 +164,7 @@
           CPManager.elements.zoneListContainer,
           "Error loading zone information.",
           "fas fa-exclamation-triangle",
-          "zone-pagination"
+          "zone-pagination",
         );
       }
     },
@@ -182,7 +182,7 @@
 
         try {
           const zoneDetailsResponse = await CPManager.api.callApi(
-            `/settings/get_zone/${uuid}`
+            `/settings/get_zone/${uuid}`,
           );
           let detailsHtml = "";
 
@@ -234,7 +234,7 @@
                   }
                 }
                 const templateInfo = CPManager.state.zones.customTemplates.find(
-                  (t) => t.uuid === selectedTemplateIdentifier
+                  (t) => t.uuid === selectedTemplateIdentifier,
                 );
                 displayValue = templateInfo
                   ? templateInfo.name
@@ -262,7 +262,7 @@
                   (v_obj) =>
                     typeof v_obj === "object" &&
                     v_obj !== null &&
-                    Object.prototype.hasOwnProperty.call(v_obj, "selected")
+                    Object.prototype.hasOwnProperty.call(v_obj, "selected"),
                 )
               ) {
                 displayValue = CPManager.utils.formatOpnsenseSelectable(value);
@@ -283,7 +283,7 @@
               }
               detailsHtml += createInfoRowDiv(
                 readableKey,
-                displayValue || CPManager.config.placeholderValue
+                displayValue || CPManager.config.placeholderValue,
               );
             }
           } else {
@@ -310,7 +310,7 @@
     fetchAndOpenEditZoneModal: async function (uuid) {
       if (!CPManager.elements.editZoneModal) {
         console.error(
-          "Edit Zone Modal element (CPManager.elements.editZoneModal) not found."
+          "Edit Zone Modal element (CPManager.elements.editZoneModal) not found.",
         );
         return;
       }
@@ -318,7 +318,7 @@
         await CPManager.zones.fetchCustomTemplates();
 
         const response = await CPManager.api.callApi(
-          `/settings/get_zone/${uuid}`
+          `/settings/get_zone/${uuid}`,
         );
         if (response && response.zone) {
           CPManager.state.zones.originalFullDataForEdit = response;
@@ -328,7 +328,7 @@
             CPManager.elements.submitEditZoneBtn.disabled = false;
           } else {
             console.error(
-              "CPManager.elements.submitEditZoneBtn not found when trying to enable it in fetchAndOpenEditZoneModal."
+              "CPManager.elements.submitEditZoneBtn not found when trying to enable it in fetchAndOpenEditZoneModal.",
             );
           }
           if (CPManager.elements.cancelEditZoneBtn) {
@@ -342,7 +342,7 @@
         } else {
           CPManager.ui.showToast(
             `Could not load details for zone ${uuid}. API response issue.`,
-            "error"
+            "error",
           );
           CPManager.state.zones.originalFullDataForEdit = null;
         }
@@ -372,7 +372,7 @@
           console.error(`Edit Zone Modal element missing: ${elId}`);
           CPManager.ui.showToast(
             "Cannot populate edit zone dialog: form elements missing.",
-            "error"
+            "error",
           );
           return;
         }
@@ -389,7 +389,7 @@
               typeof item === "object" &&
               item !== null &&
               Object.prototype.hasOwnProperty.call(item, "selected") &&
-              Object.prototype.hasOwnProperty.call(item, "value")
+              Object.prototype.hasOwnProperty.call(item, "value"),
           );
 
           if (isOpnSelectableObject) {
@@ -400,7 +400,7 @@
                 fieldValue[key] !== null &&
                 Object.prototype.hasOwnProperty.call(
                   fieldValue[key],
-                  "selected"
+                  "selected",
                 ) &&
                 Object.prototype.hasOwnProperty.call(fieldValue[key], "value")
               ) {
@@ -482,7 +482,7 @@
       if (
         selectedTemplateIdentifierFromZoneData &&
         CPManager.state.zones.customTemplates.some(
-          (t) => t.uuid === selectedTemplateIdentifierFromZoneData
+          (t) => t.uuid === selectedTemplateIdentifierFromZoneData,
         )
       ) {
         templateSelect.value = selectedTemplateIdentifierFromZoneData;
@@ -498,10 +498,10 @@
       ) {
         CPManager.ui.showToast(
           "Zone UUID is missing or save button not found. Cannot save.",
-          "error"
+          "error",
         );
         console.error(
-          "Missing UUID input or submit button in saveZoneSettings."
+          "Missing UUID input or submit button in saveZoneSettings.",
         );
         return;
       }
@@ -513,7 +513,7 @@
         allowedAddresses:
           CPManager.elements.zoneEditAllowedAddressesTextarea.value.replace(
             /\s+/g,
-            ""
+            "",
           ),
         allowedMACAddresses:
           CPManager.elements.zoneEditAllowedMACAddressesTextarea.value
@@ -542,13 +542,13 @@
         const result = await CPManager.api.callApi(
           `/settings/set_zone/${uuid}`,
           "POST",
-          finalApiPayload
+          finalApiPayload,
         );
 
         if (result && result.result === "saved") {
           CPManager.ui.showToast(
             `Zone settings updated for "${zoneSettingsToUpdate.description || uuid.substring(0, 8)}".`,
-            "success"
+            "success",
           );
           CPManager.ui.hideModal(CPManager.elements.editZoneModal);
           CPManager.state.zones.originalFullDataForEdit = null;
@@ -558,12 +558,12 @@
           CPManager.ui.showToast(
             "Applying changes by reconfiguring service...",
             "info",
-            7000
+            7000,
           );
           const reconfigResult = await CPManager.api.callApi(
             "/service/reconfigure",
             "POST",
-            {}
+            {},
           );
           if (
             reconfigResult &&
@@ -573,7 +573,7 @@
           ) {
             CPManager.ui.showToast(
               "Captive portal service reconfigured successfully.",
-              "success"
+              "success",
             );
           } else {
             CPManager.ui.showToast(
@@ -585,7 +585,7 @@
                   : "Unknown"
               }. Manual check may be needed.`,
               "warning",
-              10000
+              10000,
             );
           }
         } else {
@@ -607,7 +607,7 @@
           CPManager.elements.submitEditZoneBtn.innerHTML = "Save Changes";
         } else {
           console.error(
-            "submitEditZoneBtn is null in finally block of saveZoneSettings. Cannot re-enable."
+            "submitEditZoneBtn is null in finally block of saveZoneSettings. Cannot re-enable.",
           );
         }
       }
@@ -622,7 +622,7 @@
             if (summaryElement) {
               const card = summaryElement.closest(".zone-info-card");
               const detailsContent = card.querySelector(
-                ".card-details-content"
+                ".card-details-content",
               );
               this.handleZoneCardClick(card, detailsContent, summaryElement);
               return;
@@ -636,11 +636,11 @@
                 CPManager.zones.fetchAndOpenEditZoneModal(uuid);
               } else {
                 console.error(
-                  "Edit button clicked but no UUID found on dataset."
+                  "Edit button clicked but no UUID found on dataset.",
                 );
               }
             }
-          }
+          },
         );
       }
 
@@ -650,17 +650,17 @@
             "click",
             function () {
               console.log(
-                "Save Changes button clicked (via initialized listener)."
+                "Save Changes button clicked (via initialized listener).",
               );
               CPManager.zones.saveZoneSettings();
-            }
+            },
           );
           CPManager.elements.submitEditZoneBtn.dataset.listenerAttached =
             "true";
         }
       } else {
         console.error(
-          "Submit Edit Zone Button (CPManager.elements.submitEditZoneBtn) not found during initializeZoneEventListeners."
+          "Submit Edit Zone Button (CPManager.elements.submitEditZoneBtn) not found during initializeZoneEventListeners.",
         );
       }
 
@@ -675,7 +675,7 @@
         }
       } else {
         console.error(
-          "Cancel Edit Zone Button (CPManager.elements.cancelEditZoneBtn) not found during initializeZoneEventListeners."
+          "Cancel Edit Zone Button (CPManager.elements.cancelEditZoneBtn) not found during initializeZoneEventListeners.",
         );
       }
 
@@ -692,7 +692,7 @@
               CPManager.elements.zoneEditEnabledText.textContent = this.checked
                 ? "Enabled"
                 : "Disabled";
-            }
+            },
           );
           CPManager.elements.zoneEditEnabledCheckbox.dataset.listenerAttached =
             "true";
@@ -713,7 +713,7 @@
                 .checked
                 ? "Allowed"
                 : "Disallowed";
-            }
+            },
           );
           CPManager.elements.zoneEditConcurrentLoginsCheckbox.dataset.listenerAttached =
             "true";

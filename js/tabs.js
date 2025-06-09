@@ -24,7 +24,7 @@
             btn.classList.remove(
               "border-transparent",
               "hover:text-gray-700",
-              "hover:border-gray-400"
+              "hover:border-gray-400",
             );
             btn.setAttribute("aria-selected", "true"); // Accessibility
           } else {
@@ -32,7 +32,7 @@
             btn.classList.add(
               "border-transparent",
               "hover:text-gray-700",
-              "hover:border-gray-400"
+              "hover:border-gray-400",
             );
             btn.setAttribute("aria-selected", "false"); // Accessibility
           }
@@ -75,7 +75,7 @@
       try {
         localStorage.setItem(
           CPManager.config.localStorageKeys.activeTab,
-          tabId
+          tabId,
         );
       } catch (e) {
         console.warn("Could not save active tab to localStorage:", e.message);

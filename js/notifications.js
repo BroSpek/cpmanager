@@ -6,7 +6,7 @@
       if (!("Notification" in window)) {
         CPManager.ui.showToast(
           "Browser does not support desktop notification",
-          "error"
+          "error",
         );
         return;
       }
@@ -21,14 +21,14 @@
         } else {
           CPManager.ui.showToast(
             "API credentials not set. Cannot start polling.",
-            "warning"
+            "warning",
           );
           CPManager.notifications.updateNotificationToggleState(false, false);
         }
       } else {
         CPManager.ui.showToast(
           "Sign-in notifications permission denied.",
-          "warning"
+          "warning",
         );
         CPManager.notifications.stopSessionPolling();
         CPManager.notifications.updateNotificationToggleState(false, false);
@@ -54,7 +54,7 @@
           }
 
           const currentSessionIds = new Set(
-            data.rows.map((session) => session.sessionId)
+            data.rows.map((session) => session.sessionId),
           );
           if (CPManager.state.notifications.isFirstPoll) {
             CPManager.state.notifications.previousSessionIds =
@@ -66,8 +66,8 @@
           const newSessions = data.rows.filter(
             (session) =>
               !CPManager.state.notifications.previousSessionIds.has(
-                session.sessionId
-              )
+                session.sessionId,
+              ),
           );
           if (newSessions.length > 0) {
             newSessions.forEach((session) => {
@@ -86,7 +86,7 @@
             });
           }
           CPManager.state.notifications.previousSessionIds = new Set(
-            currentSessionIds
+            currentSessionIds,
           );
         }
       } catch (error) {
@@ -99,7 +99,7 @@
           CPManager.ui.showToast(
             `Disabling notifications due to ${CPManager.state.notifications.MAX_POLL_ERRORS_BEFORE_DISABLE} API errors.`,
             "error",
-            8000
+            8000,
           );
           CPManager.notifications.stopSessionPolling();
           CPManager.notifications.updateNotificationToggleState(false, true);
@@ -125,7 +125,7 @@
         ) {
           CPManager.state.notifications.sessionPollIntervalId = setInterval(
             CPManager.notifications.checkForNewSessionsAndNotify,
-            currentInterval
+            currentInterval,
           );
         }
       });
@@ -146,33 +146,33 @@
             '<i class="fas fa-exclamation-triangle text-red-500"></i>';
           toggleButton.setAttribute(
             "aria-label",
-            "Notifications disabled (errors). Click to re-try."
+            "Notifications disabled (errors). Click to re-try.",
           );
           toggleButton.dataset.errorState = "true";
         } else if (isEnabled) {
           toggleButton.innerHTML = '<i class="fas fa-bell"></i>';
           toggleButton.setAttribute(
             "aria-label",
-            "Disable sign-in notifications"
+            "Disable sign-in notifications",
           );
           toggleButton.dataset.errorState = "false";
         } else {
           toggleButton.innerHTML = '<i class="fas fa-bell-slash"></i>';
           toggleButton.setAttribute(
             "aria-label",
-            "Enable sign-in notifications"
+            "Enable sign-in notifications",
           );
           toggleButton.dataset.errorState = "false";
         }
         try {
           localStorage.setItem(
             CPManager.config.localStorageKeys.signInNotificationsEnabled,
-            isEnabled && !isErrorState ? "true" : "false"
+            isEnabled && !isErrorState ? "true" : "false",
           );
         } catch (e) {
           console.warn(
             "Could not save notification preference to localStorage:",
-            e.message
+            e.message,
           );
         }
       }
@@ -182,7 +182,7 @@
       if (
         !CPManager.state.notifications.sessionPollIntervalId &&
         localStorage.getItem(
-          CPManager.config.localStorageKeys.signInNotificationsEnabled
+          CPManager.config.localStorageKeys.signInNotificationsEnabled,
         ) !== "true"
       ) {
         return;
@@ -195,13 +195,13 @@
         if (Notification.permission === "granted") {
           CPManager.state.notifications.sessionPollIntervalId = setInterval(
             CPManager.notifications.checkForNewSessionsAndNotify,
-            CPManager.state.notifications.POLLING_INTERVAL_HIDDEN_TAB
+            CPManager.state.notifications.POLLING_INTERVAL_HIDDEN_TAB,
           );
         }
       } else {
         if (
           localStorage.getItem(
-            CPManager.config.localStorageKeys.signInNotificationsEnabled
+            CPManager.config.localStorageKeys.signInNotificationsEnabled,
           ) === "true" &&
           Notification.permission === "granted"
         ) {
@@ -212,7 +212,7 @@
 
     initializeNotifications: function () {
       const storedPreference = localStorage.getItem(
-        CPManager.config.localStorageKeys.signInNotificationsEnabled
+        CPManager.config.localStorageKeys.signInNotificationsEnabled,
       );
       const permissionGranted = Notification.permission === "granted";
 
@@ -229,7 +229,7 @@
       }
       document.addEventListener(
         "visibilitychange",
-        CPManager.notifications.handleVisibilityChange
+        CPManager.notifications.handleVisibilityChange,
       );
     },
   };

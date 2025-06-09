@@ -12,13 +12,13 @@
       const zoneIdForStatusCall = "0";
       try {
         const response = await fetch(
-          `${CPManager.config.baseUrl}/api/captiveportal/access/status/${zoneIdForStatusCall}`
+          `${CPManager.config.baseUrl}/api/captiveportal/access/status/${zoneIdForStatusCall}`,
         );
         const responseText = await response.text();
 
         if (!response.ok) {
           console.warn(
-            `Manager session status check failed: ${response.status} ${response.statusText}`
+            `Manager session status check failed: ${response.status} ${response.statusText}`,
           );
           CPManager.state.sessions.managerDetails = null;
           return;
@@ -36,7 +36,7 @@
             CPManager.state.sessions.managerDetails.ipAddress,
             "ID:",
             CPManager.state.sessions.managerDetails.sessionId.substring(0, 8) +
-              "..."
+              "...",
           );
           if (
             CPManager.elements.tabPanes.sessions &&
@@ -47,13 +47,13 @@
         } else {
           CPManager.state.sessions.managerDetails = null;
           console.log(
-            "Current device not connected via authorized captive portal session, or status endpoint returned unexpected data."
+            "Current device not connected via authorized captive portal session, or status endpoint returned unexpected data.",
           );
         }
       } catch (error) {
         console.error(
           `Exception during fetchManagerSessionStatus:`,
-          error.message
+          error.message,
         );
         CPManager.state.sessions.managerDetails = null;
       }
@@ -84,7 +84,7 @@
         CPManager.elements.sessionCardContainer,
         CPManager.config.itemsPerPage,
         '<div class="skeleton-card"></div>',
-        "session-pagination"
+        "session-pagination",
       );
       this.updateSelectAllUI(); // Ensure UI is correct during load
 
@@ -97,13 +97,13 @@
         } else {
           console.error(
             "Error loading sessions: API response `data.rows` is not an array or data is undefined.",
-            data
+            data,
           );
           CPManager.ui.showNoDataMessage(
             CPManager.elements.sessionCardContainer,
             "Error: Unexpected data format for sessions.",
             "fas fa-exclamation-triangle",
-            "session-pagination"
+            "session-pagination",
           );
           CPManager.state.sessions.all = [];
           this.currentlyVisibleSessions = [];
@@ -115,7 +115,7 @@
           CPManager.elements.sessionCardContainer,
           "Could not load sessions. Check API connection and OPNsense logs.",
           "fas fa-exclamation-triangle",
-          "session-pagination"
+          "session-pagination",
         );
         CPManager.state.sessions.all = [];
         this.currentlyVisibleSessions = [];
@@ -128,7 +128,7 @@
 
       const currentVal =
         localStorage.getItem(
-          CPManager.config.localStorageKeys.sessionZoneFilter
+          CPManager.config.localStorageKeys.sessionZoneFilter,
         ) || "";
       CPManager.elements.sessionZoneFilterSelect.innerHTML =
         '<option value="">All Zones</option>';
@@ -159,7 +159,7 @@
       if (CPManager.elements.sessionZoneFilterSelect) {
         localStorage.setItem(
           CPManager.config.localStorageKeys.sessionZoneFilter,
-          selectedZoneId
+          selectedZoneId,
         );
       }
 
@@ -167,7 +167,7 @@
 
       if (selectedZoneId) {
         filteredSessions = filteredSessions.filter(
-          (s) => String(s.zoneid) === selectedZoneId
+          (s) => String(s.zoneid) === selectedZoneId,
         );
       }
 
@@ -177,7 +177,7 @@
             (s.ipAddress && s.ipAddress.toLowerCase().includes(searchTerm)) ||
             (s.macAddress && s.macAddress.toLowerCase().includes(searchTerm)) ||
             (s.userName && s.userName.toLowerCase().includes(searchTerm)) ||
-            (s.sessionId && s.sessionId.toLowerCase().includes(searchTerm))
+            (s.sessionId && s.sessionId.toLowerCase().includes(searchTerm)),
         );
       }
 
@@ -191,7 +191,7 @@
 
       CPManager.ui.clearContainer(
         CPManager.elements.sessionCardContainer,
-        "session-pagination"
+        "session-pagination",
       );
 
       this.updateSelectAllUI();
@@ -202,7 +202,7 @@
           CPManager.elements.sessionCardContainer,
           "No sessions match filters or no active sessions found.",
           "fas fa-users-slash",
-          "session-pagination"
+          "session-pagination",
         );
         return;
       }
@@ -219,12 +219,12 @@
         const zoneDesc = CPManager.utils.getZoneDescription(session.zoneid);
         const zoneTagColor = CPManager.utils.getZoneColor(session.zoneid);
         const readableAuthVia = CPManager.utils.formatAuthVia(
-          session.authenticated_via
+          session.authenticated_via,
         );
         const authViaTagColor =
           CPManager.utils.getAuthViaColor(readableAuthVia);
         const macAddressType = CPManager.utils.getMacAddressType(
-          session.macAddress
+          session.macAddress,
         );
         let macTypeTagHtml = "";
         if (macAddressType) {
@@ -253,7 +253,7 @@
         card.setAttribute("role", "listitem");
         card.setAttribute(
           "aria-label",
-          `Session for IP ${session.ipAddress || "Unknown IP"}`
+          `Session for IP ${session.ipAddress || "Unknown IP"}`,
         );
 
         let managerIconHtml = "";
@@ -338,7 +338,7 @@
                   session.acc_session_timeout
                     ? CPManager.utils.formatDuration(
                         session.acc_session_timeout,
-                        "seconds"
+                        "seconds",
                       )
                     : CPManager.config.placeholderValue
                 }</span></div>
@@ -353,7 +353,7 @@
         (newPage) => {
           CPManager.state.sessions.currentPage = newPage;
           this.renderSessions(sessions);
-        }
+        },
       );
     },
 
@@ -399,7 +399,7 @@
       sessionSelectAllContainer.classList.remove("hidden");
       sessionSelectAllCheckbox.disabled = false;
       const allVisibleSelected = visibleSessions.every((s) =>
-        this.selectedSessions.has(s.sessionId)
+        this.selectedSessions.has(s.sessionId),
       );
 
       sessionSelectAllCheckbox.checked = allVisibleSelected;
@@ -427,13 +427,13 @@
       }
 
       const sessionsToDisconnect = CPManager.state.sessions.all.filter((s) =>
-        selectedSessionIds.includes(s.sessionId)
+        selectedSessionIds.includes(s.sessionId),
       );
 
       if (sessionsToDisconnect.length === 0) {
         CPManager.ui.showToast(
           "Could not find details for selected sessions. Please refresh.",
-          "error"
+          "error",
         );
         this.selectedSessions.clear();
         this.updateSelectAllUI();
@@ -443,7 +443,7 @@
       const isMySessionSelected =
         CPManager.state.sessions.managerDetails?.sessionId &&
         this.selectedSessions.has(
-          CPManager.state.sessions.managerDetails.sessionId
+          CPManager.state.sessions.managerDetails.sessionId,
         );
 
       let title = "Disconnect Selected Sessions?";
@@ -458,7 +458,7 @@
         CPManager.ui.showToast(
           `Disconnecting ${sessionsToDisconnect.length} session(s)...`,
           "info",
-          5000
+          5000,
         );
 
         let successCount = 0;
@@ -481,7 +481,7 @@
                 failureCount++;
                 console.warn(
                   `Failed to disconnect session ${session.sessionId}:`,
-                  result
+                  result,
                 );
               }
             })
@@ -489,9 +489,9 @@
               failureCount++;
               console.error(
                 `Error disconnecting session ${session.sessionId}:`,
-                error
+                error,
               );
-            })
+            }),
         );
 
         await Promise.all(disconnectPromises);
@@ -521,12 +521,12 @@
     initializeSessionEventListeners: function () {
       if (CPManager.elements.sessionSearchInput)
         CPManager.elements.sessionSearchInput.addEventListener("input", () =>
-          this.applySessionFilters()
+          this.applySessionFilters(),
         );
       if (CPManager.elements.sessionZoneFilterSelect)
         CPManager.elements.sessionZoneFilterSelect.addEventListener(
           "change",
-          () => this.applySessionFilters()
+          () => this.applySessionFilters(),
         );
 
       // Listener for card container (delegated)
@@ -547,7 +547,7 @@
                   CPManager.ui.showToast(
                     "Warning: You have selected your own session.",
                     "warning",
-                    4000
+                    4000,
                   );
                 }
               } else {
@@ -562,7 +562,7 @@
               const card = summaryElement.closest(".session-card");
               CPManager.ui.toggleCardDetails(card);
             }
-          }
+          },
         );
       }
 
@@ -570,13 +570,13 @@
       if (CPManager.elements.disconnectSelectedSessionsBtn)
         CPManager.elements.disconnectSelectedSessionsBtn.addEventListener(
           "click",
-          () => this.handleDisconnectSelectedSessions()
+          () => this.handleDisconnectSelectedSessions(),
         );
 
       if (CPManager.elements.sessionSelectAllCheckbox) {
         CPManager.elements.sessionSelectAllCheckbox.addEventListener(
           "change",
-          (e) => this.handleSelectAll(e.target.checked)
+          (e) => this.handleSelectAll(e.target.checked),
         );
       }
 
@@ -590,7 +590,7 @@
             ) {
               CPManager.ui.showToast(
                 `Found your session (IP: ${CPManager.state.sessions.managerDetails.ipAddress}). Highlighting...`,
-                "info"
+                "info",
               );
               if (CPManager.elements.sessionZoneFilterSelect)
                 CPManager.elements.sessionZoneFilterSelect.value = "";
@@ -603,7 +603,7 @@
 
               setTimeout(() => {
                 const highlightedCard = document.querySelector(
-                  ".is-manager-session"
+                  ".is-manager-session",
                 );
                 if (highlightedCard)
                   highlightedCard.scrollIntoView({
@@ -614,19 +614,19 @@
             } else {
               CPManager.ui.showToast(
                 "Your session details not found. Fetching...",
-                "warning"
+                "warning",
               );
               await this.fetchManagerSessionStatus();
               if (!CPManager.state.sessions.managerDetails) {
                 CPManager.ui.showToast(
                   "Still couldn't find your session. Ensure you are logged into the portal.",
-                  "warning"
+                  "warning",
                 );
               } else {
                 CPManager.elements.findMySessionBtn.click(); // Retry
               }
             }
-          }
+          },
         );
       }
     },
