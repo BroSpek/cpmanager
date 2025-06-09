@@ -11,6 +11,11 @@
   "author": "",
   "license": "ISC",
   "description": "**OPNsense Captive Portal Manager** is a web-based tool designed to manage the OPNsense Captive Portal, providing a user-friendly interface for monitoring and controlling various aspects of the portal.",
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-tailwindcss"
+    ]
+  },
   "devDependencies": {
     "@eslint/css": "^0.8.1",
     "@eslint/js": "^9.28.0",
