@@ -120,7 +120,7 @@
           const statusColor =
             zoneSummary.enabled === "1" ? "bg-green-500" : "bg-red-500";
 
-          const statusTag = `<span class="py-0.5 px-1.5 text-xs rounded-sm text-white max-w-[100px] whitespace-nowrap overflow-hidden text-ellipsis ${statusColor}" title="Status: ${statusText}">${statusText}</span>`;
+          const statusTag = `<span class="info-tag ${statusColor}" title="Status: ${statusText}">${statusText}</span>`;
           const cardSummaryId = `zone-summary-${zoneSummary.uuid}`;
           const cardDetailsId = `zone-details-${zoneSummary.uuid}`;
 
@@ -131,14 +131,14 @@
                 </div>
             </div>
             <div id="${cardSummaryId}" class="zone-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="${cardDetailsId}">
-              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Name</span><span class="text-sm text-right font-semibold break-all flex-grow text-slate-800 dark:text-slate-200">${
+              <div class="card-detail-row"><span class="card-detail-label">Name</span><span class="card-detail-value">${
                 zoneSummary.description ||
                 `Unnamed Zone (ID: ${zoneSummary.zoneid})`
               }</span></div>
-              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Zone ID</span><span class="text-sm text-right font-semibold break-all flex-grow text-slate-800 dark:text-slate-200">${
+              <div class="card-detail-row"><span class="card-detail-label">Zone ID</span><span class="card-detail-value">${
                 zoneSummary.zoneid
               }</span></div>
-              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Short UUID</span><span class="text-sm text-right font-semibold break-all flex-grow text-slate-800 dark:text-slate-200">${zoneSummary.uuid.substring(
+              <div class="card-detail-row"><span class="card-detail-label">Short UUID</span><span class="card-detail-value">${zoneSummary.uuid.substring(
                 0,
                 8
               )}...</span></div>
@@ -193,7 +193,7 @@
               String(value).trim() === ""
                 ? CPManager.config.placeholderValue
                 : String(value);
-            return `<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">${label}</span> <span class="text-sm text-right break-all flex-grow text-slate-600 dark:text-slate-300">${displayValue}</span></div>`;
+            return `<div class="card-detail-row"><span class="card-detail-label">${label}</span> <span class="card-detail-value-secondary">${displayValue}</span></div>`;
           };
 
           detailsHtml += createInfoRowDiv("UUID", uuid);

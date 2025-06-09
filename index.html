@@ -69,7 +69,7 @@
               in your browser's local storage.
             </p>
             <div>
-              <label for="config-api-base-url" class="block text-sm font-medium"
+              <label for="config-api-base-url" class="form-label"
                 >OPNsense API Base URL:</label
               >
               <input
@@ -81,9 +81,7 @@
               />
             </div>
             <div class="mt-2">
-              <label for="config-api-key" class="block text-sm font-medium"
-                >API Key:</label
-              >
+              <label for="config-api-key" class="form-label">API Key:</label>
               <input
                 type="text"
                 id="config-api-key"
@@ -92,7 +90,7 @@
               />
             </div>
             <div class="mt-2">
-              <label for="config-api-secret" class="block text-sm font-medium"
+              <label for="config-api-secret" class="form-label"
                 >API Secret:</label
               >
               <input
@@ -155,14 +153,14 @@
           class="p-4 rounded-lg shadow bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-200 print:p-0 print:m-0 print:shadow-none print:bg-white print:text-black"
         >
           <div id="dashboard-content" class="tab-pane">
-            <h2 class="text-2xl font-semibold flex items-center mb-4">
+            <h2 class="section-header">
               <i
                 class="fas fa-tachometer-alt mr-3 text-blue-600 dark:text-blue-400"
               ></i
               >Overview Dashboard
             </h2>
             <div
-              class="p-3 mb-6 rounded-md border flex items-start bg-blue-50 dark:bg-sky-900/50 border-blue-200 dark:border-sky-700 text-gray-700 dark:text-sky-200 print:hidden"
+              class="alert-box bg-blue-50 dark:bg-sky-900/50 border-blue-200 dark:border-sky-700 text-gray-700 dark:text-sky-200 print:hidden"
             >
               <i
                 class="fas fa-info-circle mr-2 mt-1 text-blue-500 dark:text-sky-300"
@@ -228,7 +226,7 @@
           </div>
 
           <div id="sessions-content" class="tab-pane hidden">
-            <h2 class="text-2xl font-semibold flex items-center mb-4">
+            <h2 class="section-header">
               <i class="fas fa-users mr-3 text-blue-600 dark:text-blue-400"></i
               >Session Management
             </h2>
@@ -237,9 +235,7 @@
               class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 items-end print:hidden"
             >
               <div class="min-w-0">
-                <label
-                  for="session-search-input"
-                  class="block text-sm font-medium mb-1"
+                <label for="session-search-input" class="form-label mb-1"
                   >Search:</label
                 >
                 <input
@@ -250,9 +246,7 @@
                 />
               </div>
               <div class="min-w-0">
-                <label
-                  for="session-zone-filter-select"
-                  class="block text-sm font-medium mb-1"
+                <label for="session-zone-filter-select" class="form-label mb-1"
                   >Zone:</label
                 >
                 <select id="session-zone-filter-select" class="form-input">
@@ -308,7 +302,7 @@
           </div>
 
           <div id="vouchers-content" class="tab-pane hidden">
-            <h2 class="text-2xl font-semibold flex items-center mb-4">
+            <h2 class="section-header">
               <i
                 class="fas fa-ticket-alt mr-3 text-blue-600 dark:text-blue-400"
               ></i
@@ -349,9 +343,7 @@
               class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 items-end print:hidden"
             >
               <div class="min-w-0">
-                <label
-                  for="voucher-provider-select"
-                  class="block text-sm font-medium mb-1"
+                <label for="voucher-provider-select" class="form-label mb-1"
                   >Voucher Provider:</label
                 >
                 <select id="voucher-provider-select" class="form-input">
@@ -359,9 +351,7 @@
                 </select>
               </div>
               <div class="min-w-0">
-                <label
-                  for="voucher-group-select"
-                  class="block text-sm font-medium mb-1"
+                <label for="voucher-group-select" class="form-label mb-1"
                   >Voucher Group:</label
                 >
                 <select id="voucher-group-select" class="form-input">
@@ -374,9 +364,7 @@
               class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 items-end print:hidden"
             >
               <div class="min-w-0">
-                <label
-                  for="voucher-search-input"
-                  class="block text-sm font-medium mb-1"
+                <label for="voucher-search-input" class="form-label mb-1"
                   >Search Voucher Code:</label
                 >
                 <input
@@ -387,9 +375,7 @@
                 />
               </div>
               <div class="min-w-0">
-                <label
-                  for="voucher-state-filter-select"
-                  class="block text-sm font-medium mb-1"
+                <label for="voucher-state-filter-select" class="form-label mb-1"
                   >Filter by State:</label
                 >
                 <select id="voucher-state-filter-select" class="form-input">
@@ -461,7 +447,7 @@
           </div>
 
           <div id="info-content" class="tab-pane hidden">
-            <h2 class="text-2xl font-semibold flex items-center mb-4">
+            <h2 class="section-header">
               <i
                 class="fas fa-layer-group mr-3 text-blue-600 dark:text-blue-400"
               ></i
@@ -498,10 +484,10 @@
       class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-20 hidden items-center justify-center print:hidden"
     >
       <div class="modal-base-content max-w-md">
-        <h3 class="text-xl font-semibold mb-6">Generate Vouchers</h3>
+        <h3 class="modal-title">Generate Vouchers</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label for="voucher-count-select" class="block text-sm font-medium"
+            <label for="voucher-count-select" class="form-label"
               >Number of vouchers</label
             >
             <select id="voucher-count-select" class="form-modal-input">
@@ -523,9 +509,7 @@
             />
           </div>
           <div>
-            <label
-              for="voucher-lifetime-select"
-              class="block text-sm font-medium"
+            <label for="voucher-lifetime-select" class="form-label"
               >Validity</label
             >
             <select id="voucher-lifetime-select" class="form-modal-input">
@@ -550,7 +534,7 @@
             />
           </div>
           <div>
-            <label for="voucher-usage-select" class="block text-sm font-medium"
+            <label for="voucher-usage-select" class="form-label"
               >Expires in</label
             >
             <select id="voucher-usage-select" class="form-modal-input">
@@ -580,9 +564,7 @@
             />
           </div>
           <div class="sm:col-span-2">
-            <label for="voucher-groupname" class="block text-sm font-medium"
-              >Group name</label
-            >
+            <label for="voucher-groupname" class="form-label">Group name</label>
             <input
               type="text"
               id="voucher-groupname"
@@ -591,7 +573,7 @@
             />
           </div>
           <div class="sm:col-span-2 mt-4">
-            <label class="block text-sm font-medium mb-2">Output Format:</label>
+            <label class="form-label mb-2">Output Format:</label>
             <div
               class="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0"
             >
@@ -678,7 +660,7 @@
       class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full p-4 z-20 hidden items-center justify-center print:hidden"
     >
       <div class="modal-base-content max-w-lg">
-        <h3 class="text-xl font-semibold mb-6">
+        <h3 class="modal-title">
           Edit Zone:
           <span id="editZoneModalTitleName" class="font-normal"></span>
         </h3>
@@ -686,12 +668,10 @@
           <input type="hidden" id="editZoneUuidInput" />
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label
-                for="zone-edit-enabled"
-                class="block text-sm font-medium mb-1"
+              <label for="zone-edit-enabled" class="form-label mb-1"
                 >Status:</label
               >
-              <label class="flex items-center cursor-pointer w-full">
+              <label class="toggle-switch-label">
                 <div class="relative">
                   <input
                     type="checkbox"
@@ -709,9 +689,7 @@
               </label>
             </div>
             <div>
-              <label
-                for="zone-edit-description"
-                class="block text-sm font-medium"
+              <label for="zone-edit-description" class="form-label"
                 >Description:</label
               >
               <input
@@ -724,9 +702,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label
-                for="zone-edit-hardtimeout"
-                class="block text-sm font-medium"
+              <label for="zone-edit-hardtimeout" class="form-label"
                 >Hard Timeout (minutes):</label
               >
               <input
@@ -738,9 +714,7 @@
               />
             </div>
             <div>
-              <label
-                for="zone-edit-idletimeout"
-                class="block text-sm font-medium"
+              <label for="zone-edit-idletimeout" class="form-label"
                 >Idle Timeout (minutes):</label
               >
               <input
@@ -755,12 +729,10 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label
-                for="zone-edit-concurrentlogins"
-                class="block text-sm font-medium mb-1"
+              <label for="zone-edit-concurrentlogins" class="form-label mb-1"
                 >Concurrent Logins:</label
               >
-              <label class="flex items-center cursor-pointer w-full">
+              <label class="toggle-switch-label">
                 <div class="relative">
                   <input
                     type="checkbox"
@@ -778,7 +750,7 @@
               </label>
             </div>
             <div>
-              <label for="zone-edit-template" class="block text-sm font-medium"
+              <label for="zone-edit-template" class="form-label"
                 >Custom Template:</label
               >
               <select id="zone-edit-template" class="form-input">
@@ -788,9 +760,7 @@
           </div>
 
           <div>
-            <label
-              for="zone-edit-allowedAddresses"
-              class="block text-sm font-medium"
+            <label for="zone-edit-allowedAddresses" class="form-label"
               >Allowed Addresses (comma-separated):</label
             >
             <textarea
@@ -801,9 +771,7 @@
             ></textarea>
           </div>
           <div>
-            <label
-              for="zone-edit-allowedMACAddresses"
-              class="block text-sm font-medium"
+            <label for="zone-edit-allowedMACAddresses" class="form-label"
               >Allowed MAC Addresses (comma-separated):</label
             >
             <textarea
