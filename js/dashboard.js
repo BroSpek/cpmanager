@@ -20,7 +20,7 @@
         !CPManager.elements.downloadPercentageSpan
       ) {
         console.error(
-          "One or more dashboard elements are missing from the DOM."
+          "One or more dashboard elements are missing from the DOM.",
         );
         // Display an error message if critical elements are missing
         if (CPManager.elements.dashboardStatsContainer)
@@ -119,34 +119,34 @@
           try {
             // Fetch all voucher providers
             const providers = await CPManager.api.callApi(
-              "/voucher/list_providers"
+              "/voucher/list_providers",
             );
             if (providers && Array.isArray(providers) && providers.length > 0) {
               totalProviders = providers.length; // Set total providers count
               for (const provider of providers) {
                 // For each provider, list all voucher groups
                 const voucherGroups = await CPManager.api.callApi(
-                  `/voucher/list_voucher_groups/${provider}`
+                  `/voucher/list_voucher_groups/${provider}`,
                 );
                 if (voucherGroups && Array.isArray(voucherGroups)) {
                   for (const group of voucherGroups) {
                     // For each group, list all vouchers
                     const vouchersInGroup = await CPManager.api.callApi(
-                      `/voucher/list_vouchers/${provider}/${group}`
+                      `/voucher/list_vouchers/${provider}/${group}`,
                     );
                     if (vouchersInGroup && Array.isArray(vouchersInGroup)) {
                       totalVouchers += vouchersInGroup.length;
                       // Filter and count active vouchers
                       activeVouchers += vouchersInGroup.filter(
-                        (v) => v.state === "valid"
+                        (v) => v.state === "valid",
                       ).length;
                       // Filter and count expired vouchers
                       expiredVouchers += vouchersInGroup.filter(
-                        (v) => v.state === "expired"
+                        (v) => v.state === "expired",
                       ).length;
                       // Filter and count unused vouchers (NEW)
                       unusedVouchers += vouchersInGroup.filter(
-                        (v) => v.state === "unused"
+                        (v) => v.state === "unused",
                       ).length;
                     }
                   }
@@ -156,11 +156,11 @@
           } catch (voucherError) {
             console.error(
               "Error fetching voucher stats for dashboard:",
-              voucherError.message
+              voucherError.message,
             );
             CPManager.ui.showToast(
               "Could not load all voucher statistics for dashboard.",
-              "warning"
+              "warning",
             );
           }
           // Store all calculated voucher statistics in the cache
@@ -242,23 +242,23 @@
         document
           .getElementById("dashboard-active-sessions-card")
           ?.addEventListener("click", () =>
-            CPManager.tabs.setActiveTab("sessions")
+            CPManager.tabs.setActiveTab("sessions"),
           );
         document
           .getElementById("dashboard-zones-providers-card")
           ?.addEventListener("click", () =>
-            CPManager.tabs.setActiveTab("info")
+            CPManager.tabs.setActiveTab("info"),
           );
         document
           .getElementById("dashboard-vouchers-card")
           ?.addEventListener("click", () =>
-            CPManager.tabs.setActiveTab("vouchers")
+            CPManager.tabs.setActiveTab("vouchers"),
           );
         // Add event listener for the new combined card
         document
           .getElementById("dashboard-unused-expired-vouchers-card")
           ?.addEventListener("click", () =>
-            CPManager.tabs.setActiveTab("vouchers")
+            CPManager.tabs.setActiveTab("vouchers"),
           );
 
         // Add keyboard navigation for dashboard cards
@@ -293,14 +293,14 @@
           CPManager.dashboard.storeOriginalChartData(
             totalClientUploadBytes,
             totalClientDownloadBytes,
-            currentTotalData
+            currentTotalData,
           );
 
           if (CPManager.elements.donutTotalData) {
             // Display total data in the center of the donut chart
             CPManager.elements.donutTotalData.innerHTML = `
               <span class="font-bold block text-lg">${CPManager.utils.formatBytes(
-                currentTotalData
+                currentTotalData,
               )}</span>
               <span class="text-xs text-gray-500 dark:text-gray-400">(100.0%)</span>`;
           }
@@ -469,7 +469,7 @@
         !CPManager.elements.donutTotalData
       ) {
         console.warn(
-          "Dashboard legend items or donut total display element not found."
+          "Dashboard legend items or donut total display element not found.",
         );
         return;
       }
@@ -505,10 +505,10 @@
             }
             CPManager.elements.donutTotalData.innerHTML = `
               <span class="font-bold block text-lg ${segmentColorClass}">${CPManager.utils.formatBytes(
-                segmentValue
+                segmentValue,
               )}</span>
               <span class="text-xs ${segmentPercentageColorClass}">(${segmentPercentage.toFixed(
-                1
+                1,
               )}%)</span>`;
           }
         });
@@ -523,7 +523,7 @@
               : "text-gray-500";
             CPManager.elements.donutTotalData.innerHTML = `
               <span class="font-bold block text-lg">${CPManager.utils.formatBytes(
-                CPManager.state.dashboard.originalTotalBytes
+                CPManager.state.dashboard.originalTotalBytes,
               )}</span>
               <span class="text-xs ${totalPercentageColorClass}">(100.0%)</span>`;
           }

@@ -20,7 +20,7 @@
         CPManager.ui.showToast(
           "API Base URL not set. Please configure in settings.",
           "error",
-          8000
+          8000,
         );
         throw new Error(errorMessage);
       }
@@ -35,8 +35,8 @@
             btoa(
               CPManager.state.currentApiKey +
                 ":" +
-                CPManager.state.currentApiSecret
-            )
+                CPManager.state.currentApiSecret,
+            ),
         );
       } else {
         const errorMessage =
@@ -44,7 +44,7 @@
         console.error(errorMessage, "Endpoint:", endpoint); // Log the error
         CPManager.ui.showToast(
           "API Key or Secret not set. Please configure in settings.",
-          "error"
+          "error",
         );
         throw new Error("API Key or Secret not set.");
       }
@@ -83,7 +83,7 @@
                 `Failed to parse error response as JSON for ${method} ${url}:`,
                 jsonParseError,
                 "Raw response:",
-                responseText
+                responseText,
               );
             }
           } else {
@@ -96,14 +96,14 @@
             url,
             response.status,
             errorData.detail,
-            { response, responseText } // Include response objects for full context
+            { response, responseText }, // Include response objects for full context
           );
           CPManager.ui.showToast(
             `API Error: ${errorData.message} ${errorData.detail}`,
-            "error"
+            "error",
           );
           throw new Error(
-            `HTTP error! status: ${response.status}, message: ${errorData.detail}`
+            `HTTP error! status: ${response.status}, message: ${errorData.detail}`,
           );
         }
 
@@ -111,7 +111,7 @@
         // or text responses that indicate success.
         if (response.status === 204 || !responseText) {
           console.info(
-            `API Success: ${method} ${url} - No content or empty response.`
+            `API Success: ${method} ${url} - No content or empty response.`,
           ); // Info log for success
           return {
             status: "ok",
@@ -127,11 +127,11 @@
             console.warn(
               `API Operational Error for ${method} ${url}:`,
               jsonData.message || "Error status received in JSON.",
-              { jsonData } // Log the problematic JSON data
+              { jsonData }, // Log the problematic JSON data
             );
             CPManager.ui.showToast(
               `API Operation Failed: ${jsonData.message || "Error status received."}`,
-              "warning"
+              "warning",
             );
           } else {
             console.info(`API Success: ${method} ${url}`, { jsonData }); // Info log for successful JSON response
@@ -149,7 +149,7 @@
           ) {
             console.info(
               `API Success: ${method} ${url} - Text confirmation:`,
-              responseText
+              responseText,
             );
             return { status: "ok_text", message: responseText };
           }
@@ -158,7 +158,7 @@
             `API Warning for ${method} ${url}: Successful response was not valid JSON and not recognized text. JSON parse error:`,
             jsonParseError,
             "Content snippet:",
-            responseText.substring(0, 100)
+            responseText.substring(0, 100),
           );
           return { status: "ok_non_json", message: responseText }; // Return the raw text
         }
@@ -167,7 +167,7 @@
         console.error(
           `Fetch/Process Error for ${method} ${url}:`,
           fetchOrProcessError.message,
-          fetchOrProcessError // Log the full error object for more details
+          fetchOrProcessError, // Log the full error object for more details
         );
         if (!String(fetchOrProcessError.message).startsWith("HTTP error!")) {
           // Check if it's not already an HTTP error we've handled

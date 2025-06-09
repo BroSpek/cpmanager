@@ -183,7 +183,7 @@
      */
     getZoneDescription: function (zoneId) {
       const zone = CPManager.state.zones.allConfigured.find(
-        (z) => String(z.zoneid) === String(zoneId)
+        (z) => String(z.zoneid) === String(zoneId),
       );
       return zone ? zone.description : `Zone ${zoneId}`;
     },

@@ -48,7 +48,7 @@ import "./notifications.js";
           ? "Switch to Dark Mode"
           : theme === "dark"
             ? "Switch to System Preference"
-            : "Switch to Light Mode"
+            : "Switch to Light Mode",
       );
     }
   };
@@ -69,7 +69,7 @@ import "./notifications.js";
 
     localStorage.setItem(
       CPManager.config.localStorageKeys.theme,
-      newThemeSetting
+      newThemeSetting,
     );
     // Use CPManager.app.applyTheme explicitly
     CPManager.app.applyTheme(newThemeSetting);
@@ -80,7 +80,7 @@ import "./notifications.js";
       typeof CPManager.dashboard.handleThemeChange === "function"
     ) {
       console.log(
-        "Theme setting changed by toggle, triggering dashboard theme handler."
+        "Theme setting changed by toggle, triggering dashboard theme handler.",
       );
       await CPManager.dashboard.handleThemeChange();
     }
@@ -94,7 +94,7 @@ import "./notifications.js";
 
     if (savedTheme === "system") {
       const darkModeMediaQuery = window.matchMedia(
-        "(prefers-color-scheme: dark)"
+        "(prefers-color-scheme: dark)",
       );
       darkModeMediaQuery.addEventListener("change", async () => {
         if (
@@ -108,7 +108,7 @@ import "./notifications.js";
             typeof CPManager.dashboard.handleThemeChange === "function"
           ) {
             console.log(
-              "System theme preference changed, triggering dashboard theme handler."
+              "System theme preference changed, triggering dashboard theme handler.",
             );
             await CPManager.dashboard.handleThemeChange();
           }
@@ -125,7 +125,7 @@ import "./notifications.js";
     const footerElement = document.querySelector("footer");
     const configInputSection = CPManager.elements.configInputSection;
     const mainContentScrollAreaElement = document.getElementById(
-      "main-content-scroll-area"
+      "main-content-scroll-area",
     );
 
     const elementsToToggle = [
@@ -146,12 +146,15 @@ import "./notifications.js";
           "items-center",
           "justify-center",
           "min-h-screen",
-          "p-4"
+          "p-4",
         );
       }
       if (configInputSection) {
         configInputSection.classList.add("max-w-lg", "w-full", "my-auto");
         configInputSection.classList.remove("mb-4");
+      }
+      if (CPManager.elements.saveApiCredsBtn) {
+        CPManager.elements.saveApiCredsBtn.disabled = false;
       }
     } else {
       elementsToToggle.forEach((el) => el?.classList.remove("hidden"));
@@ -164,12 +167,15 @@ import "./notifications.js";
           "items-center",
           "justify-center",
           "min-h-screen",
-          "p-4"
+          "p-4",
         );
       }
       if (configInputSection) {
         configInputSection.classList.remove("max-w-lg", "w-full", "my-auto");
         configInputSection.classList.add("mb-4");
+      }
+      if (CPManager.elements.saveApiCredsBtn) {
+        CPManager.elements.saveApiCredsBtn.disabled = true;
       }
     }
   };
@@ -180,7 +186,7 @@ import "./notifications.js";
 
       if (!response.ok) {
         throw new Error(
-          `Failed to load app-config.json: ${response.statusText}`
+          `Failed to load app-config.json: ${response.statusText}`,
         );
       }
 
@@ -190,7 +196,7 @@ import "./notifications.js";
         CPManager.config.baseUrl = appConfigData.apiBaseUrl;
       } else {
         console.warn(
-          "apiBaseUrl not found in app-config.json. Will rely on user input for API Base URL."
+          "apiBaseUrl not found in app-config.json. Will rely on user input for API Base URL.",
         );
         CPManager.config.baseUrl = "";
       }
@@ -215,7 +221,7 @@ import "./notifications.js";
         "Cache TTL:",
         CPManager.config.inMemoryCacheTTLMinutes,
         "Items/Page:",
-        CPManager.config.itemsPerPage
+        CPManager.config.itemsPerPage,
       );
     } catch (error) {
       console.error("Error loading app configuration:", error);
@@ -229,7 +235,7 @@ import "./notifications.js";
       CPManager.ui.showToast(
         `Warning: App configuration file failed to load. Error: ${error.message}`,
         "warning",
-        10000
+        10000,
       );
     }
   };
@@ -240,7 +246,7 @@ import "./notifications.js";
         .register(new URL("../sw.js", import.meta.url))
         .then((reg) => console.log("Service worker registered:", reg.scope))
         .catch((err) =>
-          console.error("Service worker registration failed:", err)
+          console.error("Service worker registration failed:", err),
         );
       let refreshing;
       navigator.serviceWorker.addEventListener("controllerchange", () => {
@@ -302,19 +308,19 @@ import "./notifications.js";
       try {
         localStorage.setItem(
           CPManager.config.localStorageKeys.apiKey,
-          CPManager.state.currentApiKey
+          CPManager.state.currentApiKey,
         );
         localStorage.setItem(
           CPManager.config.localStorageKeys.apiSecret,
-          CPManager.state.currentApiSecret
+          CPManager.state.currentApiSecret,
         );
         localStorage.setItem(
           CPManager.config.localStorageKeys.apiBaseUrl,
-          CPManager.config.baseUrl
+          CPManager.config.baseUrl,
         );
         CPManager.ui.showToast(
           "API credentials and Base URL saved.",
-          "success"
+          "success",
         );
 
         await CPManager.app.initializeAppLogic();
@@ -325,7 +331,7 @@ import "./notifications.js";
           currentActiveTabId = "dashboard";
 
         console.log(
-          `saveApiCredentials: Forcing refresh for tab: ${currentActiveTabId}`
+          `saveApiCredentials: Forcing refresh for tab: ${currentActiveTabId}`,
         );
         CPManager.tabs.setActiveTab(currentActiveTabId, true);
       } catch (e) {
@@ -371,7 +377,7 @@ import "./notifications.js";
     });
     document
       .querySelectorAll(
-        "input:not(#config-api-key):not(#config-api-secret):not(#config-api-base-url), select"
+        "input:not(#config-api-key):not(#config-api-secret):not(#config-api-base-url), select",
       )
       .forEach((el) => (el.disabled = true));
 
@@ -388,17 +394,17 @@ import "./notifications.js";
     if (CPManager.elements.sessionCardContainer)
       CPManager.ui.clearContainer(
         CPManager.elements.sessionCardContainer,
-        "session-pagination"
+        "session-pagination",
       );
     if (CPManager.elements.voucherCardContainer)
       CPManager.ui.clearContainer(
         CPManager.elements.voucherCardContainer,
-        "voucher-pagination"
+        "voucher-pagination",
       );
     if (CPManager.elements.zoneListContainer)
       CPManager.ui.clearContainer(
         CPManager.elements.zoneListContainer,
-        "zone-pagination"
+        "zone-pagination",
       );
     if (CPManager.elements.dashboardStatsContainer)
       CPManager.ui.clearContainer(CPManager.elements.dashboardStatsContainer);
@@ -437,17 +443,17 @@ import "./notifications.js";
       CPManager.ui.showToast(
         "OPNsense API Base URL is missing.",
         "error",
-        10000
+        10000,
       );
       CPManager.app.setCredentialEntryUIMode(true);
       document
         .querySelectorAll(
-          'button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"]):not(#theme-toggle-btn)'
+          'button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"]):not(#theme-toggle-btn)',
         )
         .forEach((el) => (el.disabled = true));
       document
         .querySelectorAll(
-          "input:not(#config-api-key):not(#config-api-secret):not(#config-api-base-url), select"
+          "input:not(#config-api-key):not(#config-api-secret):not(#config-api-base-url), select",
         )
         .forEach((el) => (el.disabled = true));
       if (CPManager.elements.mainTabs)
@@ -467,12 +473,12 @@ import "./notifications.js";
       CPManager.app.setCredentialEntryUIMode(true);
       document
         .querySelectorAll(
-          'button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"]):not(#theme-toggle-btn)'
+          'button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"]):not(#theme-toggle-btn)',
         )
         .forEach((el) => (el.disabled = true));
       document
         .querySelectorAll(
-          "input:not(#config-api-key):not(#config-api-secret):not(#config-api-base-url), select"
+          "input:not(#config-api-key):not(#config-api-secret):not(#config-api-base-url), select",
         )
         .forEach((el) => (el.disabled = true));
       if (CPManager.elements.mainTabs)
@@ -504,11 +510,11 @@ import "./notifications.js";
         }
         console.warn(
           "Initial API check (fetchAllZoneData) returned unexpected data format:",
-          initialCheckData
+          initialCheckData,
         );
         CPManager.ui.showToast(
           "API connection check returned unexpected data.",
-          "warning"
+          "warning",
         );
         return false;
       }
@@ -528,13 +534,13 @@ import "./notifications.js";
         CPManager.ui.showToast(
           "API authentication failed. Check API Key/Secret.",
           "error",
-          10000
+          10000,
         );
       } else if (error.message.includes("Failed to fetch")) {
         CPManager.ui.showToast(
           "Cannot reach OPNsense API. Check Base URL & CORS.",
           "error",
-          10000
+          10000,
         );
         CPManager.app.setCredentialEntryUIMode(true);
       }
@@ -550,14 +556,14 @@ import "./notifications.js";
       '<i class="fas fa-spinner fa-spin mr-2"></i>Applying...';
     CPManager.ui.showToast(
       "Applying Captive Portal configuration changes...",
-      "info"
+      "info",
     );
 
     try {
       const reconfigResult = await CPManager.api.callApi(
         "/service/reconfigure",
         "POST",
-        {}
+        {},
       );
       if (
         reconfigResult &&
@@ -567,7 +573,7 @@ import "./notifications.js";
       ) {
         CPManager.ui.showToast(
           "Captive portal service reconfigured successfully.",
-          "success"
+          "success",
         );
       } else {
         const errorDetail = reconfigResult
@@ -577,18 +583,18 @@ import "./notifications.js";
           : "Unknown response";
         CPManager.ui.showToast(
           `Service reconfigure status: ${errorDetail}`,
-          "warning"
+          "warning",
         );
         console.warn(
           "Service reconfigure did not return 'ok' status:",
-          reconfigResult
+          reconfigResult,
         );
       }
     } catch (error) {
       console.error("Error during manual reconfigure call:", error);
       CPManager.ui.showToast(
         `Error applying Captive Portal configuration: ${error.message}`,
-        "error"
+        "error",
       );
     } finally {
       CPManager.elements.applyCpConfigBtn.disabled = false;
@@ -603,7 +609,7 @@ import "./notifications.js";
       CPManager.elements === null
     ) {
       console.error(
-        "CPManager.elements not initialized. Cannot attach listeners."
+        "CPManager.elements not initialized. Cannot attach listeners.",
       );
       return;
     }
@@ -611,22 +617,35 @@ import "./notifications.js";
     if (CPManager.elements.themeToggleBtn)
       CPManager.elements.themeToggleBtn.addEventListener(
         "click",
-        CPManager.app.toggleTheme
+        CPManager.app.toggleTheme,
       );
     if (CPManager.elements.saveApiCredsBtn)
       CPManager.elements.saveApiCredsBtn.addEventListener(
         "click",
-        CPManager.app.saveApiCredentials
+        CPManager.app.saveApiCredentials,
       );
     if (CPManager.elements.clearApiCredsBtn)
       CPManager.elements.clearApiCredsBtn.addEventListener(
         "click",
-        CPManager.app.clearApiCredentials
+        CPManager.app.clearApiCredentials,
       );
+    if (CPManager.elements.apiStatusFooter) {
+      CPManager.elements.apiStatusFooter.addEventListener("click", () => {
+        CPManager.app.setCredentialEntryUIMode(true);
+      });
+      CPManager.elements.apiStatusFooter.classList.add(
+        "cursor-pointer",
+        "transition-opacity",
+        "duration-200",
+        "hover:opacity-75",
+      );
+      CPManager.elements.apiStatusFooter.title =
+        "Click to reconfigure API Credentials";
+    }
     if (CPManager.elements.applyCpConfigBtn)
       CPManager.elements.applyCpConfigBtn.addEventListener(
         "click",
-        CPManager.app.handleApplyCpConfiguration
+        CPManager.app.handleApplyCpConfiguration,
       );
     if (CPManager.elements.mainTabs) CPManager.tabs.initializeTabs();
     else console.warn("Main tabs container not found for event listener init.");
@@ -671,7 +690,7 @@ import "./notifications.js";
     });
 
     const notificationsToggleBtn = document.getElementById(
-      "notifications-toggle-btn"
+      "notifications-toggle-btn",
     );
     if (notificationsToggleBtn) {
       let longPressTimer;
@@ -699,7 +718,7 @@ import "./notifications.js";
           } else {
             CPManager.ui.showToast(
               "Enable notifications first to send a test.",
-              "warning"
+              "warning",
             );
           }
         }, LONG_PRESS_DURATION);
@@ -756,8 +775,6 @@ import "./notifications.js";
           el === CPManager.elements.themeToggleBtn
         ) {
           el.disabled = false;
-        } else if (el === CPManager.elements.saveApiCredsBtn) {
-          el.disabled = true;
         }
       });
       if (CPManager.elements.mainTabs)
@@ -782,7 +799,7 @@ import "./notifications.js";
           window.history.replaceState(
             null,
             null,
-            window.location.pathname + window.location.search
+            window.location.pathname + window.location.search,
           );
       }
       if (!CPManager.elements.tabPanes[initialTab]) initialTab = "dashboard";
@@ -794,12 +811,12 @@ import "./notifications.js";
     } else {
       document
         .querySelectorAll(
-          'button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"]):not(#theme-toggle-btn)'
+          'button:not(#save-api-creds-btn):not(#clear-api-creds-btn):not([id^="confirm-"]):not([id^="cancel-"]):not(#theme-toggle-btn)',
         )
         .forEach((el) => (el.disabled = true));
       document
         .querySelectorAll(
-          "input:not(#config-api-key):not(#config-api-secret):not(#config-api-base-url), select"
+          "input:not(#config-api-key):not(#config-api-secret):not(#config-api-base-url), select",
         )
         .forEach((el) => (el.disabled = true));
       if (CPManager.elements.mainTabs)
@@ -807,8 +824,6 @@ import "./notifications.js";
           .querySelectorAll(".tab-btn")
           .forEach((btn) => btn.classList.add("pointer-events-none"));
 
-      if (CPManager.elements.saveApiCredsBtn)
-        CPManager.elements.saveApiCredsBtn.disabled = false;
       if (CPManager.elements.clearApiCredsBtn)
         CPManager.elements.clearApiCredsBtn.disabled = false;
       if (CPManager.elements.themeToggleBtn)
@@ -839,7 +854,7 @@ import "./notifications.js";
     if (!("Notification" in window)) {
       CPManager.ui.showToast(
         "Browser does not support notifications.",
-        "error"
+        "error",
       );
       return;
     }
@@ -867,7 +882,7 @@ import "./notifications.js";
       CPManager.ui.showToast(
         "Notification permission denied. Please enable in browser settings.",
         "error",
-        7000
+        7000,
       );
     }
   };
