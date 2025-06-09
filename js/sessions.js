@@ -280,69 +280,69 @@
         const cardDetailsId = `session-details-${session.sessionId}`;
 
         card.innerHTML = `
-                    <div class="flex justify-between items-center mb-1">
-                        ${checkboxHTML}
-                        ${tagsHTML}
-                    </div>
-					<div id="${cardSummaryId}" class="session-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="${cardDetailsId}">
-						<div class="space-y-1">
-							<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">IP Address</span> <span class="text-sm text-right font-semibold break-all flex-grow" style="color: var(--card-info-value-main-color);">${
-                session.ipAddress || CPManager.config.placeholderValue
-              }</span></div>
-							<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">User</span> <span class="text-sm text-right font-semibold break-all flex-grow" style="color: var(--card-info-value-main-color);">${
-                session.userName || CPManager.config.placeholderValue
-              }</span></div>
-							<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">MAC</span> <span class="text-sm text-right font-semibold break-all flex-grow" style="color: var(--card-info-value-main-color);">${
-                session.macAddress || CPManager.config.placeholderValue
-              }</span></div>
-						</div>
-					</div>
-					<div class="card-details-content max-h-0 overflow-hidden transition-all duration-300 ease-out text-sm space-y-1" id="${cardDetailsId}" aria-hidden="true">
-						<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Zone ID</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${
-              session.zoneid
-            }</span></div>
-						<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Session ID</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${
-              session.sessionId || CPManager.config.placeholderValue
-            }</span></div>
-						<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Start Time</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${
-              session.startTime
-                ? new Date(session.startTime * 1000).toLocaleString()
-                : CPManager.config.placeholderValue
-            }</span></div>
-						<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Last Accessed</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${
-              session.last_accessed
-                ? new Date(session.last_accessed * 1000).toLocaleString()
-                : CPManager.config.placeholderValue
-            }</span></div>
-						<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Packets Uploaded</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${
-              session.packets_in !== undefined
-                ? session.packets_in.toLocaleString()
-                : CPManager.config.placeholderValue
-            }</span></div>
-						<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Packets Downloaded</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${
-              session.packets_out !== undefined
-                ? session.packets_out.toLocaleString()
-                : CPManager.config.placeholderValue
-            }</span></div>
-						<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Data Uploaded</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${
-              session.bytes_in !== undefined
-                ? CPManager.utils.formatBytes(session.bytes_in)
-                : CPManager.config.placeholderValue
-            }</span></div>
-						<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Data Downloaded</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${
-              session.bytes_out !== undefined
-                ? CPManager.utils.formatBytes(session.bytes_out)
-                : CPManager.config.placeholderValue
-            }</span></div>
-						<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Acc. Timeout</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${
-              session.acc_session_timeout
-                ? CPManager.utils.formatDuration(
-                    session.acc_session_timeout,
-                    "seconds"
-                  )
-                : CPManager.config.placeholderValue
-            }</span></div>
-					</div>`;
+            <div class="flex justify-between items-center mb-1">
+                ${checkboxHTML}
+                ${tagsHTML}
+            </div>
+            <div id="${cardSummaryId}" class="session-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="${cardDetailsId}">
+                <div class="space-y-1">
+                    <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">IP Address</span> <span class="text-sm text-right font-semibold break-all flex-grow text-slate-800 dark:text-slate-200">${
+                      session.ipAddress || CPManager.config.placeholderValue
+                    }</span></div>
+                    <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">User</span> <span class="text-sm text-right font-semibold break-all flex-grow text-slate-800 dark:text-slate-200">${
+                      session.userName || CPManager.config.placeholderValue
+                    }</span></div>
+                    <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">MAC</span> <span class="text-sm text-right font-semibold break-all flex-grow text-slate-800 dark:text-slate-200">${
+                      session.macAddress || CPManager.config.placeholderValue
+                    }</span></div>
+                </div>
+            </div>
+            <div class="card-details-content max-h-0 overflow-hidden transition-all duration-300 ease-out text-sm space-y-1" id="${cardDetailsId}" aria-hidden="true">
+                <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Zone ID</span> <span class="text-sm text-right break-all flex-grow text-slate-600 dark:text-slate-300">${
+                  session.zoneid
+                }</span></div>
+                <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Session ID</span> <span class="text-sm text-right break-all flex-grow text-slate-600 dark:text-slate-300">${
+                  session.sessionId || CPManager.config.placeholderValue
+                }</span></div>
+                <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Start Time</span> <span class="text-sm text-right break-all flex-grow text-slate-600 dark:text-slate-300">${
+                  session.startTime
+                    ? new Date(session.startTime * 1000).toLocaleString()
+                    : CPManager.config.placeholderValue
+                }</span></div>
+                <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Last Accessed</span> <span class="text-sm text-right break-all flex-grow text-slate-600 dark:text-slate-300">${
+                  session.last_accessed
+                    ? new Date(session.last_accessed * 1000).toLocaleString()
+                    : CPManager.config.placeholderValue
+                }</span></div>
+                <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Packets Uploaded</span> <span class="text-sm text-right break-all flex-grow text-slate-600 dark:text-slate-300">${
+                  session.packets_in !== undefined
+                    ? session.packets_in.toLocaleString()
+                    : CPManager.config.placeholderValue
+                }</span></div>
+                <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Packets Downloaded</span> <span class="text-sm text-right break-all flex-grow text-slate-600 dark:text-slate-300">${
+                  session.packets_out !== undefined
+                    ? session.packets_out.toLocaleString()
+                    : CPManager.config.placeholderValue
+                }</span></div>
+                <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Data Uploaded</span> <span class="text-sm text-right break-all flex-grow text-slate-600 dark:text-slate-300">${
+                  session.bytes_in !== undefined
+                    ? CPManager.utils.formatBytes(session.bytes_in)
+                    : CPManager.config.placeholderValue
+                }</span></div>
+                <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Data Downloaded</span> <span class="text-sm text-right break-all flex-grow text-slate-600 dark:text-slate-300">${
+                  session.bytes_out !== undefined
+                    ? CPManager.utils.formatBytes(session.bytes_out)
+                    : CPManager.config.placeholderValue
+                }</span></div>
+                <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Acc. Timeout</span> <span class="text-sm text-right break-all flex-grow text-slate-600 dark:text-slate-300">${
+                  session.acc_session_timeout
+                    ? CPManager.utils.formatDuration(
+                        session.acc_session_timeout,
+                        "seconds"
+                      )
+                    : CPManager.config.placeholderValue
+                }</span></div>
+            </div>`;
         CPManager.elements.sessionCardContainer.appendChild(card);
       });
       CPManager.ui.renderPaginationControls(
@@ -451,7 +451,7 @@
 
       if (isMySessionSelected) {
         title = "Warning: Disconnecting Own Session";
-        message = `<div class="p-3 mb-6 rounded-md border flex items-start" style="background-color: var(--hint-danger-bg); border-color: var(--hint-danger-border); color: var(--hint-danger-text);"><i class="fas fa-biohazard mr-2 mt-1" style="color: var(--hint-danger-icon);"></i><span><strong>DANGER:</strong> Your own session is included in the selection. Disconnecting it may lock you out of this manager.</span></div><p class="mt-4">Disconnect <strong>${sessionsToDisconnect.length}</strong> session(s) anyway?</p>`;
+        message = `<div class="p-3 mb-6 rounded-md border flex items-start bg-red-50 dark:bg-red-900/50 border-red-200 dark:border-red-700 text-red-700 dark:text-red-200"><i class="fas fa-biohazard mr-2 mt-1 text-red-500 dark:text-red-300"></i><span><strong>DANGER:</strong> Your own session is included in the selection. Disconnecting it may lock you out of this manager.</span></div><p class="mt-4">Disconnect <strong>${sessionsToDisconnect.length}</strong> session(s) anyway?</p>`;
       }
 
       CPManager.ui.showConfirmationModal(title, message, async () => {

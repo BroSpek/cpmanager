@@ -176,10 +176,9 @@
         return;
       }
       toastMessage.textContent = message;
-      // Reset classes and ensure pointer-events are disabled initially for safety
+      // Reset classes
       toastNotification.className =
-        "fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 max-w-xs z-50 print:hidden";
-      toastNotification.style.pointerEvents = "none"; // Ensure it's not interactive when hidden
+        "fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 max-w-xs z-50 print:hidden pointer-events-none";
 
       switch (type) {
         case "success":
@@ -198,14 +197,15 @@
       }
 
       // Show the toast
+      toastNotification.classList.remove("opacity-0");
       toastNotification.classList.add("opacity-100");
-      toastNotification.style.pointerEvents = "auto"; // Enable interaction when visible
+      toastNotification.classList.remove("pointer-events-none");
 
       if (toastNotification.timer) clearTimeout(toastNotification.timer);
       toastNotification.timer = setTimeout(() => {
         toastNotification.classList.remove("opacity-100");
         toastNotification.classList.add("opacity-0");
-        toastNotification.style.pointerEvents = "none"; // Disable interaction when hidden again
+        toastNotification.classList.add("pointer-events-none");
       }, duration);
     },
 
@@ -278,7 +278,7 @@
                   "i.fas.fa-chevron-down"
                 );
                 if (icon) {
-                  icon.style.transform = ""; // Reset rotation
+                  icon.classList.remove("rotate-180");
                 }
               }
             }
@@ -287,8 +287,8 @@
       }
 
       // Now, toggle the clicked card's state. If it was already expanded, it will now be closed.
-      detailsContent.classList.toggle("expanded", !isCurrentlyExpanded);
       const isNowExpanded = !isCurrentlyExpanded;
+      detailsContent.classList.toggle("expanded", isNowExpanded);
       detailsContent.setAttribute("aria-hidden", String(!isNowExpanded));
 
       const summary = clickedCard.querySelector(
@@ -298,7 +298,7 @@
         summary.setAttribute("aria-expanded", String(isNowExpanded));
         const icon = summary.querySelector("i.fas.fa-chevron-down");
         if (icon) {
-          icon.style.transform = isNowExpanded ? "rotate(180deg)" : "";
+          icon.classList.toggle("rotate-180", isNowExpanded);
         }
       }
     },

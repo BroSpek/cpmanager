@@ -121,57 +121,55 @@ import "./notifications.js";
     const navElement = document.querySelector("nav");
     const mainTabsContainerElement =
       CPManager.elements.mainTabs?.closest(".mb-4.border-b");
-    const tabContentElement = CPManager.elements.tabPanes.dashboard?.closest(
-      ".p-4.rounded-lg.shadow"
-    );
+    const tabContentElement = document.getElementById("tabContent");
     const footerElement = document.querySelector("footer");
     const configInputSection = CPManager.elements.configInputSection;
     const mainContentScrollAreaElement = document.getElementById(
       "main-content-scroll-area"
     );
 
-    if (isEntryMode) {
-      if (navElement) navElement.style.display = "none";
-      if (mainTabsContainerElement)
-        mainTabsContainerElement.style.display = "none";
-      if (tabContentElement) tabContentElement.style.display = "none";
-      if (footerElement) footerElement.style.display = "none";
+    const elementsToToggle = [
+      navElement,
+      mainTabsContainerElement,
+      tabContentElement,
+      footerElement,
+    ];
 
-      if (configInputSection) configInputSection.classList.remove("hidden");
+    if (isEntryMode) {
+      elementsToToggle.forEach((el) => el?.classList.add("hidden"));
+      configInputSection?.classList.remove("hidden");
+
       if (mainContentScrollAreaElement) {
-        mainContentScrollAreaElement.style.display = "flex";
-        mainContentScrollAreaElement.style.flexDirection = "column";
-        mainContentScrollAreaElement.style.alignItems = "center";
-        mainContentScrollAreaElement.style.justifyContent = "center";
-        mainContentScrollAreaElement.style.minHeight = "calc(100vh)";
-        mainContentScrollAreaElement.style.padding = "1rem";
+        mainContentScrollAreaElement.classList.add(
+          "flex",
+          "flex-col",
+          "items-center",
+          "justify-center",
+          "min-h-screen",
+          "p-4"
+        );
       }
       if (configInputSection) {
-        configInputSection.style.maxWidth = "500px";
-        configInputSection.style.width = "100%";
-        configInputSection.style.marginTop = "0";
-        configInputSection.style.marginBottom = "auto";
+        configInputSection.classList.add("max-w-lg", "w-full", "my-auto");
+        configInputSection.classList.remove("mb-4");
       }
     } else {
-      if (navElement) navElement.style.display = "";
-      if (mainTabsContainerElement) mainTabsContainerElement.style.display = "";
-      if (tabContentElement) tabContentElement.style.display = "";
-      if (footerElement) footerElement.style.display = "";
+      elementsToToggle.forEach((el) => el?.classList.remove("hidden"));
+      configInputSection?.classList.add("hidden");
 
-      if (configInputSection) {
-        configInputSection.classList.add("hidden");
-        configInputSection.style.maxWidth = "";
-        configInputSection.style.width = "";
-        configInputSection.style.marginTop = "";
-        configInputSection.style.marginBottom = "";
-      }
       if (mainContentScrollAreaElement) {
-        mainContentScrollAreaElement.style.display = "";
-        mainContentScrollAreaElement.style.flexDirection = "";
-        mainContentScrollAreaElement.style.alignItems = "";
-        mainContentScrollAreaElement.style.justifyContent = "";
-        mainContentScrollAreaElement.style.minHeight = "";
-        mainContentScrollAreaElement.style.padding = "";
+        mainContentScrollAreaElement.classList.remove(
+          "flex",
+          "flex-col",
+          "items-center",
+          "justify-center",
+          "min-h-screen",
+          "p-4"
+        );
+      }
+      if (configInputSection) {
+        configInputSection.classList.remove("max-w-lg", "w-full", "my-auto");
+        configInputSection.classList.add("mb-4");
       }
     }
   };
@@ -380,7 +378,7 @@ import "./notifications.js";
     if (CPManager.elements.mainTabs)
       CPManager.elements.mainTabs
         .querySelectorAll(".tab-btn")
-        .forEach((btn) => (btn.style.pointerEvents = "none"));
+        .forEach((btn) => btn.classList.add("pointer-events-none"));
     if (CPManager.elements.apiStatusFooterText) {
       CPManager.elements.apiStatusFooterText.textContent =
         "Credentials Cleared";
@@ -455,7 +453,7 @@ import "./notifications.js";
       if (CPManager.elements.mainTabs)
         CPManager.elements.mainTabs
           .querySelectorAll(".tab-btn")
-          .forEach((btn) => (btn.style.pointerEvents = "none"));
+          .forEach((btn) => btn.classList.add("pointer-events-none"));
       return false;
     }
 
@@ -480,7 +478,7 @@ import "./notifications.js";
       if (CPManager.elements.mainTabs)
         CPManager.elements.mainTabs
           .querySelectorAll(".tab-btn")
-          .forEach((btn) => (btn.style.pointerEvents = "none"));
+          .forEach((btn) => btn.classList.add("pointer-events-none"));
       return false;
     }
 
@@ -765,7 +763,7 @@ import "./notifications.js";
       if (CPManager.elements.mainTabs)
         CPManager.elements.mainTabs
           .querySelectorAll(".tab-btn")
-          .forEach((btn) => (btn.style.pointerEvents = "auto"));
+          .forEach((btn) => btn.classList.remove("pointer-events-none"));
       if (CPManager.elements.clearApiCredsBtn)
         CPManager.elements.clearApiCredsBtn.disabled = false;
       if (CPManager.elements.themeToggleBtn)
@@ -807,7 +805,7 @@ import "./notifications.js";
       if (CPManager.elements.mainTabs)
         CPManager.elements.mainTabs
           .querySelectorAll(".tab-btn")
-          .forEach((btn) => (btn.style.pointerEvents = "none"));
+          .forEach((btn) => btn.classList.add("pointer-events-none"));
 
       if (CPManager.elements.saveApiCredsBtn)
         CPManager.elements.saveApiCredsBtn.disabled = false;

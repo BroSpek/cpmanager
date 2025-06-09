@@ -131,14 +131,14 @@
                 </div>
             </div>
             <div id="${cardSummaryId}" class="zone-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="${cardDetailsId}">
-              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Name</span><span class="text-sm text-right font-semibold break-all flex-grow" style="color: var(--card-info-value-main-color);">${
+              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Name</span><span class="text-sm text-right font-semibold break-all flex-grow text-slate-800 dark:text-slate-200">${
                 zoneSummary.description ||
                 `Unnamed Zone (ID: ${zoneSummary.zoneid})`
               }</span></div>
-              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Zone ID</span><span class="text-sm text-right font-semibold break-all flex-grow" style="color: var(--card-info-value-main-color);">${
+              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Zone ID</span><span class="text-sm text-right font-semibold break-all flex-grow text-slate-800 dark:text-slate-200">${
                 zoneSummary.zoneid
               }</span></div>
-              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">Short UUID</span><span class="text-sm text-right font-semibold break-all flex-grow" style="color: var(--card-info-value-main-color);">${zoneSummary.uuid.substring(
+              <div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">Short UUID</span><span class="text-sm text-right font-semibold break-all flex-grow text-slate-800 dark:text-slate-200">${zoneSummary.uuid.substring(
                 0,
                 8
               )}...</span></div>
@@ -193,7 +193,7 @@
               String(value).trim() === ""
                 ? CPManager.config.placeholderValue
                 : String(value);
-            return `<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0" style="color: var(--card-info-label-color);">${label}</span> <span class="text-sm text-right break-all flex-grow" style="color: var(--card-info-value-color);">${displayValue}</span></div>`;
+            return `<div class="flex justify-between items-start py-1"><span class="font-semibold text-sm mr-3 whitespace-nowrap flex-shrink-0 text-slate-500 dark:text-slate-400">${label}</span> <span class="text-sm text-right break-all flex-grow text-slate-600 dark:text-slate-300">${displayValue}</span></div>`;
           };
 
           detailsHtml += createInfoRowDiv("UUID", uuid);
