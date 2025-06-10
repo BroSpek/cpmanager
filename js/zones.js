@@ -132,14 +132,14 @@
                 </div>
             </div>
             <div id="${cardSummaryId}" class="zone-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="${cardDetailsId}">
-              <div class="card-detail-row"><span class="card-detail-label">Name</span><span class="card-detail-value">${
+              <div class="card-detail-row"><span class="card-label">Name</span><span class="card-value">${
                 zoneSummary.description ||
                 `Unnamed Zone (ID: ${zoneSummary.zoneid})`
               }</span></div>
-              <div class="card-detail-row"><span class="card-detail-label">Zone ID</span><span class="card-detail-value">${
+              <div class="card-detail-row"><span class="card-label">Zone ID</span><span class="card-value">${
                 zoneSummary.zoneid
               }</span></div>
-              <div class="card-detail-row"><span class="card-detail-label">Short UUID</span><span class="card-detail-value">${zoneSummary.uuid.substring(
+              <div class="card-detail-row"><span class="card-label">Short UUID</span><span class="card-value">${zoneSummary.uuid.substring(
                 0,
                 8,
               )}...</span></div>
@@ -194,7 +194,7 @@
               String(value).trim() === ""
                 ? CPManager.config.placeholderValue
                 : String(value);
-            return `<div class="card-detail-row"><span class="card-detail-label">${label}</span> <span class="card-detail-value-secondary">${displayValue}</span></div>`;
+            return `<div class="card-detail-row"><span class="card-label">${label}</span> <span class="card-value-secondary">${displayValue}</span></div>`;
           };
 
           detailsHtml += createInfoRowDiv("UUID", uuid);

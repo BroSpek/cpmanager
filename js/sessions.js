@@ -288,55 +288,55 @@
             </div>
             <div id="${cardSummaryId}" class="session-summary cursor-pointer pb-1" role="button" tabindex="0" aria-expanded="false" aria-controls="${cardDetailsId}">
                 <div class="space-y-1">
-                    <div class="card-detail-row"><span class="card-detail-label">IP Address</span> <span class="card-detail-value">${
+                    <div class="card-detail-row"><span class="card-label">IP Address</span> <span class="card-value">${
                       session.ipAddress || CPManager.config.placeholderValue
                     }</span></div>
-                    <div class="card-detail-row"><span class="card-detail-label">User</span> <span class="card-detail-value">${
+                    <div class="card-detail-row"><span class="card-label">User</span> <span class="card-value">${
                       session.userName || CPManager.config.placeholderValue
                     }</span></div>
-                    <div class="card-detail-row"><span class="card-detail-label">MAC</span> <span class="card-detail-value">${
+                    <div class="card-detail-row"><span class="card-label">MAC</span> <span class="card-value">${
                       session.macAddress || CPManager.config.placeholderValue
                     }</span></div>
                 </div>
             </div>
             <div class="card-details-content max-h-0 overflow-hidden transition-all duration-300 ease-out text-sm space-y-1" id="${cardDetailsId}" aria-hidden="true">
-                <div class="card-detail-row"><span class="card-detail-label">Zone ID</span> <span class="card-detail-value-secondary">${
+                <div class="card-detail-row"><span class="card-label">Zone ID</span> <span class="card-value-secondary">${
                   session.zoneid
                 }</span></div>
-                <div class="card-detail-row"><span class="card-detail-label">Session ID</span> <span class="card-detail-value-secondary">${
+                <div class="card-detail-row"><span class="card-label">Session ID</span> <span class="card-value-secondary">${
                   session.sessionId || CPManager.config.placeholderValue
                 }</span></div>
-                <div class="card-detail-row"><span class="card-detail-label">Start Time</span> <span class="card-detail-value-secondary">${
+                <div class="card-detail-row"><span class="card-label">Start Time</span> <span class="card-value-secondary">${
                   session.startTime
                     ? new Date(session.startTime * 1000).toLocaleString()
                     : CPManager.config.placeholderValue
                 }</span></div>
-                <div class="card-detail-row"><span class="card-detail-label">Last Accessed</span> <span class="card-detail-value-secondary">${
+                <div class="card-detail-row"><span class="card-label">Last Accessed</span> <span class="card-value-secondary">${
                   session.last_accessed
                     ? new Date(session.last_accessed * 1000).toLocaleString()
                     : CPManager.config.placeholderValue
                 }</span></div>
-                <div class="card-detail-row"><span class="card-detail-label">Packets Uploaded</span> <span class="card-detail-value-secondary">${
+                <div class="card-detail-row"><span class="card-label">Packets Uploaded</span> <span class="card-value-secondary">${
                   session.packets_in !== undefined
                     ? session.packets_in.toLocaleString()
                     : CPManager.config.placeholderValue
                 }</span></div>
-                <div class="card-detail-row"><span class="card-detail-label">Packets Downloaded</span> <span class="card-detail-value-secondary">${
+                <div class="card-detail-row"><span class="card-label">Packets Downloaded</span> <span class="card-value-secondary">${
                   session.packets_out !== undefined
                     ? session.packets_out.toLocaleString()
                     : CPManager.config.placeholderValue
                 }</span></div>
-                <div class="card-detail-row"><span class="card-detail-label">Data Uploaded</span> <span class="card-detail-value-secondary">${
+                <div class="card-detail-row"><span class="card-label">Data Uploaded</span> <span class="card-value-secondary">${
                   session.bytes_in !== undefined
                     ? CPManager.utils.formatBytes(session.bytes_in)
                     : CPManager.config.placeholderValue
                 }</span></div>
-                <div class="card-detail-row"><span class="card-detail-label">Data Downloaded</span> <span class="card-detail-value-secondary">${
+                <div class="card-detail-row"><span class="card-label">Data Downloaded</span> <span class="card-value-secondary">${
                   session.bytes_out !== undefined
                     ? CPManager.utils.formatBytes(session.bytes_out)
                     : CPManager.config.placeholderValue
                 }</span></div>
-                <div class="card-detail-row"><span class="card-detail-label">Acc. Timeout</span> <span class="card-detail-value-secondary">${
+                <div class="card-detail-row"><span class="card-label">Acc. Timeout</span> <span class="card-value-secondary">${
                   session.acc_session_timeout
                     ? CPManager.utils.formatDuration(
                         session.acc_session_timeout,

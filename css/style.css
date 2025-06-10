@@ -95,11 +95,6 @@
     @apply mx-auto w-full rounded-lg bg-container p-6 text-container-foreground shadow-xl;
   }
 
-  /* Form input style specific to modals (with dark:bg-slate-700) */
-  .form-modal-input {
-    @apply mt-1 block w-full rounded-md bg-card px-3 py-2.5 text-card-foreground shadow-sm;
-  }
-
   /* Button Components */
   .btn {
     @apply w-full rounded-md px-6 py-3 text-sm font-semibold shadow-md transition-shadow duration-200 disabled:cursor-not-allowed disabled:opacity-50;
@@ -139,13 +134,13 @@
   .card-detail-row {
     @apply flex items-start justify-between py-1;
   }
-  .card-detail-label {
+  .card-label {
     @apply mr-3 flex-shrink-0 whitespace-nowrap text-sm font-semibold text-muted-foreground;
   }
-  .card-detail-value {
+  .card-value {
     @apply flex-grow break-all text-right text-sm font-semibold text-foreground;
   }
-  .card-detail-value-secondary {
+  .card-value-secondary {
     @apply flex-grow break-all text-right text-sm text-muted-foreground/80;
   }
 
@@ -155,16 +150,16 @@
   }
 
   /* Dashboard Card Styles */
-  .dashboard-card {
+  .db-card {
     @apply cp-card cursor-pointer p-6 text-center transition-transform duration-200 ease-in-out hover:-translate-y-0.5 hover:transform hover:shadow-lg;
   }
-  .dashboard-card-2-column {
+  .db-card-cols-2 {
     @apply grid grid-cols-2 items-center gap-x-2;
   }
-  .dashboard-stat-number {
+  .db-card-number {
     @apply text-4xl font-bold text-muted-foreground;
   }
-  .dashboard-stat-label {
+  .db-card-label {
     @apply mt-1 text-sm text-muted-foreground/80;
   }
 
