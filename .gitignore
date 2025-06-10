@@ -1,8 +1,7 @@
 # Ignore folders
-/img
-/node_modules
-/dist
-/.parcel-cache
-/.vscode
+img/
+node_modules/
+dist/
+.vscode/
 
 # Ignore files
