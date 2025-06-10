@@ -80,7 +80,14 @@
 
   /* Base style for main navigation tab buttons */
   .tab-base {
-    @apply inline-block w-full rounded-t-lg border-b-2 border-transparent p-4 text-center text-muted-foreground hover:border-muted hover:text-foreground;
+    /* Base styles for the tab, without hover effects */
+    @apply inline-block w-full rounded-t-lg border-b-2 border-transparent p-4 text-center text-muted-foreground;
+  }
+  /* Apply hover effects only on devices that can truly hover (e.g., with a mouse) */
+  @media (hover: hover) {
+    .tab-base:hover {
+      @apply border-muted text-foreground;
+    }
   }
 
   /* Base style for modal content containers */
