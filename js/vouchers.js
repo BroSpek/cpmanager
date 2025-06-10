@@ -1343,20 +1343,24 @@ import "jspdf-autotable";
         CPManager.elements.voucherCardContainer.addEventListener(
           "click",
           (e) => {
+            // First, check if a checkbox was clicked
             const checkbox = e.target.closest(".voucher-select-checkbox");
             if (checkbox) {
+              // Handle the checkbox logic
               if (checkbox.checked) {
                 this.selectedVouchers.add(checkbox.dataset.voucherUsername);
               } else {
                 this.selectedVouchers.delete(checkbox.dataset.voucherUsername);
               }
               this.updateSelectAllUI();
-              return;
+              return; // Stop further processing
             }
-            const summary = e.target.closest(".voucher-summary");
-            if (summary) {
-              const card = summary.closest(".voucher-card");
-              if (card) CPManager.ui.toggleCardDetails(card);
+
+            // If not a checkbox, check if a card was clicked
+            const card = e.target.closest(".voucher-card");
+            if (card) {
+              // Toggle the card details
+              CPManager.ui.toggleCardDetails(card);
             }
           },
         );
