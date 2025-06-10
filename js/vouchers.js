@@ -111,7 +111,7 @@ import "jspdf-autotable";
       } catch (error) {
         console.error("Error displaying provider-zone linkage:", error); // Added error logging
         detailsContainer.innerHTML =
-          '<p class="text-destructive">Could not load linkage information. Check console.</p>';
+          '<p class="text-danger">Could not load linkage information. Check console.</p>';
       }
     },
 

@@ -25,7 +25,7 @@ import Chart from "chart.js/auto";
         );
         // Display an error message if critical elements are missing
         if (CPManager.elements.dashboardStatsContainer)
-          CPManager.elements.dashboardStatsContainer.innerHTML = `<p class="text-destructive col-span-full text-center">Error: Dashboard UI elements missing.</p>`;
+          CPManager.elements.dashboardStatsContainer.innerHTML = `<p class="text-danger col-span-full text-center">Error: Dashboard UI elements missing.</p>`;
         return;
       }
 
@@ -232,7 +232,7 @@ import Chart from "chart.js/auto";
                       <div class="dashboard-stat-label">Unused Vouchers</div>
                   </div>
                   <div>
-                      <div class="dashboard-stat-number text-destructive">${expiredVouchers}</div>
+                      <div class="dashboard-stat-number text-danger">${expiredVouchers}</div>
                       <div class="dashboard-stat-label">Expired Vouchers</div>
                   </div>
               </div>
@@ -419,7 +419,7 @@ import Chart from "chart.js/auto";
         console.error("Error loading dashboard data:", error);
         // Display generic error message if data fetching fails
         if (CPManager.elements.dashboardStatsContainer)
-          CPManager.elements.dashboardStatsContainer.innerHTML = `<p class="text-destructive col-span-full text-center">Error loading dashboard data. Check console.</p>`;
+          CPManager.elements.dashboardStatsContainer.innerHTML = `<p class="text-danger col-span-full text-center">Error loading dashboard data. Check console.</p>`;
         if (CPManager.elements.donutTotalData)
           CPManager.elements.donutTotalData.textContent =
             CPManager.config.placeholderValue;

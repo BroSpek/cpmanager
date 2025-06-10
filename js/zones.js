@@ -303,7 +303,7 @@
         } catch (error) {
           console.error(`Error loading details for zone ${uuid}:`, error);
           detailsContainer.innerHTML =
-            '<p class="text-destructive">Error loading details. Check console.</p>';
+            '<p class="text-danger">Error loading details. Check console.</p>';
         }
       }
     },

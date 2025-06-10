@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* --- NEW THEMING VARIABLES --- */
+/* --- THEMING --- */
 @layer base {
   :root {
     --background: 210 40% 98%; /* slate-50 */
@@ -15,8 +15,6 @@
     --muted-foreground: 215 14% 34%; /* slate-600 */
     --accent: 215 16% 47%; /* slate-500 */
     --accent-foreground: 210 40% 98%; /* slate-50 */
-    --destructive: 0 84% 60%; /* red-500 */
-    --destructive-foreground: 210 40% 98%; /* slate-50 */
     --border: 220 13% 91%; /* slate-100 */
     --input: 215 20% 65%; /* slate-400 */
     --ring: 221 83% 53%; /* blue-600 */
@@ -43,9 +41,7 @@
     --muted-foreground: 215 20% 65%; /* slate-400 */
     --accent: 215 16% 47%; /* slate-500 */
     --accent-foreground: 210 40% 98%; /* slate-50 */
-    --destructive: 0 72% 51%; /* red-600 */
-    --destructive-foreground: 210 40% 98%; /* slate-50 */
-    --border: 215 25% 27%; /* slate-700 */
+    --border: 215 28% 17%; /* slate-800 */
     --input: 215 16% 47%; /* slate-500 */
     --ring: 217 91% 60%; /* blue-500 */
     --primary: 217 91% 60%; /* blue-500 */
@@ -61,7 +57,7 @@
   }
 }
 
-/* --- YOUR CUSTOM COMPONENT STYLES (now using CSS variables) --- */
+/* --- CUSTOM COMPONENT STYLES --- */
 @layer components {
   /* Card Component */
   .cp-card {
