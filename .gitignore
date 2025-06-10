@@ -1,7 +1,7 @@
 # Ignore folders
-img/
-node_modules/
-dist/
-.vscode/
+/img
+/node_modules
+/dist
+/.vscode
 
 # Ignore files
