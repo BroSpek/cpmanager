@@ -1,6 +1,6 @@
 // js/vouchers.js
-import jsPDF from "jspdf";
-import "jspdf-autotable";
+import { jsPDF } from "jspdf";
+import { autoTable } from "jspdf-autotable";
 
 (function (CPManager) {
   CPManager.vouchers = {
@@ -1098,7 +1098,7 @@ import "jspdf-autotable";
         v.vouchergroup || CPManager.config.placeholderValue,
       ]);
 
-      doc.autoTable({
+      autoTable(doc, {
         startY: startY + 10,
         head: tableHeaders,
         body: tableData,
