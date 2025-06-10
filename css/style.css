@@ -9,8 +9,8 @@
     --foreground: 222 47% 11%; /* slate-900 */
     --card: 210 40% 98%; /* slate-50 */
     --card-foreground: 222 47% 11%; /* slate-900 */
-    --popover: 210 40% 98%; /* slate-50 */
-    --popover-foreground: 222 47% 11%; /* slate-900 */
+    --container: 0 0% 100%; /* white */
+    --container-foreground: 222 47% 11%; /* slate-900 */
     --muted: 215 20% 65%; /* slate-400 */
     --muted-foreground: 215 14% 34%; /* slate-600 */
     --accent: 215 16% 47%; /* slate-500 */
@@ -20,7 +20,7 @@
     --ring: 221 83% 53%; /* blue-600 */
     --primary: 221 83% 53%; /* blue-600 */
     --primary-foreground: 210 40% 98%; /* slate-50 */
-    --secondary: 215 28% 17%; /* slate-800 */
+    --secondary: 215, 25%, 27%; /* slate-700 */
     --secondary-foreground: 210 40% 98%; /* slate-50 */
     --success: 142 71% 45%; /* green-500 */
     --success-foreground: 210 40% 98%; /* slate-50 */
@@ -35,8 +35,8 @@
     --foreground: 210 40% 98%; /* slate-50 */
     --card: 222 47% 11%; /* slate-900 */
     --card-foreground: 210 40% 98%; /* slate-50 */
-    --popover: 222 47% 11%; /* slate-900 */
-    --popover-foreground: 210 40% 98%; /* slate-50 */
+    --container: 215 28% 17%; /* slate-800 */
+    --container-foreground: 210 40% 98%; /* slate-50 */
     --muted: 215 16% 47%; /* slate-500 */
     --muted-foreground: 215 20% 65%; /* slate-400 */
     --accent: 215 16% 47%; /* slate-500 */
@@ -46,7 +46,7 @@
     --ring: 217 91% 60%; /* blue-500 */
     --primary: 217 91% 60%; /* blue-500 */
     --primary-foreground: 210 40% 98%; /* slate-50 */
-    --secondary: 215 28% 17%; /* slate-800 */
+    --secondary: 215, 25%, 27%; /* slate-700 */
     --secondary-foreground: 210 40% 98%; /* slate-50 */
     --success: 142 76% 36%; /* green-600 */
     --success-foreground: 210 40% 98%; /* slate-50 */
@@ -85,12 +85,12 @@
 
   /* Base style for modal content containers */
   .modal-base-content {
-    @apply mx-auto w-full rounded-lg bg-popover p-6 text-popover-foreground shadow-xl;
+    @apply bg-container text-container-foreground mx-auto w-full rounded-lg p-6 shadow-xl;
   }
 
   /* Form input style specific to modals (with dark:bg-slate-700) */
   .form-modal-input {
-    @apply mt-1 block w-full rounded-md border border-input bg-background px-3 py-2.5 text-foreground shadow-sm;
+    @apply mt-1 block w-full rounded-md bg-background px-3 py-2.5 text-foreground shadow-sm;
   }
 
   /* Button Components */
@@ -120,7 +120,7 @@
   .form-input,
   .form-select,
   .form-textarea {
-    @apply mt-1 block w-full rounded-md border border-input bg-background px-3 py-2.5 text-foreground shadow-sm focus:border-ring focus:ring-ring;
+    @apply mt-1 block w-full rounded-md bg-background px-3 py-2.5 text-foreground shadow-sm focus:border-ring focus:ring-ring;
   }
 
   .form-radio,
@@ -174,7 +174,7 @@
 
   /* Alert Box Styles */
   .alert-box {
-    @apply mb-4 flex items-start rounded-md border p-3;
+    @apply mb-4 flex items-start rounded-md border-0 p-3;
   }
   .alert-box-info {
     @apply border-blue-200 bg-blue-50 text-gray-700 dark:border-sky-700 dark:bg-sky-900/50 dark:text-sky-200;

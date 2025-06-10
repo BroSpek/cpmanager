@@ -15,10 +15,10 @@
     <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body
-    class="ease bg-background text-foreground m-0 flex h-screen flex-col overflow-hidden font-sans transition-colors duration-300 print:overflow-visible print:bg-white print:text-black"
+    class="ease m-0 flex h-screen flex-col overflow-hidden bg-background font-sans text-foreground transition-colors duration-300 print:overflow-visible print:bg-white print:text-black"
   >
     <nav
-      class="bg-secondary text-secondary-foreground sticky top-0 z-20 flex-shrink-0 p-4 shadow-md print:hidden"
+      class="bg-container text-container-foreground sticky top-0 z-20 flex-shrink-0 p-4 shadow-md print:hidden"
     >
       <div class="container mx-auto flex items-center justify-between">
         <h1 class="text-xl font-semibold">
@@ -45,7 +45,7 @@
 
     <div
       id="main-content-scroll-area"
-      class="bg-background print:min-h-auto flex-grow overflow-y-auto print:m-0 print:block print:h-auto print:overflow-visible print:bg-white print:p-0"
+      class="print:min-h-auto flex-grow overflow-y-auto bg-background print:m-0 print:block print:h-auto print:overflow-visible print:bg-white print:p-0"
     >
       <div
         class="container mx-auto p-4 print:m-0 print:w-full print:max-w-none print:p-0"
@@ -112,7 +112,7 @@
           </form>
         </div>
 
-        <div class="border-border mb-4 border-b">
+        <div class="mb-4 border-b border-border">
           <ul class="-mb-px flex text-sm font-medium" id="mainTabs">
             <li class="flex-1 sm:mr-2 sm:flex-initial">
               <a href="#" class="tab-btn tab-base" data-tab="dashboard">
@@ -147,7 +147,7 @@
         >
           <div id="dashboard-content" class="tab-pane">
             <h2 class="section-header">
-              <i class="fas fa-tachometer-alt text-primary mr-3"></i>Overview
+              <i class="fas fa-tachometer-alt mr-3 text-primary"></i>Overview
               Dashboard
             </h2>
             <div class="alert-box alert-box-info print:hidden">
@@ -175,7 +175,7 @@
                     </div>
                     <div
                       id="donut-total-data"
-                      class="text-foreground absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-center text-lg font-semibold"
+                      class="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-center text-lg font-semibold text-foreground"
                     >
                       0 MB
                     </div>
@@ -184,7 +184,7 @@
                     class="legend-items mt-3 flex flex-col items-center gap-2 xl:flex-row xl:justify-center xl:gap-4"
                   >
                     <div
-                      class="legend-item text-muted-foreground flex items-center text-sm transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold"
+                      class="legend-item flex items-center text-sm text-muted-foreground transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold"
                     >
                       <span class="mr-1 h-3 w-3 rounded-sm bg-blue-500"></span
                       >Client Upload:
@@ -192,7 +192,7 @@
                       <span id="upload-percentage" class="ml-1"></span>
                     </div>
                     <div
-                      class="legend-item text-muted-foreground flex items-center text-sm transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold"
+                      class="legend-item flex items-center text-sm text-muted-foreground transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold"
                     >
                       <span class="mr-1 h-3 w-3 rounded-sm bg-green-500"></span
                       >Client Download:
@@ -216,7 +216,7 @@
 
           <div id="sessions-content" class="tab-pane hidden">
             <h2 class="section-header">
-              <i class="fas fa-users text-primary mr-3"></i>Session Management
+              <i class="fas fa-users mr-3 text-primary"></i>Session Management
             </h2>
             <div
               id="session-field-container"
@@ -275,7 +275,7 @@
                 <span id="session-select-all-label">Select All</span>
                 <span
                   id="session-selected-count-text"
-                  class="text-muted-foreground ml-2 text-sm"
+                  class="ml-2 text-sm text-muted-foreground"
                 ></span>
               </label>
             </div>
@@ -291,7 +291,7 @@
 
           <div id="vouchers-content" class="tab-pane hidden">
             <h2 class="section-header">
-              <i class="fas fa-ticket-alt text-primary mr-3"></i>Voucher
+              <i class="fas fa-ticket-alt mr-3 text-primary"></i>Voucher
               Management
             </h2>
             <div
@@ -419,7 +419,7 @@
                 <span id="voucher-select-all-label">Select All</span>
                 <span
                   id="voucher-selected-count-text"
-                  class="text-muted-foreground ml-2 text-sm"
+                  class="ml-2 text-sm text-muted-foreground"
                 ></span>
               </label>
             </div>
@@ -434,7 +434,7 @@
 
           <div id="info-content" class="tab-pane hidden">
             <h2 class="section-header">
-              <i class="fas fa-layer-group text-primary mr-3"></i>Zone
+              <i class="fas fa-layer-group mr-3 text-primary"></i>Zone
               Management
             </h2>
             <div
@@ -587,7 +587,7 @@
                   name="voucher-output-format"
                   value="both"
                 />
-                <span class="ml-2 text-sm">Both (Card then Table)</span>
+                <span class="ml-2 text-sm">Card and Table PDF</span>
               </label>
             </div>
           </div>
@@ -793,7 +793,7 @@
     </div>
 
     <footer
-      class="bg-background text-muted-foreground border-border flex-shrink-0 border-t p-4 text-center text-sm print:hidden"
+      class="flex-shrink-0 border-t border-border bg-background p-4 text-center text-sm text-muted-foreground print:hidden"
     >
       <p id="api-status-footer">
         API Status: <span class="font-semibold">Initializing...</span>
