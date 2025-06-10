@@ -331,12 +331,29 @@ import Chart from "chart.js/auto";
             totalClientUploadBytes,
             totalClientDownloadBytes,
           ];
-          // Determine chart colors based on current theme
-          const isDarkMode =
-            document.documentElement.classList.contains("dark"); // Check html element for 'dark' class
-          const tooltipBgColor = isDarkMode ? "#334155" : "#1F2937";
-          const tooltipTextColor = isDarkMode ? "#E2E8F0" : "#FFFFFF";
-          const chartBorderColor = isDarkMode ? "#1E293B" : "#FFFFFF";
+          // --- FINAL, COMPATIBLE CODE FOR CHART COLORS ---
+          const rootStyles = getComputedStyle(document.documentElement);
+
+          // This function gets a color and ensures it uses commas for Chart.js
+          const getChartCompatibleColor = (variableName, alpha = 1.0) => {
+            const rawValue = rootStyles.getPropertyValue(variableName).trim();
+            const commaValue = rawValue.replace(/ /g, ", "); // THE FIX: Replaces spaces with commas
+            if (alpha < 1.0) {
+              return `hsla(${commaValue}, ${alpha})`;
+            }
+            return `hsl(${commaValue})`;
+          };
+          // Get all the colors for the chart using our new compatible function
+          const chartPrimaryColor = getChartCompatibleColor("--primary", 0.7);
+          const chartSuccessColor = getChartCompatibleColor("--success", 0.7);
+          const chartPrimaryHoverColor = getChartCompatibleColor("--primary");
+          const chartSuccessHoverColor = getChartCompatibleColor("--success");
+          const tooltipBgColor = getChartCompatibleColor("--secondary");
+          const tooltipTextColor = getChartCompatibleColor(
+            "--secondary-foreground",
+          );
+          const chartBorderColor = getChartCompatibleColor("--card");
+          // --- END OF FINAL CODE ---
 
           // Update existing chart data or create a new chart instance
           if (CPManager.state.dashboard.chartInstance) {
@@ -361,8 +378,11 @@ import Chart from "chart.js/auto";
                 datasets: [
                   {
                     data: chartDataValues,
-                    backgroundColor: ["#3B82F6", "#10B981"], // Blue for upload, Green for download
-                    hoverBackgroundColor: ["#2563EB", "#059669"], // Darker shades for hover
+                    backgroundColor: [chartPrimaryColor, chartSuccessColor],
+                    hoverBackgroundColor: [
+                      chartPrimaryHoverColor,
+                      chartSuccessHoverColor,
+                    ],
                     borderColor: chartBorderColor,
                     borderWidth: 2,
                     hoverBorderWidth: 3,
