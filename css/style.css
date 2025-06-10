@@ -20,7 +20,7 @@
     --ring: 221 83% 53%; /* blue-600 */
     --primary: 221 83% 53%; /* blue-600 */
     --primary-foreground: 210 40% 98%; /* slate-50 */
-    --secondary: 215, 25%, 27%; /* slate-700 */
+    --secondary: 215 25% 27%; /* slate-700 */
     --secondary-foreground: 210 40% 98%; /* slate-50 */
     --success: 142 71% 45%; /* green-500 */
     --success-foreground: 210 40% 98%; /* slate-50 */
@@ -46,7 +46,7 @@
     --ring: 217 91% 60%; /* blue-500 */
     --primary: 217 91% 60%; /* blue-500 */
     --primary-foreground: 210 40% 98%; /* slate-50 */
-    --secondary: 215, 25%, 27%; /* slate-700 */
+    --secondary: 215 25% 27%; /* slate-700 */
     --secondary-foreground: 210 40% 98%; /* slate-50 */
     --success: 142 76% 36%; /* green-600 */
     --success-foreground: 210 40% 98%; /* slate-50 */
@@ -85,7 +85,7 @@
 
   /* Base style for modal content containers */
   .modal-base-content {
-    @apply bg-container text-container-foreground mx-auto w-full rounded-lg p-6 shadow-xl;
+    @apply mx-auto w-full rounded-lg bg-container p-6 text-container-foreground shadow-xl;
   }
 
   /* Form input style specific to modals (with dark:bg-slate-700) */
