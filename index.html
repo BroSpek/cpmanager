@@ -52,7 +52,7 @@
       >
         <div
           id="config-input-section"
-          class="mb-4 hidden rounded-md border border-yellow-500 bg-yellow-100 p-4 text-yellow-800 dark:border-yellow-700 dark:bg-slate-800 dark:text-yellow-300 print:hidden"
+          class="alert-box-warning mb-4 hidden rounded-md border p-4 print:hidden"
           role="alert"
         >
           <form id="api-credentials-form">
@@ -151,9 +151,7 @@
               Dashboard
             </h2>
             <div class="alert-box alert-box-info print:hidden">
-              <i
-                class="fas fa-info-circle mr-2 mt-1 text-blue-500 dark:text-sky-300"
-              ></i>
+              <i class="fas fa-info-circle mr-2 mt-1 text-primary"></i>
               <span>Showing aggregated data for all configured zones.</span>
             </div>
             <div class="flex flex-col gap-4 sm:flex-row">
@@ -186,7 +184,7 @@
                     <div
                       class="legend-item flex items-center text-sm text-muted-foreground transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold"
                     >
-                      <span class="mr-1 h-3 w-3 rounded-sm bg-blue-500"></span
+                      <span class="mr-1 h-3 w-3 rounded-sm bg-primary"></span
                       >Client Upload:
                       <span id="upload-legend-value" class="ml-1">0 Bytes</span>
                       <span id="upload-percentage" class="ml-1"></span>
@@ -194,7 +192,7 @@
                     <div
                       class="legend-item flex items-center text-sm text-muted-foreground transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold"
                     >
-                      <span class="mr-1 h-3 w-3 rounded-sm bg-green-500"></span
+                      <span class="mr-1 h-3 w-3 rounded-sm bg-success"></span
                       >Client Download:
                       <span id="download-legend-value" class="ml-1"
                         >0 Bytes</span
@@ -465,7 +463,7 @@
 
     <div
       id="generateVoucherModal"
-      class="fixed inset-0 z-20 hidden h-full w-full items-center justify-center overflow-y-auto bg-gray-600 bg-opacity-50 p-4 print:hidden"
+      class="fixed inset-0 z-20 hidden h-full w-full items-center justify-center overflow-y-auto bg-background/50 p-4 print:hidden"
     >
       <div class="modal-base-content max-w-md">
         <h3 class="modal-title">Generate Vouchers</h3>
@@ -613,7 +611,7 @@
 
     <div
       id="confirmationModal"
-      class="fixed inset-0 z-30 hidden h-full w-full items-center justify-center overflow-y-auto bg-gray-600 bg-opacity-50 p-4 print:hidden"
+      class="fixed inset-0 z-30 hidden h-full w-full items-center justify-center overflow-y-auto bg-background/50 p-4 print:hidden"
     >
       <div class="modal-base-content max-w-md">
         <h3 class="mb-4 text-xl font-semibold" id="confirmationTitle">
@@ -641,7 +639,7 @@
 
     <div
       id="editZoneModal"
-      class="fixed inset-0 z-20 hidden h-full w-full items-center justify-center overflow-y-auto bg-gray-600 bg-opacity-50 p-4 print:hidden"
+      class="fixed inset-0 z-20 hidden h-full w-full items-center justify-center overflow-y-auto bg-background/50 p-4 print:hidden"
     >
       <div class="modal-base-content max-w-lg">
         <h3 class="modal-title">

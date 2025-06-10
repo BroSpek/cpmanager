@@ -183,17 +183,17 @@
 
       switch (type) {
         case "success":
-          toastNotification.classList.add("bg-green-600");
+          toastNotification.classList.add("bg-success");
           break;
         case "error":
-          toastNotification.classList.add("bg-red-600");
+          toastNotification.classList.add("bg-danger");
           break;
         case "warning":
-          toastNotification.classList.add("bg-yellow-500", "text-black");
+          toastNotification.classList.add("bg-warning", "text-foreground");
           break;
         case "info":
         default:
-          toastNotification.classList.add("bg-gray-800");
+          toastNotification.classList.add("bg-secondary");
           break;
       }
 

@@ -177,10 +177,13 @@
     @apply mb-4 flex items-start rounded-md border-0 p-3;
   }
   .alert-box-info {
-    @apply border-blue-200 bg-blue-50 text-gray-700 dark:border-sky-700 dark:bg-sky-900/50 dark:text-sky-200;
+    @apply border-primary/20 bg-primary/10 text-primary dark:bg-primary/20;
+  }
+  .alert-box-warning {
+    @apply border-warning/20 bg-warning/10 text-warning dark:bg-warning/20;
   }
   .alert-box-danger {
-    @apply border-red-200 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-900/50 dark:text-red-200;
+    @apply border-danger/20 bg-danger/10 text-danger dark:bg-danger/20;
   }
 
   /* Toggle Switch */

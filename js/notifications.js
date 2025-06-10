@@ -143,7 +143,7 @@
       if (toggleButton) {
         if (isErrorState) {
           toggleButton.innerHTML =
-            '<i class="fas fa-exclamation-triangle text-red-500"></i>';
+            '<i class="fas fa-exclamation-triangle text-danger"></i>';
           toggleButton.setAttribute(
             "aria-label",
             "Notifications disabled (errors). Click to re-try.",
