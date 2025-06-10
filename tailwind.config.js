@@ -1,7 +1,8 @@
+// cpmanager/tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
-  content: ["./index.html", "./js/**/*.js"],
+  content: ["./src/index.html", "./src/js/**/*.js"],
   theme: {
     extend: {
       colors: {
