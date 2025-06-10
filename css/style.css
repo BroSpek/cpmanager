@@ -5,7 +5,7 @@
 /* --- THEMING --- */
 @layer base {
   :root {
-    --background: 210 40% 98%; /* slate-50 */
+    --background: 222 47% 90%; /* slate-200 */
     --foreground: 222 47% 11%; /* slate-900 */
     --card: 210 40% 98%; /* slate-50 */
     --card-foreground: 222 47% 11%; /* slate-900 */
@@ -13,7 +13,7 @@
     --container-foreground: 222 47% 11%; /* slate-900 */
     --muted: 215 20% 65%; /* slate-400 */
     --muted-foreground: 215 14% 34%; /* slate-600 */
-    --accent: 215 16% 47%; /* slate-500 */
+    --accent: 222 47% 11%; /* slate-900 */
     --accent-foreground: 210 40% 98%; /* slate-50 */
     --border: 220 13% 91%; /* slate-100 */
     --input: 215 20% 65%; /* slate-400 */
@@ -32,14 +32,14 @@
 
   .dark {
     --background: 222 47% 11%; /* slate-900 */
-    --foreground: 210 40% 98%; /* slate-50 */
+    --foreground: 222 47% 90%; /* slate-200 */
     --card: 222 47% 11%; /* slate-900 */
     --card-foreground: 210 40% 98%; /* slate-50 */
     --container: 215 28% 17%; /* slate-800 */
     --container-foreground: 210 40% 98%; /* slate-50 */
     --muted: 215 16% 47%; /* slate-500 */
     --muted-foreground: 215 20% 65%; /* slate-400 */
-    --accent: 215 16% 47%; /* slate-500 */
+    --accent: 222 47% 11%; /* slate-900 */
     --accent-foreground: 210 40% 98%; /* slate-50 */
     --border: 215 28% 17%; /* slate-800 */
     --input: 215 16% 47%; /* slate-500 */
@@ -90,7 +90,7 @@
 
   /* Form input style specific to modals (with dark:bg-slate-700) */
   .form-modal-input {
-    @apply mt-1 block w-full rounded-md bg-background px-3 py-2.5 text-foreground shadow-sm;
+    @apply mt-1 block w-full rounded-md bg-card px-3 py-2.5 text-card-foreground shadow-sm;
   }
 
   /* Button Components */
@@ -120,7 +120,7 @@
   .form-input,
   .form-select,
   .form-textarea {
-    @apply mt-1 block w-full rounded-md bg-background px-3 py-2.5 text-foreground shadow-sm focus:border-ring focus:ring-ring;
+    @apply mt-1 block w-full rounded-md bg-card px-3 py-2.5 text-card-foreground shadow-sm focus:border-ring focus:ring-ring;
   }
 
   .form-radio,

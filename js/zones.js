@@ -619,19 +619,10 @@
         CPManager.elements.zoneListContainer.addEventListener(
           "click",
           async (e) => {
-            const summaryElement = e.target.closest(".zone-summary");
-            if (summaryElement) {
-              const card = summaryElement.closest(".zone-info-card");
-              const detailsContent = card.querySelector(
-                ".card-details-content",
-              );
-              this.handleZoneCardClick(card, detailsContent, summaryElement);
-              return;
-            }
-
+            // Check if the click was on the "Edit" button first
             const editButton = e.target.closest('[data-action="edit-zone"]');
             if (editButton) {
-              e.stopPropagation();
+              e.stopPropagation(); // Prevent the card from toggling
               const uuid = editButton.dataset.uuid;
               if (uuid) {
                 CPManager.zones.fetchAndOpenEditZoneModal(uuid);
@@ -640,6 +631,18 @@
                   "Edit button clicked but no UUID found on dataset.",
                 );
               }
+              return; // Stop further processing
+            }
+
+            // If not the edit button, check if a card was clicked
+            const card = e.target.closest(".zone-info-card");
+            if (card) {
+              // Proceed with the original handler function to toggle and fetch data
+              const detailsContent = card.querySelector(
+                ".card-details-content",
+              );
+              const summaryElement = card.querySelector(".zone-summary");
+              this.handleZoneCardClick(card, detailsContent, summaryElement);
             }
           },
         );

@@ -536,8 +536,10 @@
         CPManager.elements.sessionCardContainer.addEventListener(
           "click",
           (e) => {
+            // First, check if a checkbox was clicked
             const checkbox = e.target.closest(".session-select-checkbox");
             if (checkbox) {
+              // Handle the checkbox logic
               const sessionId = checkbox.dataset.sessionId;
               if (checkbox.checked) {
                 this.selectedSessions.add(sessionId);
@@ -556,12 +558,13 @@
                 this.selectedSessions.delete(sessionId);
               }
               this.updateSelectAllUI();
-              return;
+              return; // Stop further processing to prevent card from toggling
             }
 
-            const summaryElement = e.target.closest(".session-summary");
-            if (summaryElement) {
-              const card = summaryElement.closest(".session-card");
+            // If a checkbox wasn't clicked, check if a card was clicked
+            const card = e.target.closest(".session-card");
+            if (card) {
+              // Toggle the card details
               CPManager.ui.toggleCardDetails(card);
             }
           },
