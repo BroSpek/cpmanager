@@ -197,43 +197,43 @@ import Chart from "chart.js/auto";
         // Construct the HTML for dashboard statistics cards
         // UPDATED: Using semantic color classes
         let statsHtml = `
-          <div class="dashboard-card" id="dashboard-active-sessions-card" title="Go to Sessions tab" role="button" tabindex="0">
-            <div class="dashboard-stat-number">${activeSessionCount}</div>
-            <div class="dashboard-stat-label">Active Sessions</div>
+          <div class="db-card" id="dashboard-active-sessions-card" title="Go to Sessions tab" role="button" tabindex="0">
+            <div class="db-card-number">${activeSessionCount}</div>
+            <div class="db-card-label">Active Sessions</div>
           </div>
-          <div class="dashboard-card" id="dashboard-zones-providers-card" title="Go to Zones or Vouchers tab" role="button" tabindex="0">
-            <div class="dashboard-card-2-column">
+          <div class="db-card" id="dashboard-zones-providers-card" title="Go to Zones or Vouchers tab" role="button" tabindex="0">
+            <div class="db-card-cols-2">
               <div>
-                <div class="dashboard-stat-number">${totalZonesCount}</div>
-                <div class="dashboard-stat-label">Configured Zones</div>
+                <div class="db-card-number">${totalZonesCount}</div>
+                <div class="db-card-label">Configured Zones</div>
               </div>
               <div>
-                <div class="dashboard-stat-number">${totalProviders}</div>
-                <div class="dashboard-stat-label">Voucher Providers</div>
+                <div class="db-card-number">${totalProviders}</div>
+                <div class="db-card-label">Voucher Providers</div>
               </div>
             </div>
           </div>
-          <div class="dashboard-card" id="dashboard-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
-            <div class="dashboard-card-2-column">
+          <div class="db-card" id="dashboard-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
+            <div class="db-card-cols-2">
               <div>
-                <div class="dashboard-stat-number">${totalVouchers}</div>
-                <div class="dashboard-stat-label">Total Vouchers</div>
+                <div class="db-card-number">${totalVouchers}</div>
+                <div class="db-card-label">Total Vouchers</div>
               </div>
               <div>
-                <div class="dashboard-stat-number text-success">${activeVouchers}</div>
-                <div class="dashboard-stat-label">Active Vouchers</div>
+                <div class="db-card-number text-success">${activeVouchers}</div>
+                <div class="db-card-label">Active Vouchers</div>
               </div>
             </div>
           </div>
-          <div class="dashboard-card" id="dashboard-unused-expired-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
-              <div class="dashboard-card-2-column">
+          <div class="db-card" id="dashboard-unused-expired-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
+              <div class="db-card-cols-2">
                   <div>
-                      <div class="dashboard-stat-number text-primary">${unusedVouchers}</div>
-                      <div class="dashboard-stat-label">Unused Vouchers</div>
+                      <div class="db-card-number text-primary">${unusedVouchers}</div>
+                      <div class="db-card-label">Unused Vouchers</div>
                   </div>
                   <div>
-                      <div class="dashboard-stat-number text-danger">${expiredVouchers}</div>
-                      <div class="dashboard-stat-label">Expired Vouchers</div>
+                      <div class="db-card-number text-danger">${expiredVouchers}</div>
+                      <div class="db-card-label">Expired Vouchers</div>
                   </div>
               </div>
           </div>
