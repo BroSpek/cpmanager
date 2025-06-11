@@ -1,7 +1,7 @@
 // sw.js - Service Worker for Caching App Shell with Automatic Updates and Notification Handling
 
 // Increment the version when you change urlsToCache or the SW logic itself.
-const CACHE_NAME = "cpm-cache-v1.0.0"; // << Cache version updated
+const CACHE_NAME = "cpm-cache-v0.1.0";
 const urlsToCache = [
   "index.html",
   "icons/icon-192x192.png",
@@ -20,16 +20,16 @@ self.addEventListener("install", (event) => {
       })
       .then(() => {
         console.log(
-          `Service Worker: App shell for ${CACHE_NAME} cached successfully`
+          `Service Worker: App shell for ${CACHE_NAME} cached successfully`,
         );
         return self.skipWaiting(); // Activate new SW immediately
       })
       .catch((error) => {
         console.error(
           `Service Worker: Caching for ${CACHE_NAME} failed`,
-          error
+          error,
         );
-      })
+      }),
   );
 });
 
@@ -46,15 +46,15 @@ self.addEventListener("activate", (event) => {
               console.log(`Service Worker: Deleting old cache: ${cacheName}`);
               return caches.delete(cacheName);
             }
-          })
+          }),
         );
       })
       .then(() => {
         console.log(
-          `Service Worker: Activated (${CACHE_NAME}) and old caches cleaned.`
+          `Service Worker: Activated (${CACHE_NAME}) and old caches cleaned.`,
         );
         return self.clients.claim(); // Take control of uncontrolled clients
-      })
+      }),
   );
 });
 
@@ -79,9 +79,9 @@ self.addEventListener("fetch", (event) => {
       .catch((error) => {
         console.error(
           "Service Worker: Fetch failed or cache open failed.",
-          error
+          error,
         );
-      })
+      }),
   );
 });
 
@@ -94,7 +94,7 @@ self.addEventListener("message", (event) => {
         icon: icon || "icons/icon-192x192.png",
         badge: "icons/badge-icon.png",
         tag: `new-user-signin-${id || new Date().getTime()}`,
-      })
+      }),
     );
   }
 });
@@ -121,6 +121,6 @@ self.addEventListener("notificationclick", (event) => {
         if (self.clients.openWindow) {
           return self.clients.openWindow(urlToOpen);
         }
-      })
+      }),
   );
 });

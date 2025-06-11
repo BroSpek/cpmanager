@@ -60,7 +60,7 @@ Here's a glimpse of how the Captive Portal Manager looks on mobile devices in bo
 
 - An operational OPNsense® firewall.
 - The OPNsense Captive Portal module configured for at least one zone.
-- The OPNsense API enabled, with an API Key and Secret generated that have sufficient permissions for captive portal and voucher management.
+- The OPNsense API enabled, with an `API Key` and `Secret` generated that have sufficient permissions for captive portal and voucher management.
 - Network connectivity from the device running this tool to the OPNsense API endpoint.
 - A modern web browser (e.g., Chrome, Firefox, Safari, Edge).
 
@@ -68,15 +68,17 @@ Here's a glimpse of how the Captive Portal Manager looks on mobile devices in bo
 
 The recommended way to install the Captive Portal Manager is by deploying the pre-built release files. For OPNsense users, hosting it on the firewall itself is the easiest method.
 
-1.  **Download**: Go to the **[Releases page](https://github.com/halimstt/cpmanager/releases)** of this project and download the latest `cpmanager.zip` file.
-2.  **Unzip**: Extract the zip file. This will create a `cpmanager` folder containing all the application files.
+1.  **Download**: Go to the **[Releases page](https://github.com/halimstt/cpmanager/releases)** of this project and download the latest `cpmanager-vX.X.X.zip` file.
+2.  **Unzip**: Create a folder for it, eg: `cpmanager`. Extract the zip file into this folder.
 3.  **Upload**:
-    - **(Recommended on OPNsense)**: Upload the entire `cpmanager` folder to your OPNsense firewall's web server root, located at `/usr/local/www/`.
-    - **(Alternative)**: Upload the `cpmanager` folder to the root of any other web server. Please see the **Troubleshooting** section regarding CORS if you choose this method.
-4.  **Access**: Open your web browser and navigate to the application URL (e.g., `https://Your-OPNsense-IP/cpmanager/`).
+    - **(Recommended on OPNsense)**: Upload the entire folder to your OPNsense firewall's web server root, located at `/usr/local/www/`.
+    - **(Alternative on external server)**: Upload the folder to the root of any other web server. Please see the **Troubleshooting** section regarding CORS if you choose this method.
+4.  **Access**: Open your web browser and navigate to the application URL (e.g., `https://192.168.1.1/cpmanager/`).
 5.  **Configure Credentials**: On first launch, the app will prompt for your API Base URL, Key, and Secret.
 
 ## Configuration
+
+Before configuring the app you need to have API `Key` and `Secret`. To generate the API Key and Secret, you need to go to your OPNsense WebUI, then navigate to `System > Access > Users`, and look for the icon that says 'API' (it looks like a ticket icon).
 
 The application can be configured in two ways:
 
@@ -110,7 +112,7 @@ You can edit the `app-config.json` file located inside the `cpmanager` folder to
 
 1.  **Clone Repository**:
     ```sh
-    git clone [https://github.com/halimstt/cpmanager.git](https://github.com/halimstt/cpmanager.git)
+    git clone https://github.com/halimstt/cpmanager.git
     cd cpmanager
     ```
 2.  **Install Dependencies**:
@@ -165,7 +167,7 @@ CORS is a browser-level security mechanism that prevents a web page loaded from 
 - In OPNsense, navigate to **System > Access > Servers**.
 - Click `+` (Add) to create a new server. Set the `Type` to **"Vouchers"** and give it a descriptive `Name` (e.g., "GuestVouchers"). This name will appear as the "Voucher Provider" in this tool.
 
-2.  \*_Configure Your Captive Portal Zone_
+2.  **Configure Your Captive Portal Zone**:
 
 - Navigate to **Services > Captive Portal > Administration**.
 - Edit the zone where you will use vouchers.
@@ -180,7 +182,7 @@ CORS is a browser-level security mechanism that prevents a web page loaded from 
 2.  Select your configured **Voucher Provider**.
 3.  Click the **"Create New Vouchers"** button.
 4.  In the dialog, configure the voucher parameters (count, validity, expiration, group name, output format).
-5.  Click **"Generate"**. A PDF file containing the new voucher codes will be downloaded automatically.
+5.  Choose output type and click **"Generate"**. A PDF file containing the new voucher codes will be downloaded automatically.
 
 </details>
 
