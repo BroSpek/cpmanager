@@ -3,7 +3,7 @@
 // Import all modules that contribute to the global CPManager object.
 // This ensures that CPManager.config, CPManager.elements, CPManager.sessions, etc.,
 // are all properly initialized before CPManager.app (defined below) tries to use them.
-import "@fortawesome/fontawesome-free/css/all.min.css";
+import "@fortawesome/fontawesome-free/css/solid.min.css";
 import "../css/style.css";
 import "chart.js/auto";
 import "jspdf-autotable";
