@@ -82,14 +82,14 @@ Before configuring the app you need to have API `Key` and `Secret`. To generate 
 
 The application can be configured in two ways:
 
-#### 1. In-App Configuration
+### 1. In-App Configuration
 
 The primary method for configuration is through the application's user interface.
 
 - **API Credentials & Base URL**: On first use, the app will prompt for your API Base URL, Key, and Secret.
 - **Persistence**: All settings configured in the UI are saved to your browser's **local storage**. These values will always **override** any settings present in the `app-config.json` file. To re-enter credentials, click the "API Status" text in the footer.
 
-#### 2. Pre-deployment Configuration (Optional)
+### 2. Pre-deployment Configuration (Optional)
 
 You can edit the `app-config.json` file located inside the `cpmanager` folder to set default values. This is useful for pre-configuring the application.
 
@@ -124,9 +124,24 @@ You can edit the `app-config.json` file located inside the `cpmanager` folder to
     npm start
     ```
 4.  **Build for Production**: To create a production-ready build in the `dist/` directory:
-`sh
+    ```sh
     npm run build
-    `
+    ```
+
+### Icon System (Font Awesome SVG with JavaScript)
+
+This project utilizes Font Awesome's SVG icons. For developers, there are two critical steps to using and interacting with icons:
+
+1.  Add New Icons to the Library: To make a new icon available in the application, you must perform two actions in `src/js/main.js`:
+
+    - First, import the specific icon from the `@fortawesome/free-solid-svg-icons` package (e.g., `import { faNewIcon } from '@fortawesome/free-solid-svg-icons'`).
+    - Then, add your imported icon to the `library.add()` function call.
+
+2.  Target the `<svg>` Tag for Scripting: When writing JavaScript to interact with an icon (e.g., adding a `click` listener), always target the final `<svg>` element, not the initial `<i>` tag. The `dom.watch()` function removes the `<i>` tag and replaces it with an `<svg>`.
+
+    - Incorrect: `document.querySelector('i.fa-some-icon')`
+    - Correct: `document.querySelector('svg.fa-some-icon')`
+
 </details>
 
 ---

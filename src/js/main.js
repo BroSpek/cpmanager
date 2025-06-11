@@ -1,9 +1,69 @@
-// js/main.js
+// src/js/main.js
 
 // Import all modules that contribute to the global CPManager object.
 // This ensures that CPManager.config, CPManager.elements, CPManager.sessions, etc.,
 // are all properly initialized before CPManager.app (defined below) tries to use them.
-import "@fortawesome/fontawesome-free/css/solid.min.css";
+
+import { library, dom } from "@fortawesome/fontawesome-svg-core";
+import {
+  faShieldAlt,
+  faSun,
+  faMoon,
+  faMobileAlt,
+  faBellSlash,
+  faBell,
+  faExclamationTriangle,
+  faInfoCircle,
+  faTimesCircle,
+  faTrashAlt,
+  faPlusCircle,
+  faEdit,
+  faSpinner,
+  faChevronDown,
+  faChevronLeft,
+  faChevronRight,
+  faTachometerAlt,
+  faUsers,
+  faTicketAlt,
+  faLayerGroup,
+  faStreetView,
+  faUsersSlash,
+  faFolderOpen,
+  faBiohazard,
+  faRotate,
+  faUserShield,
+} from "@fortawesome/free-solid-svg-icons";
+
+// Add the imported icons to the library
+library.add(
+  faShieldAlt,
+  faSun,
+  faMoon,
+  faMobileAlt,
+  faBellSlash,
+  faBell,
+  faExclamationTriangle,
+  faInfoCircle,
+  faTimesCircle,
+  faTrashAlt,
+  faPlusCircle,
+  faEdit,
+  faSpinner,
+  faChevronDown,
+  faChevronLeft,
+  faChevronRight,
+  faTachometerAlt,
+  faUsers,
+  faTicketAlt,
+  faLayerGroup,
+  faStreetView,
+  faUsersSlash,
+  faFolderOpen,
+  faBiohazard,
+  faRotate,
+  faUserShield,
+);
+
 import "../css/style.css";
 import "chart.js/auto";
 import "jspdf-autotable";
@@ -789,6 +849,10 @@ import "./notifications.js";
         CPManager.elements.clearApiCredsBtn.disabled = false;
       if (CPManager.elements.themeToggleBtn)
         CPManager.elements.themeToggleBtn.disabled = false;
+
+      // This call to dom.watch() needs to happen after DOM content is loaded
+      // to ensure all <i> tags are available for replacement.
+      dom.watch();
 
       await CPManager.sessions.fetchManagerSessionStatus();
       CPManager.ui.disableVoucherActionButtons(false, true, true);

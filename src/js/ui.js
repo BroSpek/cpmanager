@@ -277,7 +277,7 @@
               if (otherSummary) {
                 otherSummary.setAttribute("aria-expanded", "false");
                 const icon = otherSummary.querySelector(
-                  "i.fas.fa-chevron-down",
+                  "svg.svg-inline--fa.fa-chevron-down",
                 );
                 if (icon) {
                   icon.classList.remove("rotate-180");
@@ -298,7 +298,9 @@
       );
       if (summary) {
         summary.setAttribute("aria-expanded", String(isNowExpanded));
-        const icon = summary.querySelector("i.fas.fa-chevron-down");
+        const icon = summary.querySelector(
+          "svg.svg-inline--fa.fa-chevron-down",
+        );
         if (icon) {
           icon.classList.toggle("rotate-180", isNowExpanded);
         }
