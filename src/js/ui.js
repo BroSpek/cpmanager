@@ -119,6 +119,7 @@
       "zone-edit-concurrentlogins-text",
     ),
     zoneEditTemplateSelect: document.getElementById("zone-edit-template"),
+    zoneEditAuthServersSelect: document.getElementById("zone-edit-authservers"),
     cancelEditZoneBtn: document.getElementById("cancel-edit-zone-btn"),
     submitEditZoneBtn: document.getElementById("submit-edit-zone-btn"),
     applyCpConfigBtn: document.getElementById("apply-cp-config-btn"),
