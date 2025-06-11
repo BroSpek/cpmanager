@@ -367,6 +367,7 @@
         "zoneEditConcurrentLoginsCheckbox",
         "zoneEditConcurrentLoginsText",
         "zoneEditTemplateSelect",
+        "zoneEditAuthServersSelect",
       ];
       for (const elId of requiredElements) {
         if (!CPManager.elements[elId]) {
@@ -490,6 +491,34 @@
       } else {
         templateSelect.value = "";
       }
+
+      const authServersSelect = CPManager.elements.zoneEditAuthServersSelect;
+      authServersSelect.innerHTML = ""; // Clear previous options
+
+      if (zoneData.authservers && typeof zoneData.authservers === "object") {
+        for (const serverName in zoneData.authservers) {
+          // The key of the object is the server name
+          if (
+            Object.prototype.hasOwnProperty.call(
+              zoneData.authservers,
+              serverName,
+            )
+          ) {
+            const serverDetails = zoneData.authservers[serverName];
+            const option = document.createElement("option");
+            option.value = serverDetails.value; // The value is the name
+            option.textContent = serverDetails.value; // Display the name
+            // Mark the option as selected if the 'selected' flag is 1
+            if (
+              serverDetails.selected === 1 ||
+              serverDetails.selected === "1"
+            ) {
+              option.selected = true;
+            }
+            authServersSelect.appendChild(option);
+          }
+        }
+      }
     },
 
     saveZoneSettings: async function () {
@@ -507,7 +536,9 @@
         return;
       }
       const uuid = CPManager.elements.editZoneUuidInput.value;
-
+      const selectedAuthServers = Array.from(
+        CPManager.elements.zoneEditAuthServersSelect.selectedOptions,
+      ).map((opt) => opt.value);
       const zoneSettingsToUpdate = {
         description: CPManager.elements.zoneEditDescriptionInput.value.trim(),
         enabled: CPManager.elements.zoneEditEnabledCheckbox.checked ? "1" : "0",
@@ -529,6 +560,7 @@
           ? "1"
           : "0",
         template: CPManager.elements.zoneEditTemplateSelect.value || "",
+        authservers: selectedAuthServers.join(","),
       };
 
       const finalApiPayload = {
