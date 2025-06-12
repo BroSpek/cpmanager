@@ -1,0 +1,5 @@
+{
+  "apiBaseUrl": "",
+  "inMemoryCacheTTLMinutes": 1,
+  "itemsPerPage": 6
+}
