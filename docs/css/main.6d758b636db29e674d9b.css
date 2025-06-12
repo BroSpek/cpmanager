@@ -1114,11 +1114,11 @@ video {
 .h-3 {
   height: 0.75rem;
 }
+.h-\[100dvh\] {
+  height: 100dvh;
+}
 .h-full {
   height: 100%;
-}
-.h-screen {
-  height: 100vh;
 }
 .max-h-0 {
   max-height: 0px;
@@ -1884,4 +1884,4 @@ video {
 }
 
 
-/*# sourceMappingURL=main.26a0e5ae6a4bb4c2334f.css.map*/
+/*# sourceMappingURL=main.6d758b636db29e674d9b.css.map*/
