@@ -159,7 +159,7 @@ CORS is a browser-level security mechanism that prevents a web page loaded from 
   Host this application directly within a subfolder on your OPNsense web server (e.g., `/usr/local/www/cpmanager/`). When the app is served from the same domain/IP as the OPNsense API, browser security policies will not block requests.
 
 - **Option 2: Configure OPNsense for CORS (for external hosting)**:
-  If you host this application on a separate server, you must configure your OPNsense firewall to allow requests from your application's origin. This involves adding CORS headers to OPNsense's web server configuration. Refer to the official OPNsense documentation on API access and CORS settings for instructions on how to add "Allowed Origins".
+  If you host this application on a separate server, you must configure your OPNsense firewall to allow requests from your application's origin. This involves adding CORS headers to OPNsense's web server configuration. Refer to [Proxying the OPNsense API with CORS](https://github.com/halimstt/cpmanager/blob/main/README_CORS.md).
 
 **Common Symptoms of CORS issues**:
 

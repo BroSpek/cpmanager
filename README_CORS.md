@@ -1,4 +1,4 @@
-# HAProxy Configuration Summary: Proxying the OPNsense API with CORS
+# Proxying the OPNsense API with CORS
 
 Objective:
 To use HAProxy on OPNsense to securely proxy the internal OPNsense Captive Portal API, making it accessible to an external web application while correctly handling all CORS (Cross-Origin Resource Sharing) requirements.
@@ -17,7 +17,7 @@ Final Architecture:
 
    - Name: `api_server`
    - IP Address: `127.0.0.1`
-   - Port: `443` <- Replace with your current OPNsense WebUI port
+   - Port: `443` <- Assuming your current OPNsense WebUI port.
    - SSL: Checked
    - Verify SSL Certificate: Unchecked
 
@@ -49,7 +49,7 @@ Final Architecture:
       - Select conditions: `is_options_request`
       - Execute function: `http-response set-header`
       - HTTP Header: `Access-Control-Allow-Origin`
-      - Header Content: `"https://halimstt.github.io"`<- Replace with your CPManager URL.
+      - Header Content: `"https://halimstt.github.io"`<- Replace with your cpmanager URL.
    3. Rule 3
       - Name: `rule_cors_allowed_methods`
       - Test Type: `If`
@@ -84,21 +84,21 @@ Final Architecture:
       - Select conditions: `is_options_request`
       - Execute function: `http-response set-header`
       - HTTP Header: `Access-Control-Allow-Origin`
-      - Header Content: `"https://halimstt.github.io"`<- Replace with your CPManager URL.
+      - Header Content: `"https://halimstt.github.io"`<- Replace with your cpmanager URL.
 
    Take note that some are `http-response add-header` and some are `http-response set-header`
 
 5. Go to Services -> HAProxy -> Virtual Services -> Public Services. And create or edit a frontend with the following settings:
 
    - Name: `api_frontend`
-   - Listen Address: `0.0.0.0:4343`<- If `4343` is used, replace with another unsunsed port.
+   - Listen Address: `0.0.0.0:4343`<- If `4343` is conflict, replace with another unused port.
    - Type: `HTTP / HTTPS (SSL Offloading)`
    - Default Backend Pool: `api_backend_pool`.
    - Enable SSL offloading: Checked.
    - Certificates: Select your public SSL certificate.
-   - Rules: Apply all the rules created by their **sequence** above: `rule_cors_preflight_response` until `rule_add_cors_origin_to_responses`.
+   - Rules: Apply all the rules created by their **order** above: start with `rule_cors_preflight_response` and end with `rule_add_cors_origin_to_responses`.
 
-6. Go to Firewall -> Rules -> WAN. And Ensure a rule exists to `Pass` `TCP` traffic with a Destination port of `4343` (or the custom port you chose).
+6. Go to Firewall -> Rules -> WAN. And Ensure a rule exists to `Pass` `TCP` traffic with a Destination port of `4343` (or the port you use).
 
 7. Go to Services -> HAProxy -> Settings. And click Test Syntax. If there are no errors, check the Enable HAProxy box and click Apply.
 
