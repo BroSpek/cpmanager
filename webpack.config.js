@@ -118,6 +118,18 @@ module.exports = (env, argv) => {
       splitChunks: {
         chunks: "all",
         cacheGroups: {
+          chartjs: {
+            test: /[\\/]node_modules[\\/]chart.js[\\/]/,
+            name: "chartjs",
+            priority: 30,
+            reuseExistingChunk: true,
+          },
+          jspdf: {
+            test: /[\\/]node_modules[\\/](jspdf|jspdf-autotable)[\\/]/,
+            name: "jspdf",
+            priority: 25,
+            reuseExistingChunk: true,
+          },
           defaultVendors: {
             test: /[\\/]node_modules[\\/]/,
             priority: -10,
