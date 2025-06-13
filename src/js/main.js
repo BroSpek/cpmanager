@@ -1,82 +1,76 @@
 // src/js/main.js
 
-// Import all modules that contribute to the global CPManager object.
-// This ensures that CPManager.config, CPManager.elements, CPManager.sessions, etc.,
-// are all properly initialized before CPManager.app (defined below) tries to use them.
-
+// Import only the globally used Font Awesome icons.
+// Specific icons are now imported by their respective modules (sessions.js, vouchers.js, etc.)
 import { library, dom } from "@fortawesome/fontawesome-svg-core";
 import {
+  // Global UI Icons
   faShieldAlt,
   faSun,
   faMoon,
   faMobileAlt,
+  faSpinner,
+  faChevronDown,
+  faChevronLeft,
+  faChevronRight,
+  faRotate,
+
+  // Global Feedback & Notification Icons
   faBellSlash,
   faBell,
   faExclamationTriangle,
   faInfoCircle,
   faTimesCircle,
-  faTrashAlt,
-  faPlusCircle,
-  faEdit,
-  faSpinner,
-  faChevronDown,
-  faChevronLeft,
-  faChevronRight,
+
+  // Icons for main navigation tabs (from index.html)
   faTachometerAlt,
   faUsers,
   faTicketAlt,
   faLayerGroup,
-  faStreetView,
-  faUsersSlash,
-  faFolderOpen,
-  faBiohazard,
-  faRotate,
-  faUserShield,
 } from "@fortawesome/free-solid-svg-icons";
 
-// Add the imported icons to the library
+// Add only the global icons to the library
 library.add(
+  // Global UI Icons
   faShieldAlt,
   faSun,
   faMoon,
   faMobileAlt,
+  faSpinner,
+  faChevronDown,
+  faChevronLeft,
+  faChevronRight,
+  faRotate,
+
+  // Global Feedback & Notification Icons
   faBellSlash,
   faBell,
   faExclamationTriangle,
   faInfoCircle,
   faTimesCircle,
-  faTrashAlt,
-  faPlusCircle,
-  faEdit,
-  faSpinner,
-  faChevronDown,
-  faChevronLeft,
-  faChevronRight,
+
+  // Icons for main navigation tabs (from index.html)
   faTachometerAlt,
   faUsers,
   faTicketAlt,
   faLayerGroup,
-  faStreetView,
-  faUsersSlash,
-  faFolderOpen,
-  faBiohazard,
-  faRotate,
-  faUserShield,
 );
 
+// Import CSS and core modules
 import "../css/style.css";
-import "chart.js/auto";
-import "jspdf-autotable";
-import "./config.js"; // Must be first to define CPManager.config and CPManager.state
+import "./config.js";
 import "./utils.js";
 import "./api.js";
 import "./ui.js";
-import "./tabs.js";
 import "./sessions.js";
-import "./vouchers.js";
-import "./zones.js";
+import "./tabs.js";
+import "./zones.js"; // Keep for initial API status check
 import "./dashboard.js";
 import "./notifications.js";
+
+// --- NOTE ---
+// dashboard.js, sessions.js, and vouchers.js are now loaded dynamically
+// by tabs.js, so they are no longer imported here.
 
 (function (CPManager) {
   // Define CPManager.app as an object
@@ -92,10 +86,8 @@ import "./notifications.js";
     }
 
     if (actualTheme === "dark") {
-      // Use 'dark' for Tailwind's class strategy
       document.documentElement.classList.add("dark");
     } else {
-      // Remove 'dark' for light mode
       document.documentElement.classList.remove("dark");
     }
 
@@ -135,17 +127,12 @@ import "./notifications.js";
       CPManager.config.localStorageKeys.theme,
       newThemeSetting,
     );
-    // Use CPManager.app.applyTheme explicitly
     CPManager.app.applyTheme(newThemeSetting);
 
-    // Refresh dashboard chart due to theme change
     if (
       CPManager.dashboard &&
       typeof CPManager.dashboard.handleThemeChange === "function"
     ) {
-      console.log(
-        "Theme setting changed by toggle, triggering dashboard theme handler.",
-      );
       await CPManager.dashboard.handleThemeChange();
     }
   };
@@ -153,7 +140,6 @@ import "./notifications.js";
   CPManager.app.loadTheme = function () {
     const savedTheme =
       localStorage.getItem(CPManager.config.localStorageKeys.theme) || "system";
-    // Use CPManager.app.applyTheme explicitly
     CPManager.app.applyTheme(savedTheme);
 
     if (savedTheme === "system") {
@@ -165,15 +151,11 @@ import "./notifications.js";
           localStorage.getItem(CPManager.config.localStorageKeys.theme) ===
           "system"
         ) {
-          // Use CPManager.app.applyTheme explicitly
           CPManager.app.applyTheme("system");
           if (
             CPManager.dashboard &&
             typeof CPManager.dashboard.handleThemeChange === "function"
           ) {
-            console.log(
-              "System theme preference changed, triggering dashboard theme handler.",
-            );
             await CPManager.dashboard.handleThemeChange();
           }
         }
@@ -850,8 +832,6 @@ import "./notifications.js";
       if (CPManager.elements.themeToggleBtn)
         CPManager.elements.themeToggleBtn.disabled = false;
 
-      // This call to dom.watch() needs to happen after DOM content is loaded
-      // to ensure all <i> tags are available for replacement.
       dom.watch();
 
       await CPManager.sessions.fetchManagerSessionStatus();
@@ -956,7 +936,6 @@ import "./notifications.js";
   };
 
   CPManager.app.initializeApp = async function () {
-    // Call loadTheme here using CPManager.app directly, ensuring it's defined.
     CPManager.app.loadTheme();
     try {
       await CPManager.app.loadAppConfiguration();

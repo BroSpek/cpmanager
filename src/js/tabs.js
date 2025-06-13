@@ -4,12 +4,12 @@
   CPManager.tabs = {
     /**
      * Sets the active tab and corresponding content pane.
-     * Handles visual styling of tab buttons and visibility of tab content.
-     * Also triggers data loading functions for the newly active tab.
+     * Handles visual styling, visibility, and dynamically loads the required JS module.
      * @param {string} tabId - The ID of the tab to activate (e.g., 'dashboard', 'sessions').
      * @param {boolean} [forceRefreshData=false] - If true, forces data re-fetch for the tab.
      */
-    setActiveTab: function (tabId, forceRefreshData = false) {
+    // --- CHANGE 1: Make the function async to use 'await' ---
+    setActiveTab: async function (tabId, forceRefreshData = false) {
       if (!CPManager.elements.mainTabs || !CPManager.elements.tabPanes[tabId]) {
         console.error(`Tab or tab pane not found for ID: ${tabId}`);
         return;
@@ -40,37 +40,56 @@
           }
         });
 
-      // Show/hide tab content panes
-      Object.keys(CPManager.elements.tabPanes).forEach((paneKey) => {
-        if (CPManager.elements.tabPanes[paneKey]) {
-          if (paneKey === tabId) {
-            CPManager.elements.tabPanes[paneKey].classList.remove("hidden");
-            CPManager.elements.tabPanes[paneKey].classList.add("active");
-            CPManager.elements.tabPanes[paneKey].removeAttribute("hidden"); // Accessibility
+      // Update visibility of tab content panes
+      Object.entries(CPManager.elements.tabPanes).forEach(([key, pane]) => {
+        if (pane) {
+          if (key === tabId) {
+            pane.classList.remove("hidden");
+            pane.classList.add("active");
           } else {
-            CPManager.elements.tabPanes[paneKey].classList.add("hidden");
-            CPManager.elements.tabPanes[paneKey].classList.remove("active");
-            CPManager.elements.tabPanes[paneKey].setAttribute("hidden", ""); // Accessibility
+            pane.classList.add("hidden");
+            pane.classList.remove("active");
           }
         }
       });
 
-      // Trigger data loading for the active tab, passing forceRefreshData
-      switch (tabId) {
-        case "dashboard":
-          CPManager.dashboard.loadDashboardData(forceRefreshData);
-          break;
-        case "sessions":
-          CPManager.sessions.loadSessions(forceRefreshData);
-          break;
-        case "vouchers":
-          CPManager.vouchers.loadVoucherProviders(forceRefreshData);
-          break;
-        case "info": // Assuming 'info' is the Zones tab
-          CPManager.zones.loadZoneInfo(forceRefreshData);
-          break;
-        default:
-          console.warn(`No specific load function for tab: ${tabId}`);
+      // --- CHANGE 2: Dynamically load the module for the active tab ---
+      try {
+        switch (tabId) {
+          case "dashboard":
+            // Dynamically import the dashboard module
+            await import("./dashboard.js");
+            // Now that it's loaded, call its function
+            if (CPManager.dashboard && CPManager.dashboard.loadDashboardData) {
+              CPManager.dashboard.loadDashboardData(forceRefreshData);
+            }
+            break;
+          case "sessions":
+            await import("./sessions.js");
+            if (CPManager.sessions && CPManager.sessions.loadSessions) {
+              CPManager.sessions.loadSessions(forceRefreshData);
+            }
+            break;
+          case "vouchers":
+            await import("./vouchers.js");
+            if (CPManager.vouchers && CPManager.vouchers.loadVoucherProviders) {
+              CPManager.vouchers.loadVoucherProviders(forceRefreshData);
+            }
+            break;
+          case "info": // This is the Zones tab
+            await import("./zones.js");
+            if (CPManager.zones && CPManager.zones.loadZoneInfo) {
+              CPManager.zones.loadZoneInfo(forceRefreshData);
+            }
+            break;
+          default:
+            console.warn(`No specific load function for tab: ${tabId}`);
+        }
+      } catch (error) {
+        console.error(
+          `Failed to dynamically load module for tab: ${tabId}`,
+          error,
+        );
       }
 
       // Save the active tab to localStorage for persistence
@@ -97,8 +116,8 @@
           }
         });
       } else {
-        console.error("Main tabs container (mainTabs) not found.");
+        console.error("Main tabs container not found for initialization.");
       }
     },
   };
-})(CPManager);
+})(window.CPManager);

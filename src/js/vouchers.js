@@ -1,6 +1,15 @@
 // js/vouchers.js
-import { jsPDF } from "jspdf";
-import { autoTable } from "jspdf-autotable";
+
+// Import icons specific to the vouchers tab
+import { library } from "@fortawesome/fontawesome-svg-core";
+import {
+  faPlusCircle,
+  faBiohazard,
+  faFolderOpen,
+} from "@fortawesome/free-solid-svg-icons";
+
+// Add the imported icons to the library
+library.add(faPlusCircle, faBiohazard, faFolderOpen);
 
 (function (CPManager) {
   CPManager.vouchers = {
@@ -858,6 +867,8 @@ import { autoTable } from "jspdf-autotable";
       CPManager.elements.submitGenerateVoucherBtn.innerHTML =
         '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
       try {
+        const { jsPDF } = await import("jspdf");
+
         const result = await CPManager.api.callApi(
           `/voucher/generate_vouchers/${selectedProvider}`,
           "POST",
@@ -885,7 +896,7 @@ import { autoTable } from "jspdf-autotable";
               doc,
             );
           } else if (outputFormat === "table") {
-            this.generateVouchersAsTablePDF(
+            await this.generateVouchersAsTablePDF(
               CPManager.state.vouchers.lastGenerated,
               groupname,
               doc,
@@ -897,7 +908,7 @@ import { autoTable } from "jspdf-autotable";
               doc,
             );
             doc.addPage();
-            this.generateVouchersAsTablePDF(
+            await this.generateVouchersAsTablePDF(
               CPManager.state.vouchers.lastGenerated,
               groupname,
               doc,
@@ -1072,7 +1083,9 @@ import { autoTable } from "jspdf-autotable";
       });
     },
 
-    generateVouchersAsTablePDF: function (vouchers, groupName, doc) {
+    generateVouchersAsTablePDF: async function (vouchers, groupName, doc) {
+      const { default: autoTable } = await import("jspdf-autotable");
+
       const startY = 20;
       doc.setFontSize(18);
       doc.setFont("helvetica", "bold");

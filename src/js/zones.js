@@ -1,5 +1,12 @@
 // js/zones.js
 
+// Import icons specific to the zones tab
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faEdit, faUserShield } from "@fortawesome/free-solid-svg-icons";
+
+// Add the imported icons to the library
+library.add(faEdit, faUserShield);
+
 (function (CPManager) {
   CPManager.zones = {
     fetchAllZoneData: async function (forceRefresh = false) {

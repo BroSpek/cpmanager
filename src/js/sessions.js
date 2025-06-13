@@ -1,5 +1,16 @@
 // js/sessions.js
 
+// Import icons specific to the sessions tab
+import { library } from "@fortawesome/fontawesome-svg-core";
+import {
+  faUsersSlash,
+  faStreetView,
+  faTrashAlt,
+  faPlusCircle,
+} from "@fortawesome/free-solid-svg-icons";
+
+// Add the imported icons to the library
+library.add(faUsersSlash, faStreetView, faTrashAlt, faPlusCircle);
 (function (CPManager) {
   CPManager.sessions = {
     // --- State for selection, similar to vouchers ---
