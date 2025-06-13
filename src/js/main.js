@@ -1,67 +1,59 @@
 // src/js/main.js
 
-// Import all modules that contribute to the global CPManager object.
-// This ensures that CPManager.config, CPManager.elements, CPManager.sessions, etc.,
-// are all properly initialized before CPManager.app (defined below) tries to use them.
-
+// Import only the globally used Font Awesome icons.
+// Specific icons are now imported by their respective modules (sessions.js, vouchers.js, etc.)
 import { library, dom } from "@fortawesome/fontawesome-svg-core";
 import {
+  // Global UI Icons
   faShieldAlt,
   faSun,
   faMoon,
   faMobileAlt,
+  faSpinner,
+  faChevronDown,
+  faChevronLeft,
+  faChevronRight,
+  faRotate,
+
+  // Global Feedback & Notification Icons
   faBellSlash,
   faBell,
   faExclamationTriangle,
   faInfoCircle,
   faTimesCircle,
-  faTrashAlt,
-  faPlusCircle,
-  faEdit,
-  faSpinner,
-  faChevronDown,
-  faChevronLeft,
-  faChevronRight,
+
+  // Icons for main navigation tabs (from index.html)
   faTachometerAlt,
   faUsers,
   faTicketAlt,
   faLayerGroup,
-  faStreetView,
-  faUsersSlash,
-  faFolderOpen,
-  faBiohazard,
-  faRotate,
-  faUserShield,
 } from "@fortawesome/free-solid-svg-icons";
 
-// Add the imported icons to the library
+// Add only the global icons to the library
 library.add(
+  // Global UI Icons
   faShieldAlt,
   faSun,
   faMoon,
   faMobileAlt,
+  faSpinner,
+  faChevronDown,
+  faChevronLeft,
+  faChevronRight,
+  faRotate,
+
+  // Global Feedback & Notification Icons
   faBellSlash,
   faBell,
   faExclamationTriangle,
   faInfoCircle,
   faTimesCircle,
-  faTrashAlt,
-  faPlusCircle,
-  faEdit,
-  faSpinner,
-  faChevronDown,
-  faChevronLeft,
-  faChevronRight,
+
+  // Icons for main navigation tabs (from index.html)
   faTachometerAlt,
   faUsers,
   faTicketAlt,
   faLayerGroup,
-  faStreetView,
-  faUsersSlash,
-  faFolderOpen,
-  faBiohazard,
-  faRotate,
-  faUserShield,
 );
 
 import "../css/style.css";

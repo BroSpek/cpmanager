@@ -1,6 +1,12 @@
 // js/vouchers.js
+
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
+
+// Import icons specific to the vouchers tab
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faPlusCircle, faFolderOpen } from "@fortawesome/free-solid-svg-icons";
+library.add(faPlusCircle, faFolderOpen);
 
 (function (CPManager) {
   CPManager.vouchers = {
