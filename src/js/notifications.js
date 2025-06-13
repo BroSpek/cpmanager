@@ -15,8 +15,12 @@
       if (permission === "granted") {
         CPManager.ui.showToast("Sign-in notifications enabled!", "success");
         if (CPManager.state.currentApiKey && CPManager.state.currentApiSecret) {
-          CPManager.notifications.startSessionPolling();
+          // Reset the notification state only when permission is freshly granted
+          // or notifications are explicitly turned on.
+          CPManager.state.notifications.isFirstPoll = true;
+          CPManager.state.notifications.previousSessionIds.clear();
           CPManager.state.notifications.consecutivePollErrors = 0;
+          CPManager.notifications.startSessionPolling();
           CPManager.notifications.updateNotificationToggleState(true, false);
         } else {
           CPManager.ui.showToast(
@@ -111,14 +115,13 @@
       if (CPManager.state.notifications.sessionPollIntervalId) return;
       if (Notification.permission !== "granted") return;
 
-      CPManager.state.notifications.isFirstPoll = true;
-      CPManager.state.notifications.previousSessionIds.clear();
-      CPManager.state.notifications.consecutivePollErrors = 0;
-
       const currentInterval = document.hidden
         ? CPManager.state.notifications.POLLING_INTERVAL_HIDDEN_TAB
         : CPManager.state.notifications.POLLING_INTERVAL;
+      // Immediately check for sessions, then start the interval.
+      // This ensures a check runs right away, even before the first interval tick.
       CPManager.notifications.checkForNewSessionsAndNotify().finally(() => {
+        // We still need to check if polling hasn't already been started by another process while the async check was running.
         if (
           Notification.permission === "granted" &&
           !CPManager.state.notifications.sessionPollIntervalId
@@ -217,6 +220,10 @@
       const permissionGranted = Notification.permission === "granted";
 
       if (storedPreference === "true" && permissionGranted) {
+        // Reset the notification state on page load to start a new, clean detection session.
+        CPManager.state.notifications.isFirstPoll = true;
+        CPManager.state.notifications.previousSessionIds.clear();
+        CPManager.state.notifications.consecutivePollErrors = 0;
         CPManager.notifications.startSessionPolling();
         CPManager.notifications.updateNotificationToggleState(true, false);
       } else if (
@@ -233,4 +240,4 @@
       );
     },
   };
-})(CPManager);
+})(window.CPManager);
