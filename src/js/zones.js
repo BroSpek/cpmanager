@@ -144,10 +144,11 @@ library.add(faEdit, faUserShield);
               <div class="card-detail-row"><span class="card-label">Zone ID</span><span class="card-value">${
                 zoneSummary.zoneid
               }</span></div>
-              <div class="card-detail-row"><span class="card-label">Short UUID</span><span class="card-value">${zoneSummary.uuid.substring(
-                0,
-                8,
-              )}...</span></div>
+              <div class="card-detail-row"><span class="card-label">Short UUID</span><span class="card-value">${
+                zoneSummary.uuid
+                  ? `${zoneSummary.uuid.substring(0, 8)}...`
+                  : "Not Available"
+              }</span></div>
             </div>
             <div class="card-details-content max-h-0 overflow-hidden transition-all duration-300 ease-out text-sm space-y-1" id="${cardDetailsId}" aria-hidden="true">Loading details...</div>`;
           zoneCard.dataset.uuid = zoneSummary.uuid;
