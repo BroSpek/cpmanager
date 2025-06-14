@@ -21,18 +21,22 @@ import Chart from "chart.js/auto";
           return []; // No zones found or error
         }
 
-        // CORRECTED: Use the correct relative endpoint path for get_zone.
         const detailPromises = searchData.rows.map((zoneSummary) =>
           CPManager.api.callApi(`/settings/get_zone/${zoneSummary.uuid}`),
         );
 
-        // Wait for all detail requests to complete
         const detailedResponses = await Promise.all(detailPromises);
-
-        // Filter out any failed requests and extract the 'zone' object from each response
         const detailedZones = detailedResponses
-          .filter((res) => res && res.zone)
-          .map((res) => res.zone);
+          .map((res, index) => {
+            if (res && res.zone) {
+              return {
+                ...res.zone,
+                uuid: searchData.rows[index].uuid,
+              };
+            }
+            return null;
+          })
+          .filter((zone) => zone !== null);
 
         return detailedZones;
       } catch (error) {
