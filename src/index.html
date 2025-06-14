@@ -153,61 +153,66 @@
               <i class="fas fa-info-circle mr-2 mt-1 text-primary"></i>
               <span>Showing aggregated data for all configured zones.</span>
             </div>
-            <div class="flex flex-col gap-4 sm:flex-row">
-              <div class="flex w-full flex-col sm:w-1/2">
-                <div
-                  class="cp-card flex flex-1 flex-col overflow-hidden p-4 sm:p-6"
-                >
-                  <h3
-                    class="mb-2 text-center text-lg font-semibold sm:text-left"
-                  >
-                    Data Usage Distribution
-                  </h3>
+            <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-4 lg:flex-row">
+                <div class="flex w-full flex-col lg:w-1/2">
                   <div
-                    id="dataUsageCanvasContainer"
-                    class="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden"
+                    class="cp-card flex h-full flex-1 flex-col overflow-hidden p-4 sm:p-6"
                   >
-                    <div class="new-canvas-wrapper">
-                      <canvas id="dataUsageCanvas"></canvas>
-                    </div>
-                    <div
-                      id="donut-total-data"
-                      class="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-center text-lg font-semibold text-foreground"
+                    <h3
+                      class="mb-2 text-center text-lg font-semibold sm:text-left"
                     >
-                      0 MB
-                    </div>
-                  </div>
-                  <div
-                    class="legend-items mt-3 flex flex-col items-center gap-2 xl:flex-row xl:justify-center xl:gap-4"
-                  >
+                      Data Usage Distribution
+                    </h3>
                     <div
-                      class="legend-item flex items-center text-sm text-muted-foreground transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold"
+                      id="dataUsageCanvasContainer"
+                      class="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden"
                     >
-                      <span class="mr-1 h-3 w-3 rounded-sm bg-primary"></span
-                      >Client Upload:
-                      <span id="upload-legend-value" class="ml-1">0 Bytes</span>
-                      <span id="upload-percentage" class="ml-1"></span>
-                    </div>
-                    <div
-                      class="legend-item flex items-center text-sm text-muted-foreground transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold"
-                    >
-                      <span class="mr-1 h-3 w-3 rounded-sm bg-success"></span
-                      >Client Download:
-                      <span id="download-legend-value" class="ml-1"
-                        >0 Bytes</span
+                      <div class="new-canvas-wrapper">
+                        <canvas id="dataUsageCanvas"></canvas>
+                      </div>
+                      <div
+                        id="donut-total-data"
+                        class="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-center text-lg font-semibold text-foreground"
                       >
-                      <span id="download-percentage" class="ml-1"></span>
+                        0 MB
+                      </div>
+                    </div>
+                    <div
+                      class="legend-items mt-3 flex flex-col items-center gap-2 xl:flex-row xl:justify-center xl:gap-4"
+                    >
+                      <div
+                        class="legend-item flex items-center text-sm text-muted-foreground transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold"
+                      >
+                        <span class="mr-1 h-3 w-3 rounded-sm bg-primary"></span
+                        >Client Upload:
+                        <span id="upload-legend-value" class="ml-1"
+                          >0 Bytes</span
+                        >
+                        <span id="upload-percentage" class="ml-1"></span>
+                      </div>
+                      <div
+                        class="legend-item flex items-center text-sm text-muted-foreground transition-transform duration-200 ease-out hover:scale-105 hover:font-semibold"
+                      >
+                        <span class="mr-1 h-3 w-3 rounded-sm bg-success"></span
+                        >Client Download:
+                        <span id="download-legend-value" class="ml-1"
+                          >0 Bytes</span
+                        >
+                        <span id="download-percentage" class="ml-1"></span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div class="flex w-full flex-col sm:w-1/2">
                 <div
-                  id="dashboard-stats-container"
-                  class="flex flex-col gap-4"
+                  class="flex w-full flex-col gap-4 lg:w-1/2"
+                  id="dashboard-right-column"
                 ></div>
               </div>
+              <div
+                id="dashboard-bottom-row"
+                class="grid grid-cols-1 gap-4 sm:grid-cols-2"
+              ></div>
             </div>
           </div>
 

@@ -4,83 +4,122 @@ import Chart from "chart.js/auto";
 (function (CPManager) {
   CPManager.dashboard = {
     /**
+     * Fetches the full details for every configured captive portal zone.
+     * This is a special requirement for the dashboard to calculate active providers.
+     * @returns {Promise<Array>} A promise that resolves to an array of detailed zone objects.
+     */
+    fetchAllZoneDetails: async function () {
+      try {
+        // CORRECTED: Use POST and the correct relative endpoint path.
+        const searchData = await CPManager.api.callApi(
+          "/settings/search_zones",
+          "POST",
+          {},
+        );
+        if (!searchData || !Array.isArray(searchData.rows)) {
+          console.error("Could not fetch zone list.");
+          return []; // No zones found or error
+        }
+
+        // CORRECTED: Use the correct relative endpoint path for get_zone.
+        const detailPromises = searchData.rows.map((zoneSummary) =>
+          CPManager.api.callApi(`/settings/get_zone/${zoneSummary.uuid}`),
+        );
+
+        // Wait for all detail requests to complete
+        const detailedResponses = await Promise.all(detailPromises);
+
+        // Filter out any failed requests and extract the 'zone' object from each response
+        const detailedZones = detailedResponses
+          .filter((res) => res && res.zone)
+          .map((res) => res.zone);
+
+        return detailedZones;
+      } catch (error) {
+        console.error("Error fetching all zone details:", error);
+        CPManager.ui.showToast(
+          "Failed to load zone details for dashboard.",
+          "danger",
+        );
+        return []; // Return empty array on failure
+      }
+    },
+
+    /**
      * Loads and displays data for the dashboard.
      * Includes statistics like active sessions, configured zones, voucher counts,
      * and a data usage donut chart.
      * @param {boolean} [forceRefresh=false] - If true, forces a re-fetch even if data exists.
      */
     loadDashboardData: async function (forceRefresh = false) {
-      // Check if all necessary DOM elements are present for the dashboard
+      const dashboardRightColumn = document.getElementById(
+        "dashboard-right-column",
+      );
+      const dashboardBottomRow = document.getElementById(
+        "dashboard-bottom-row",
+      );
+
       if (
-        !CPManager.elements.dashboardStatsContainer ||
-        !CPManager.elements.dataUsageCanvas ||
-        !CPManager.elements.donutTotalData ||
-        !CPManager.elements.uploadLegendValue ||
-        !CPManager.elements.downloadLegendValue ||
-        !CPManager.elements.uploadPercentageSpan ||
-        !CPManager.elements.downloadPercentageSpan
+        !dashboardRightColumn ||
+        !dashboardBottomRow ||
+        !CPManager.elements.dataUsageCanvas
       ) {
         console.error(
           "One or more dashboard elements are missing from the DOM.",
         );
-        // Display an error message if critical elements are missing
-        if (CPManager.elements.dashboardStatsContainer)
-          CPManager.elements.dashboardStatsContainer.innerHTML = `<p class="text-danger col-span-full text-center">Error: Dashboard UI elements missing.</p>`;
+        if (dashboardRightColumn)
+          dashboardRightColumn.innerHTML = `<p class="text-danger col-span-full text-center">Error: Dashboard UI elements missing.</p>`;
         return;
       }
 
       let sessionDataRows = null;
-      // voucherStats will now hold totalVouchers, activeVouchers, expiredVouchers, unusedVouchers (NEW), and totalProviders
       let voucherStats = null;
-      let totalZonesCount = 0;
+      let allDetailedZones = [];
 
-      // Define cache parameters
       const now = Date.now();
       const cacheTTL = CPManager.config.inMemoryCacheTTLMinutes * 60 * 1000;
 
-      // Check if existing cache data is valid
       const isSessionCacheValid =
         CPManager.state.dashboard.apiDataCache.sessions &&
         now - CPManager.state.dashboard.apiDataCache.sessionsLastFetched <
           cacheTTL;
-      // Check for unusedVouchers in cache, as it's a new metric
       const isVoucherStatsCacheValid =
-        CPManager.state.dashboard.apiDataCache.voucherStats !== null &&
-        CPManager.state.dashboard.apiDataCache.voucherStats.unusedVouchers !==
-          undefined && // NEW check
+        CPManager.state.dashboard.apiDataCache.voucherStats &&
         now - CPManager.state.dashboard.apiDataCache.voucherStatsLastFetched <
           cacheTTL;
+      const isZoneDetailsCacheValid =
+        CPManager.state.dashboard.apiDataCache.zoneDetails &&
+        now - CPManager.state.dashboard.apiDataCache.zoneDetailsLastFetched <
+          cacheTTL;
 
-      // Use cached data if available and valid, otherwise prepare for fresh fetch
-      if (!forceRefresh && isSessionCacheValid && isVoucherStatsCacheValid) {
+      if (
+        !forceRefresh &&
+        isSessionCacheValid &&
+        isVoucherStatsCacheValid &&
+        isZoneDetailsCacheValid
+      ) {
         console.log("Using cached dashboard API data.");
         sessionDataRows = CPManager.state.dashboard.apiDataCache.sessions;
         voucherStats = CPManager.state.dashboard.apiDataCache.voucherStats;
-        // Ensure zones data is loaded even if cached for other parts of the app
-        if (CPManager.state.zones.allConfigured.length === 0) {
-          await CPManager.zones.fetchAllZoneData();
-        }
-        totalZonesCount = CPManager.state.zones.allConfigured.length;
+        allDetailedZones = CPManager.state.dashboard.apiDataCache.zoneDetails;
       } else {
         console.log("Fetching fresh dashboard data or cache expired/forced.");
-        // Show skeleton loaders while data is being fetched
-        // We now need 4 skeletons: Active Sessions, Configured Zones, Total/Active Vouchers, and the new combined card.
-        CPManager.elements.dashboardStatsContainer.innerHTML = `
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
-                    <div class="skeleton-card"></div> `;
-        // Reset donut chart and legends to placeholder values
-        CPManager.elements.donutTotalData.textContent =
-          CPManager.config.placeholderValue;
-        CPManager.elements.uploadLegendValue.textContent =
-          CPManager.config.placeholderValue;
-        CPManager.elements.downloadLegendValue.textContent =
-          CPManager.config.placeholderValue;
-        CPManager.elements.uploadPercentageSpan.textContent = "";
-        CPManager.elements.downloadPercentageSpan.textContent = "";
+        dashboardRightColumn.innerHTML = `<div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>`;
+        dashboardBottomRow.innerHTML = `<div class="skeleton-card"></div><div class="skeleton-card"></div>`;
 
-        // Destroy existing chart instance to prevent conflicts
+        if (CPManager.elements.donutTotalData) {
+          CPManager.elements.donutTotalData.textContent =
+            CPManager.config.placeholderValue;
+        }
+        if (CPManager.elements.uploadLegendValue) {
+          CPManager.elements.uploadLegendValue.textContent =
+            CPManager.config.placeholderValue;
+        }
+        if (CPManager.elements.downloadLegendValue) {
+          CPManager.elements.downloadLegendValue.textContent =
+            CPManager.config.placeholderValue;
+        }
+
         if (CPManager.state.dashboard.chartInstance) {
           CPManager.state.dashboard.chartInstance.destroy();
           CPManager.state.dashboard.chartInstance = null;
@@ -88,7 +127,6 @@ import Chart from "chart.js/auto";
       }
 
       try {
-        // Fetch session data if not cached or forced refresh
         if (!sessionDataRows || forceRefresh || !isSessionCacheValid) {
           const sessionData = await CPManager.api.callApi("/session/search");
           sessionDataRows =
@@ -96,56 +134,53 @@ import Chart from "chart.js/auto";
               ? sessionData.rows
               : [];
           CPManager.state.dashboard.apiDataCache.sessions = sessionDataRows;
-          CPManager.state.dashboard.apiDataCache.sessionsLastFetched =
-            Date.now();
+          CPManager.state.dashboard.apiDataCache.sessionsLastFetched = now;
         }
 
-        // Fetch zone data if not already loaded
         if (
-          CPManager.state.zones.allConfigured.length === 0 &&
-          totalZonesCount === 0
+          !allDetailedZones.length ||
+          forceRefresh ||
+          !isZoneDetailsCacheValid
         ) {
-          await CPManager.zones.fetchAllZoneData();
+          allDetailedZones = await this.fetchAllZoneDetails();
+          CPManager.state.dashboard.apiDataCache.zoneDetails = allDetailedZones;
+          CPManager.state.dashboard.apiDataCache.zoneDetailsLastFetched = now;
         }
-        totalZonesCount = CPManager.state.zones.allConfigured.length;
+        // Also update the main zones state for other parts of the app that might need it
+        CPManager.state.zones.allConfigured = allDetailedZones;
 
-        // Fetch Voucher Stats including Total Providers and Expired Vouchers
         if (!voucherStats || forceRefresh || !isVoucherStatsCacheValid) {
           let totalVouchers = 0,
             activeVouchers = 0,
-            expiredVouchers = 0, // Initialize counter for expired vouchers
-            unusedVouchers = 0, // Initialize counter for unused vouchers (NEW)
-            totalProviders = 0; // Initialize counter for total providers
+            expiredVouchers = 0,
+            unusedVouchers = 0,
+            totalProviders = 0;
+          let allVoucherProviderNames = [];
 
           try {
-            // Fetch all voucher providers
             const providers = await CPManager.api.callApi(
               "/voucher/list_providers",
             );
             if (providers && Array.isArray(providers) && providers.length > 0) {
-              totalProviders = providers.length; // Set total providers count
+              totalProviders = providers.length;
+              allVoucherProviderNames = providers;
               for (const provider of providers) {
-                // For each provider, list all voucher groups
                 const voucherGroups = await CPManager.api.callApi(
                   `/voucher/list_voucher_groups/${provider}`,
                 );
                 if (voucherGroups && Array.isArray(voucherGroups)) {
                   for (const group of voucherGroups) {
-                    // For each group, list all vouchers
                     const vouchersInGroup = await CPManager.api.callApi(
                       `/voucher/list_vouchers/${provider}/${group}`,
                     );
                     if (vouchersInGroup && Array.isArray(vouchersInGroup)) {
                       totalVouchers += vouchersInGroup.length;
-                      // Filter and count active vouchers
                       activeVouchers += vouchersInGroup.filter(
                         (v) => v.state === "valid",
                       ).length;
-                      // Filter and count expired vouchers
                       expiredVouchers += vouchersInGroup.filter(
                         (v) => v.state === "expired",
                       ).length;
-                      // Filter and count unused vouchers (NEW)
                       unusedVouchers += vouchersInGroup.filter(
                         (v) => v.state === "unused",
                       ).length;
@@ -156,29 +191,28 @@ import Chart from "chart.js/auto";
             }
           } catch (voucherError) {
             console.error(
-              "Error fetching voucher stats for dashboard:",
+              "Error fetching voucher stats:",
               voucherError.message,
             );
             CPManager.ui.showToast(
-              "Could not load all voucher statistics for dashboard.",
+              "Could not load voucher statistics.",
               "warning",
             );
           }
-          // Store all calculated voucher statistics in the cache
           voucherStats = {
             totalVouchers,
             activeVouchers,
             expiredVouchers,
-            unusedVouchers, // NEW
+            unusedVouchers,
             totalProviders,
+            allVoucherProviderNames,
           };
           CPManager.state.dashboard.apiDataCache.voucherStats = voucherStats;
-          CPManager.state.dashboard.apiDataCache.voucherStatsLastFetched =
-            Date.now();
+          CPManager.state.dashboard.apiDataCache.voucherStatsLastFetched = now;
         }
 
-        // Destructure retrieved data for display
         const activeSessionCount = sessionDataRows.length;
+        const totalZonesCount = allDetailedZones.length;
         const {
           totalVouchers,
           activeVouchers,
@@ -187,6 +221,28 @@ import Chart from "chart.js/auto";
           totalProviders,
         } = voucherStats;
 
+        const activeZonesCount = allDetailedZones.filter(
+          (zone) => zone.enabled == "1",
+        ).length;
+
+        const activeProviders = new Set();
+        if (allDetailedZones && Array.isArray(allDetailedZones)) {
+          allDetailedZones.forEach((zone) => {
+            const authservers = zone.authservers;
+            if (authservers && typeof authservers === "object") {
+              for (const providerName in authservers) {
+                if (
+                  authservers[providerName] &&
+                  authservers[providerName].selected === 1
+                ) {
+                  activeProviders.add(providerName);
+                }
+              }
+            }
+          });
+        }
+        const activeProvidersCount = activeProviders.size;
+
         let totalClientUploadBytes = 0,
           totalClientDownloadBytes = 0;
         sessionDataRows.forEach((s) => {
@@ -194,79 +250,44 @@ import Chart from "chart.js/auto";
           totalClientDownloadBytes += s.bytes_out || 0;
         });
 
-        // Construct the HTML for dashboard statistics cards
-        // UPDATED: Using semantic color classes
-        let statsHtml = `
+        const rightColumnHtml = `
           <div class="db-card" id="dashboard-active-sessions-card" title="Go to Sessions tab" role="button" tabindex="0">
             <div class="db-card-number">${activeSessionCount}</div>
             <div class="db-card-label">Active Sessions</div>
           </div>
-          <div class="db-card" id="dashboard-zones-providers-card" title="Go to Zones or Vouchers tab" role="button" tabindex="0">
+          <div class="db-card" id="dashboard-zones-card" title="Go to Zones tab" role="button" tabindex="0">
             <div class="db-card-cols-2">
-              <div>
-                <div class="db-card-number">${totalZonesCount}</div>
-                <div class="db-card-label">Configured Zones</div>
-              </div>
-              <div>
-                <div class="db-card-number">${totalProviders}</div>
-                <div class="db-card-label">Voucher Providers</div>
-              </div>
+              <div><div class="db-card-number">${totalZonesCount}</div><div class="db-card-label">Configured Zones</div></div>
+              <div><div class="db-card-number text-success">${activeZonesCount}</div><div class="db-card-label">Active Zones</div></div>
             </div>
           </div>
+          <div class="db-card" id="dashboard-providers-card" title="Go to Vouchers tab" role="button" tabindex="0">
+            <div class="db-card-cols-2">
+              <div><div class="db-card-number">${totalProviders}</div><div class="db-card-label">Total Providers</div></div>
+              <div><div class="db-card-number text-success">${activeProvidersCount}</div><div class="db-card-label">Active Providers</div></div>
+            </div>
+          </div>`;
+        dashboardRightColumn.innerHTML = rightColumnHtml;
+
+        const bottomRowHtml = `
           <div class="db-card" id="dashboard-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
             <div class="db-card-cols-2">
-              <div>
-                <div class="db-card-number">${totalVouchers}</div>
-                <div class="db-card-label">Total Vouchers</div>
-              </div>
-              <div>
-                <div class="db-card-number text-success">${activeVouchers}</div>
-                <div class="db-card-label">Active Vouchers</div>
-              </div>
+              <div><div class="db-card-number">${totalVouchers}</div><div class="db-card-label">Total Vouchers</div></div>
+              <div><div class="db-card-number text-success">${activeVouchers}</div><div class="db-card-label">Active Vouchers</div></div>
             </div>
           </div>
           <div class="db-card" id="dashboard-unused-expired-vouchers-card" title="Go to Vouchers tab" role="button" tabindex="0">
-              <div class="db-card-cols-2">
-                  <div>
-                      <div class="db-card-number text-primary">${unusedVouchers}</div>
-                      <div class="db-card-label">Unused Vouchers</div>
-                  </div>
-                  <div>
-                      <div class="db-card-number text-danger">${expiredVouchers}</div>
-                      <div class="db-card-label">Expired Vouchers</div>
-                  </div>
-              </div>
-          </div>
-        `;
-        CPManager.elements.dashboardStatsContainer.innerHTML = statsHtml;
+            <div class="db-card-cols-2">
+              <div><div class="db-card-number text-primary">${unusedVouchers}</div><div class="db-card-label">Unused Vouchers</div></div>
+              <div><div class="db-card-number text-danger">${expiredVouchers}</div><div class="db-card-label">Expired Vouchers</div></div>
+            </div>
+          </div>`;
+        dashboardBottomRow.innerHTML = bottomRowHtml;
 
-        // Add event listeners for direct navigation to tabs
-        document
-          .getElementById("dashboard-active-sessions-card")
-          ?.addEventListener("click", () =>
-            CPManager.tabs.setActiveTab("sessions"),
-          );
-        document
-          .getElementById("dashboard-zones-providers-card")
-          ?.addEventListener("click", () =>
-            CPManager.tabs.setActiveTab("info"),
-          );
-        document
-          .getElementById("dashboard-vouchers-card")
-          ?.addEventListener("click", () =>
-            CPManager.tabs.setActiveTab("vouchers"),
-          );
-        // Add event listener for the new combined card
-        document
-          .getElementById("dashboard-unused-expired-vouchers-card")
-          ?.addEventListener("click", () =>
-            CPManager.tabs.setActiveTab("vouchers"),
-          );
-
-        // Add keyboard navigation for dashboard cards
         [
           "dashboard-active-sessions-card",
-          "dashboard-zones-providers-card",
+          "dashboard-zones-card",
+          "dashboard-providers-card",
           "dashboard-vouchers-card",
           "dashboard-unused-expired-vouchers-card",
         ].forEach((id) => {
@@ -281,267 +302,227 @@ import Chart from "chart.js/auto";
           }
         });
 
-        // Update donut chart data and legends
+        document
+          .getElementById("dashboard-active-sessions-card")
+          ?.addEventListener("click", () =>
+            CPManager.tabs.setActiveTab("sessions"),
+          );
+        document
+          .getElementById("dashboard-zones-card")
+          ?.addEventListener("click", () =>
+            CPManager.tabs.setActiveTab("info"),
+          );
+        document
+          .getElementById("dashboard-providers-card")
+          ?.addEventListener("click", () =>
+            CPManager.tabs.setActiveTab("vouchers"),
+          );
+        document
+          .getElementById("dashboard-vouchers-card")
+          ?.addEventListener("click", () =>
+            CPManager.tabs.setActiveTab("vouchers"),
+          );
+        document
+          .getElementById("dashboard-unused-expired-vouchers-card")
+          ?.addEventListener("click", () =>
+            CPManager.tabs.setActiveTab("vouchers"),
+          );
+
         const currentTotalData =
           totalClientUploadBytes + totalClientDownloadBytes;
         if (
           forceRefresh ||
-          totalClientUploadBytes !==
-            CPManager.state.dashboard.originalUploadBytes ||
-          totalClientDownloadBytes !==
-            CPManager.state.dashboard.originalDownloadBytes ||
-          !CPManager.state.dashboard.chartInstance
+          !CPManager.state.dashboard.chartInstance ||
+          currentTotalData !== CPManager.state.dashboard.originalTotalBytes
         ) {
-          CPManager.dashboard.storeOriginalChartData(
+          this.storeOriginalChartData(
             totalClientUploadBytes,
             totalClientDownloadBytes,
             currentTotalData,
           );
-
-          if (CPManager.elements.donutTotalData) {
-            // Display total data in the center of the donut chart
-            CPManager.elements.donutTotalData.innerHTML = `
-              <span class="font-bold block text-lg">${CPManager.utils.formatBytes(
-                currentTotalData,
-              )}</span>
-              <span class="text-xs text-muted-foreground">(100.0%)</span>`;
-          }
-          // Update legend values for upload and download
-          if (CPManager.elements.uploadLegendValue)
-            CPManager.elements.uploadLegendValue.textContent =
-              CPManager.utils.formatBytes(totalClientUploadBytes);
-          if (CPManager.elements.downloadLegendValue)
-            CPManager.elements.downloadLegendValue.textContent =
-              CPManager.utils.formatBytes(totalClientDownloadBytes);
-          // Update percentage spans in legends
-          if (CPManager.elements.uploadPercentageSpan)
-            CPManager.elements.uploadPercentageSpan.textContent = `(${(currentTotalData >
-            0
-              ? (totalClientUploadBytes / currentTotalData) * 100
-              : 0
-            ).toFixed(1)}%)`;
-          if (CPManager.elements.downloadPercentageSpan)
-            CPManager.elements.downloadPercentageSpan.textContent = `(${(currentTotalData >
-            0
-              ? (totalClientDownloadBytes / currentTotalData) * 100
-              : 0
-            ).toFixed(1)}%)`;
-
-          const chartDataValues = [
-            totalClientUploadBytes,
-            totalClientDownloadBytes,
-          ];
-          // --- FINAL, COMPATIBLE CODE FOR CHART COLORS ---
-          const rootStyles = getComputedStyle(document.documentElement);
-
-          // This function gets a color and ensures it uses commas for Chart.js
-          const getChartCompatibleColor = (variableName, alpha = 1.0) => {
-            const rawValue = rootStyles.getPropertyValue(variableName).trim();
-            const commaValue = rawValue.replace(/ /g, ", "); // THE FIX: Replaces spaces with commas
-            if (alpha < 1.0) {
-              return `hsla(${commaValue}, ${alpha})`;
-            }
-            return `hsl(${commaValue})`;
-          };
-          // Get all the colors for the chart using our new compatible function
-          const chartPrimaryColor = getChartCompatibleColor("--primary", 0.7);
-          const chartSuccessColor = getChartCompatibleColor("--success", 0.7);
-          const chartPrimaryHoverColor = getChartCompatibleColor("--primary");
-          const chartSuccessHoverColor = getChartCompatibleColor("--success");
-          const tooltipBgColor = getChartCompatibleColor("--secondary");
-          const tooltipTextColor = getChartCompatibleColor(
-            "--secondary-foreground",
-          );
-          const chartBorderColor = getChartCompatibleColor("--card");
-          // --- END OF FINAL CODE ---
-
-          // Update existing chart data or create a new chart instance
-          if (CPManager.state.dashboard.chartInstance) {
-            CPManager.state.dashboard.chartInstance.data.datasets[0].data =
-              chartDataValues;
-            CPManager.state.dashboard.chartInstance.options.plugins.tooltip.backgroundColor =
-              tooltipBgColor;
-            CPManager.state.dashboard.chartInstance.options.plugins.tooltip.titleColor =
-              tooltipTextColor;
-            CPManager.state.dashboard.chartInstance.options.plugins.tooltip.bodyColor =
-              tooltipTextColor;
-            CPManager.state.dashboard.chartInstance.options.borderColor =
-              chartBorderColor;
-            CPManager.state.dashboard.chartInstance.update();
-          } else if (CPManager.elements.dataUsageCanvas) {
-            // Ensure canvas element exists
-            const ctx = CPManager.elements.dataUsageCanvas.getContext("2d");
-            CPManager.state.dashboard.chartInstance = new Chart(ctx, {
-              type: "doughnut",
-              data: {
-                labels: ["Client Upload", "Client Download"],
-                datasets: [
-                  {
-                    data: chartDataValues,
-                    backgroundColor: [chartPrimaryColor, chartSuccessColor],
-                    hoverBackgroundColor: [
-                      chartPrimaryHoverColor,
-                      chartSuccessHoverColor,
-                    ],
-                    borderColor: chartBorderColor,
-                    borderWidth: 2,
-                    hoverBorderWidth: 3,
-                    hoverOffset: 8,
-                  },
-                ],
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false, // Allows flexible sizing
-                cutout: "70%", // Donut thickness
-                animation: {
-                  animateScale: true,
-                  animateRotate: true,
-                  duration: 1000,
-                },
-                layout: { padding: 10 },
-                plugins: {
-                  legend: { display: false }, // Hide default legend as custom legend is used
-                  tooltip: {
-                    enabled: true,
-                    backgroundColor: tooltipBgColor,
-                    titleColor: tooltipTextColor,
-                    bodyColor: tooltipTextColor,
-                    displayColors: false, // Hide color squares in tooltip
-                    callbacks: {
-                      label: function (context) {
-                        let label = context.label || "";
-                        if (label) label += ": ";
-                        if (context.parsed !== null) {
-                          label += CPManager.utils.formatBytes(context.parsed);
-                          const totalForPercentage =
-                            CPManager.state.dashboard.originalTotalBytes;
-                          if (totalForPercentage > 0) {
-                            const percentage = (
-                              (context.parsed / totalForPercentage) *
-                              100
-                            ).toFixed(1);
-                            label += ` (${percentage}%)`;
-                          } else {
-                            label += ` (0.0%)`;
-                          }
-                        }
-                        return label;
-                      },
-                    },
-                  },
-                },
-              },
-            });
-          }
+          this.updateChart(currentTotalData);
         }
       } catch (error) {
         console.error("Error loading dashboard data:", error);
-        // Display generic error message if data fetching fails
-        if (CPManager.elements.dashboardStatsContainer)
-          CPManager.elements.dashboardStatsContainer.innerHTML = `<p class="text-danger col-span-full text-center">Error loading dashboard data. Check console.</p>`;
-        if (CPManager.elements.donutTotalData)
-          CPManager.elements.donutTotalData.textContent =
-            CPManager.config.placeholderValue;
-        // Reset cache states on error
-        CPManager.state.dashboard.apiDataCache.sessions = null;
-        CPManager.state.dashboard.apiDataCache.sessionsLastFetched = 0;
-        CPManager.state.dashboard.apiDataCache.voucherStats = null;
-        CPManager.state.dashboard.apiDataCache.voucherStatsLastFetched = 0;
+        dashboardRightColumn.innerHTML = `<p class="text-danger col-span-full text-center">Error loading dashboard data. Check console.</p>`;
       }
     },
 
-    /**
-     * Stores the original bytes data for chart calculations and legend displays.
-     * @param {number} uploadBytes - Total upload bytes.
-     * @param {number} downloadBytes - Total download bytes.
-     * @param {number} totalBytes - Sum of upload and download bytes.
-     */
+    updateChart: function (currentTotalData) {
+      if (!CPManager.elements.dataUsageCanvas) return;
+      const { originalUploadBytes, originalDownloadBytes } =
+        CPManager.state.dashboard;
+
+      if (CPManager.elements.donutTotalData) {
+        CPManager.elements.donutTotalData.innerHTML = `
+                <span class="font-bold block text-lg">${CPManager.utils.formatBytes(
+                  currentTotalData,
+                )}</span>
+                <span class="text-xs text-muted-foreground">(100.0%)</span>`;
+      }
+      if (CPManager.elements.uploadLegendValue) {
+        CPManager.elements.uploadLegendValue.textContent =
+          CPManager.utils.formatBytes(originalUploadBytes);
+      }
+      if (CPManager.elements.uploadPercentageSpan) {
+        CPManager.elements.uploadPercentageSpan.textContent = `(${(currentTotalData >
+        0
+          ? (originalUploadBytes / currentTotalData) * 100
+          : 0
+        ).toFixed(1)}%)`;
+      }
+      if (CPManager.elements.downloadLegendValue) {
+        CPManager.elements.downloadLegendValue.textContent =
+          CPManager.utils.formatBytes(originalDownloadBytes);
+      }
+      if (CPManager.elements.downloadPercentageSpan) {
+        CPManager.elements.downloadPercentageSpan.textContent = `(${(currentTotalData >
+        0
+          ? (originalDownloadBytes / currentTotalData) * 100
+          : 0
+        ).toFixed(1)}%)`;
+      }
+
+      const chartDataValues = [originalUploadBytes, originalDownloadBytes];
+      const rootStyles = getComputedStyle(document.documentElement);
+      const getChartCompatibleColor = (variableName, alpha = 1.0) => {
+        const rawValue = rootStyles.getPropertyValue(variableName).trim();
+        const commaValue = rawValue.replace(/ /g, ", ");
+        return alpha < 1.0
+          ? `hsla(${commaValue}, ${alpha})`
+          : `hsl(${commaValue})`;
+      };
+
+      const chartColors = {
+        primary: getChartCompatibleColor("--primary", 0.7),
+        success: getChartCompatibleColor("--success", 0.7),
+        primaryHover: getChartCompatibleColor("--primary"),
+        successHover: getChartCompatibleColor("--success"),
+        tooltipBg: getChartCompatibleColor("--secondary"),
+        tooltipText: getChartCompatibleColor("--secondary-foreground"),
+        border: getChartCompatibleColor("--card"),
+      };
+
+      if (CPManager.state.dashboard.chartInstance) {
+        CPManager.state.dashboard.chartInstance.data.datasets[0].data =
+          chartDataValues;
+        CPManager.state.dashboard.chartInstance.update();
+      } else {
+        const ctx = CPManager.elements.dataUsageCanvas.getContext("2d");
+        CPManager.state.dashboard.chartInstance = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: ["Client Upload", "Client Download"],
+            datasets: [
+              {
+                data: chartDataValues,
+                backgroundColor: [chartColors.primary, chartColors.success],
+                hoverBackgroundColor: [
+                  chartColors.primaryHover,
+                  chartColors.successHover,
+                ],
+                borderColor: chartColors.border,
+                borderWidth: 2,
+                hoverBorderWidth: 3,
+                hoverOffset: 8,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "70%",
+            animation: {
+              animateScale: true,
+              animateRotate: true,
+              duration: 1000,
+            },
+            layout: { padding: 10 },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                enabled: true,
+                backgroundColor: chartColors.tooltipBg,
+                titleColor: chartColors.tooltipText,
+                bodyColor: chartColors.tooltipText,
+                displayColors: false,
+                callbacks: {
+                  label: (context) => {
+                    let label = context.label || "";
+                    if (label) label += ": ";
+                    if (context.parsed !== null) {
+                      label += CPManager.utils.formatBytes(context.parsed);
+                      const total =
+                        CPManager.state.dashboard.originalTotalBytes;
+                      const percentage =
+                        total > 0
+                          ? ((context.parsed / total) * 100).toFixed(1)
+                          : 0;
+                      label += ` (${percentage}%)`;
+                    }
+                    return label;
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+    },
+
     storeOriginalChartData: function (uploadBytes, downloadBytes, totalBytes) {
       CPManager.state.dashboard.originalUploadBytes = uploadBytes;
       CPManager.state.dashboard.originalDownloadBytes = downloadBytes;
       CPManager.state.dashboard.originalTotalBytes = totalBytes;
     },
 
-    /**
-     * Handles theme changes by destroying and reloading the dashboard chart
-     * to ensure colors and styles are updated correctly.
-     */
     handleThemeChange: async function () {
       console.log("Dashboard: Handling theme change for chart update.");
-      // Destroy current chart instance to apply new theme styles
       if (CPManager.state.dashboard.chartInstance) {
         CPManager.state.dashboard.chartInstance.destroy();
         CPManager.state.dashboard.chartInstance = null;
-        console.log("Dashboard chart instance destroyed for theme change.");
       }
-
-      // Reload dashboard data, forcing a refresh to re-render the chart with new theme colors
-      await CPManager.dashboard.loadDashboardData(true);
+      await this.loadDashboardData(true);
     },
 
-    /**
-     * Initializes event listeners specific to the dashboard,
-     * such as hover effects for chart legends.
-     */
     initializeDashboardEventListeners: function () {
-      // Check for required elements
-      if (
-        !CPManager.elements.legendItems ||
-        !CPManager.elements.donutTotalData
-      ) {
+      const legendItems = document.querySelectorAll(".legend-item");
+      const donutTotalData = document.getElementById("donut-total-data");
+
+      if (!legendItems.length || !donutTotalData) {
         console.warn(
           "Dashboard legend items or donut total display element not found.",
         );
         return;
       }
 
-      // Add mouseover and mouseleave events for legend items
-      CPManager.elements.legendItems.forEach((item) => {
+      legendItems.forEach((item) => {
         item.addEventListener("mouseenter", () => {
-          let segmentValue;
-          let segmentColorClass, segmentPercentageColorClass;
-          const currentTotalForPercentage =
-            CPManager.state.dashboard.originalTotalBytes;
+          const isUpload = item.textContent.includes("Client Upload");
+          const segmentValue = isUpload
+            ? CPManager.state.dashboard.originalUploadBytes
+            : CPManager.state.dashboard.originalDownloadBytes;
+          const segmentColorClass = isUpload
+            ? "text-blue-500"
+            : "text-green-500";
+          const total = CPManager.state.dashboard.originalTotalBytes;
+          const percentage =
+            total > 0 ? ((segmentValue / total) * 100).toFixed(1) : 0;
 
-          segmentPercentageColorClass = "text-muted-foreground";
-
-          // Determine segment value and color based on the hovered legend item
-          if (item.textContent.includes("Client Upload")) {
-            segmentValue = CPManager.state.dashboard.originalUploadBytes;
-            segmentColorClass = "text-blue-500";
-          } else if (item.textContent.includes("Client Download")) {
-            segmentValue = CPManager.state.dashboard.originalDownloadBytes;
-            segmentColorClass = "text-green-500";
-          }
-
-          // Update the donut total display with specific segment data on hover
-          if (segmentValue !== undefined && CPManager.elements.donutTotalData) {
-            let segmentPercentage = 0;
-            if (currentTotalForPercentage > 0) {
-              segmentPercentage =
-                (segmentValue / currentTotalForPercentage) * 100;
-            }
-            CPManager.elements.donutTotalData.innerHTML = `
-              <span class="font-bold block text-lg ${segmentColorClass}">${CPManager.utils.formatBytes(
-                segmentValue,
-              )}</span>
-              <span class="text-xs ${segmentPercentageColorClass}">(${segmentPercentage.toFixed(
-                1,
-              )}%)</span>`;
-          }
+          donutTotalData.innerHTML = `
+            <span class="font-bold block text-lg ${segmentColorClass}">${CPManager.utils.formatBytes(
+              segmentValue,
+            )}</span>
+            <span class="text-xs text-muted-foreground">(${percentage}%)</span>`;
         });
 
         item.addEventListener("mouseleave", () => {
-          // Revert the donut total display to show overall total when mouse leaves legend item
-          if (CPManager.elements.donutTotalData) {
-            const totalPercentageColorClass = "text-muted-foreground";
-            CPManager.elements.donutTotalData.innerHTML = `
-              <span class="font-bold block text-lg">${CPManager.utils.formatBytes(
-                CPManager.state.dashboard.originalTotalBytes,
-              )}</span>
-              <span class="text-xs ${totalPercentageColorClass}">(100.0%)</span>`;
-          }
+          const totalBytes = CPManager.state.dashboard.originalTotalBytes;
+          donutTotalData.innerHTML = `
+            <span class="font-bold block text-lg">${CPManager.utils.formatBytes(
+              totalBytes,
+            )}</span>
+            <span class="text-xs text-muted-foreground">(100.0%)</span>`;
         });
       });
     },
