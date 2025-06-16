@@ -1,9 +1,6 @@
 // js/vouchers.js
 
-// Import icons specific to the vouchers tab
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faPlusCircle, faFolderOpen } from "@fortawesome/free-solid-svg-icons";
-library.add(faPlusCircle, faFolderOpen);
+// All icons are now loaded globally in main.js.
 
 (function (CPManager) {
   CPManager.vouchers = {
