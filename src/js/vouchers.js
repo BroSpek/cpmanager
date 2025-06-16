@@ -1,8 +1,5 @@
 // js/vouchers.js
 
-import { jsPDF } from "jspdf";
-import { autoTable } from "jspdf-autotable";
-
 // Import icons specific to the vouchers tab
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faPlusCircle, faFolderOpen } from "@fortawesome/free-solid-svg-icons";
@@ -864,6 +861,9 @@ library.add(faPlusCircle, faFolderOpen);
       CPManager.elements.submitGenerateVoucherBtn.innerHTML =
         '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
       try {
+        const { jsPDF } = await import("jspdf");
+        const { autoTable } = await import("jspdf-autotable");
+
         const result = await CPManager.api.callApi(
           `/voucher/generate_vouchers/${selectedProvider}`,
           "POST",
@@ -895,6 +895,7 @@ library.add(faPlusCircle, faFolderOpen);
               CPManager.state.vouchers.lastGenerated,
               groupname,
               doc,
+              autoTable,
             );
           } else if (outputFormat === "both") {
             this.generateVouchersAsCardPDF(
@@ -907,6 +908,7 @@ library.add(faPlusCircle, faFolderOpen);
               CPManager.state.vouchers.lastGenerated,
               groupname,
               doc,
+              autoTable,
             );
           }
           const timestamp = new Date()
@@ -1078,7 +1080,7 @@ library.add(faPlusCircle, faFolderOpen);
       });
     },
 
-    generateVouchersAsTablePDF: function (vouchers, groupName, doc) {
+    generateVouchersAsTablePDF: function (vouchers, groupName, doc, autoTable) {
       const startY = 20;
       doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
