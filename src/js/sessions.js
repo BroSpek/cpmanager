@@ -241,7 +241,7 @@ library.add(faUsersSlash, faStreetView, faTrashAlt, faPlusCircle, faBiohazard);
         if (macAddressType) {
           // UPDATED: Using a consistent color from the palette
           const macTypeTagColor =
-            macAddressType === "device" ? "bg-accent" : "bg-purple-500";
+            macAddressType === "device" ? "bg-secondary" : "bg-purple-500";
           const macTypeReadable =
             macAddressType.charAt(0).toUpperCase() + macAddressType.slice(1);
           macTypeTagHtml = `<span class="info-tag ${macTypeTagColor}" title="MAC Type: ${macTypeReadable}">${macTypeReadable}</span>`;
