@@ -58,7 +58,6 @@ library.add(
 
 import "../css/style.css";
 import "chart.js/auto";
-import "jspdf-autotable";
 import "./config.js"; // Must be first to define CPManager.config and CPManager.state
 import "./utils.js";
 import "./api.js";
