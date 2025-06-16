@@ -179,7 +179,7 @@
     @apply mb-4 flex items-start rounded-md border-0 p-3;
   }
   .alert-box-info {
-    @apply border-primary/20 bg-primary/10 text-primary dark:bg-primary/20;
+    @apply border-primary/20 bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-200;
   }
   .alert-box-warning {
     @apply border-warning/20 bg-warning/10 text-warning dark:bg-warning/20;
