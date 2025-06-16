@@ -1,5 +1,4 @@
 // js/dashboard.js
-import Chart from "chart.js/auto";
 
 (function (CPManager) {
   CPManager.dashboard = {
@@ -10,7 +9,6 @@ import Chart from "chart.js/auto";
      */
     fetchAllZoneDetails: async function () {
       try {
-        // CORRECTED: Use POST and the correct relative endpoint path.
         const searchData = await CPManager.api.callApi(
           "/settings/search_zones",
           "POST",
@@ -344,15 +342,16 @@ import Chart from "chart.js/auto";
             totalClientDownloadBytes,
             currentTotalData,
           );
-          this.updateChart(currentTotalData);
+          await this.updateChart(currentTotalData);
         }
       } catch (error) {
-        console.error("Error loading dashboard data:", error);
-        dashboardRightColumn.innerHTML = `<p class="text-danger col-span-full text-center">Error loading dashboard data. Check console.</p>`;
+        console.warn("Could not load dashboard data:", error.message);
+        dashboardRightColumn.innerHTML = `<p class="text-warning col-span-full text-center">Could not load dashboard statistics.</p>`;
+        dashboardBottomRow.innerHTML = `<p class="text-warning col-span-full text-center">API connection may be unavailable.</p>`;
       }
     },
 
-    updateChart: function (currentTotalData) {
+    updateChart: async function (currentTotalData) {
       if (!CPManager.elements.dataUsageCanvas) return;
       const { originalUploadBytes, originalDownloadBytes } =
         CPManager.state.dashboard;
@@ -412,6 +411,10 @@ import Chart from "chart.js/auto";
           chartDataValues;
         CPManager.state.dashboard.chartInstance.update();
       } else {
+        const { Chart, DoughnutController, ArcElement, Tooltip, Legend } =
+          await import("chart.js");
+        Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
+
         const ctx = CPManager.elements.dataUsageCanvas.getContext("2d");
         CPManager.state.dashboard.chartInstance = new Chart(ctx, {
           type: "doughnut",

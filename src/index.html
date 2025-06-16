@@ -42,7 +42,7 @@
       </div>
     </nav>
 
-    <div
+    <main
       id="main-content-scroll-area"
       class="print:min-h-auto flex-grow overflow-y-auto bg-card print:m-0 print:block print:h-auto print:overflow-visible print:bg-white print:p-0"
     >
@@ -112,29 +112,57 @@
         </div>
 
         <div class="mb-4 border-b border-border">
-          <ul class="-mb-px flex text-sm font-medium" id="mainTabs">
-            <li class="flex-1 sm:mr-2 sm:flex-initial">
-              <a href="#" class="tab-btn tab-base" data-tab="dashboard">
-                <i class="fas fa-tachometer-alt sm:mr-2"></i
-                ><span class="hidden sm:inline">Dashboard</span>
+          <ul
+            class="-mb-px flex text-sm font-medium"
+            id="mainTabs"
+            role="tablist"
+          >
+            <li class="flex-1 sm:mr-2 sm:flex-initial" role="presentation">
+              <a
+                href="#"
+                class="tab-btn tab-base"
+                data-tab="dashboard"
+                role="tab"
+                aria-label="Dashboard"
+              >
+                <i class="fas fa-tachometer-alt sm:mr-2"></i>
+                <span class="hidden sm:inline">Dashboard</span>
               </a>
             </li>
-            <li class="flex-1 sm:mr-2 sm:flex-initial">
-              <a href="#" class="tab-btn tab-base" data-tab="sessions">
-                <i class="fas fa-users sm:mr-2"></i
-                ><span class="hidden sm:inline">Sessions</span>
+            <li class="flex-1 sm:mr-2 sm:flex-initial" role="presentation">
+              <a
+                href="#"
+                class="tab-btn tab-base"
+                data-tab="sessions"
+                role="tab"
+                aria-label="Sessions"
+              >
+                <i class="fas fa-users sm:mr-2"></i>
+                <span class="hidden sm:inline">Sessions</span>
               </a>
             </li>
-            <li class="flex-1 sm:mr-2 sm:flex-initial">
-              <a href="#" class="tab-btn tab-base" data-tab="vouchers">
-                <i class="fas fa-ticket-alt sm:mr-2"></i
-                ><span class="hidden sm:inline">Vouchers</span>
+            <li class="flex-1 sm:flex-initial" role="presentation">
+              <a
+                href="#"
+                class="tab-btn tab-base"
+                data-tab="vouchers"
+                role="tab"
+                aria-label="Vouchers"
+              >
+                <i class="fas fa-ticket-alt sm:mr-2"></i>
+                <span class="hidden sm:inline">Vouchers</span>
               </a>
             </li>
-            <li class="flex-1 sm:flex-initial">
-              <a href="#" class="tab-btn tab-base" data-tab="info">
-                <i class="fas fa-layer-group sm:mr-2"></i
-                ><span class="hidden sm:inline">Zones</span>
+            <li class="flex-1 sm:flex-initial" role="presentation">
+              <a
+                href="#"
+                class="tab-btn tab-base"
+                data-tab="info"
+                role="tab"
+                aria-label="Zones"
+              >
+                <i class="fas fa-layer-group sm:mr-2"></i>
+                <span class="hidden sm:inline">Zones</span>
               </a>
             </li>
           </ul>
@@ -459,7 +487,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </main>
 
     <div
       id="generateVoucherModal"
