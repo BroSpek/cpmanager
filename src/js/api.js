@@ -12,11 +12,10 @@
      * @throws {Error} Throws an error if the API call fails or returns an error status.
      */
     callApi: async function (endpoint, method = "GET", body = null) {
-      // Add check for baseUrl
       if (!CPManager.config.baseUrl) {
         const errorMessage =
           "OPNsense API Base URL is not configured. Cannot make API call.";
-        console.error(errorMessage, "Endpoint:", endpoint); // Log the error
+        console.error(errorMessage, "Endpoint:", endpoint);
         CPManager.ui.showToast(
           "API Base URL not set. Please configure in settings.",
           "error",
@@ -41,7 +40,7 @@
       } else {
         const errorMessage =
           "API Key or Secret is missing. Cannot make API call.";
-        console.error(errorMessage, "Endpoint:", endpoint); // Log the error
+        console.error(errorMessage, "Endpoint:", endpoint);
         CPManager.ui.showToast(
           "API Key or Secret not set. Please configure in settings.",
           "error",
@@ -60,7 +59,7 @@
 
       try {
         const response = await fetch(url, options);
-        const responseText = await response.text(); // Get text first to handle various response types
+        const responseText = await response.text();
 
         if (!response.ok) {
           let errorData = {
@@ -68,14 +67,12 @@
           };
           if (responseText) {
             try {
-              // Attempt to parse as JSON for more detailed error messages
               const parsedError = JSON.parse(responseText);
               errorData.detail =
                 parsedError.message ||
                 parsedError.detail ||
                 JSON.stringify(parsedError);
             } catch (jsonParseError) {
-              // Caught error from JSON.parse is logged here
               errorData.detail =
                 responseText.substring(0, 200) +
                 (responseText.length > 200 ? "..." : "");
@@ -96,7 +93,7 @@
             url,
             response.status,
             errorData.detail,
-            { response, responseText }, // Include response objects for full context
+            { response, responseText },
           );
           CPManager.ui.showToast(
             `API Error: ${errorData.message} ${errorData.detail}`,
@@ -107,12 +104,10 @@
           );
         }
 
-        // Handle successful responses that might not have content (e.g., 204 No Content)
-        // or text responses that indicate success.
         if (response.status === 204 || !responseText) {
           console.info(
             `API Success: ${method} ${url} - No content or empty response.`,
-          ); // Info log for success
+          );
           return {
             status: "ok",
             message: `Operation successful (${response.status === 204 ? "No Content" : "Empty Response"})`,
@@ -120,26 +115,22 @@
         }
 
         try {
-          // Attempt to parse successful response as JSON
           const jsonData = JSON.parse(responseText);
-          // Check for application-level errors within a 2xx response
           if (jsonData && jsonData.status === "error") {
             console.warn(
               `API Operational Error for ${method} ${url}:`,
               jsonData.message || "Error status received in JSON.",
-              { jsonData }, // Log the problematic JSON data
+              { jsonData },
             );
             CPManager.ui.showToast(
               `API Operation Failed: ${jsonData.message || "Error status received."}`,
               "warning",
             );
           } else {
-            console.info(`API Success: ${method} ${url}`, { jsonData }); // Info log for successful JSON response
+            console.info(`API Success: ${method} ${url}`, { jsonData });
           }
           return jsonData;
         } catch (jsonParseError) {
-          // Catch and log specific JSON parsing error
-          // If parsing JSON fails but response was OK, it might be a simple text confirmation
           if (
             response.ok &&
             (responseText.toLowerCase().includes("ok") ||
@@ -153,27 +144,23 @@
             );
             return { status: "ok_text", message: responseText };
           }
-          // If it's not recognized text and not JSON, log a warning.
           console.warn(
             `API Warning for ${method} ${url}: Successful response was not valid JSON and not recognized text. JSON parse error:`,
             jsonParseError,
             "Content snippet:",
             responseText.substring(0, 100),
           );
-          return { status: "ok_non_json", message: responseText }; // Return the raw text
+          return { status: "ok_non_json", message: responseText };
         }
       } catch (fetchOrProcessError) {
-        // Catch network errors or re-thrown errors from internal checks
         console.error(
           `Fetch/Process Error for ${method} ${url}:`,
           fetchOrProcessError.message,
-          fetchOrProcessError, // Log the full error object for more details
+          fetchOrProcessError,
         );
         if (!String(fetchOrProcessError.message).startsWith("HTTP error!")) {
-          // Check if it's not already an HTTP error we've handled
           let userMessage =
             "API request failed. This could be a network issue, or the OPNsense server might be unavailable or misconfigured.";
-          // The 'Failed to fetch' message is very common for CORS issues or actual network failures.
           if (
             CPManager.config.baseUrl &&
             CPManager.config.baseUrl.startsWith("http") &&
@@ -184,10 +171,29 @@
           }
           userMessage +=
             " More details may be available in the browser's developer console.";
-          CPManager.ui.showToast(userMessage, "error", 8000); // Increased duration for more text
+          CPManager.ui.showToast(userMessage, "error", 8000);
         }
-        throw fetchOrProcessError; // Re-throw the error to be caught by the caller
+        throw fetchOrProcessError;
+      }
+    },
+
+    /**
+     * Performs a lightweight API call to check if the connection and credentials are valid.
+     * @returns {Promise<boolean>} A promise that resolves to true if the connection is successful, false otherwise.
+     */
+    checkConnection: async function () {
+      try {
+        // This endpoint is a good candidate for a general health check.
+        // The callApi function will handle throwing errors for network or auth issues.
+        const data = await this.callApi("/settings/search_zones");
+        // If we receive the expected data structure, the connection is good.
+        return Array.isArray(data?.rows);
+      } catch (error) {
+        console.error("API connection check failed:", error.message);
+        // The detailed error is already shown as a toast by callApi.
+        // We just need to signal failure to the caller.
+        return false;
       }
     },
   };
-})(window.CPManager); // Explicitly pass window.CPManager
+})(window.CPManager);

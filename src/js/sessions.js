@@ -1,15 +1,6 @@
 // js/sessions.js
 
-// Import icons specific to the sessions tab
-import { library } from "@fortawesome/fontawesome-svg-core";
-import {
-  faUsersSlash,
-  faStreetView,
-  faTrashAlt,
-  faPlusCircle,
-  faBiohazard,
-} from "@fortawesome/free-solid-svg-icons";
-library.add(faUsersSlash, faStreetView, faTrashAlt, faPlusCircle, faBiohazard);
+// All icons are now loaded globally in main.js.
 
 (function (CPManager) {
   CPManager.sessions = {
@@ -71,12 +62,20 @@ library.add(faUsersSlash, faStreetView, faTrashAlt, faPlusCircle, faBiohazard);
     },
 
     loadSessions: async function (forceRefresh = false) {
+      // ======================= FIX STARTS HERE =======================
+      // Ensure the zones module is loaded, as it's a dependency for
+      // fetching zone descriptions needed by the sessions tab.
+      if (!CPManager.zones) {
+        await import("./zones.js");
+      }
+      // ======================= FIX ENDS HERE =========================
+
       if (!CPManager.elements.sessionCardContainer) return;
       CPManager.state.sessions.currentPage = 1;
       this.selectedSessions.clear(); // Clear selection on load
 
       if (CPManager.state.zones.allConfigured.length === 0) {
-        await CPManager.zones.fetchAllZoneData();
+        await CPManager.zones.fetchAllZoneData(); // This will now work correctly
       }
       this.populateSessionZoneFilter();
 

@@ -1,7 +1,18 @@
 // js/tabs.js
+import { dom } from "@fortawesome/fontawesome-svg-core";
 
 (function (CPManager) {
   CPManager.tabs = {
+    /**
+     * Keeps track of which tab modules have been loaded and initialized.
+     */
+    loaded: {
+      dashboard: false,
+      sessions: false,
+      vouchers: false,
+      info: false,
+    },
+
     /**
      * Sets the active tab and corresponding content pane.
      * Handles visual styling of tab buttons and visibility of tab content.
@@ -9,7 +20,7 @@
      * @param {string} tabId - The ID of the tab to activate (e.g., 'dashboard', 'sessions').
      * @param {boolean} [forceRefreshData=false] - If true, forces data re-fetch for the tab.
      */
-    setActiveTab: function (tabId, forceRefreshData = false) {
+    setActiveTab: async function (tabId, forceRefreshData = false) {
       if (!CPManager.elements.mainTabs || !CPManager.elements.tabPanes[tabId]) {
         console.error(`Tab or tab pane not found for ID: ${tabId}`);
         return;
@@ -55,23 +66,55 @@
         }
       });
 
-      // Trigger data loading for the active tab, passing forceRefreshData
+      // --- Lazy Loading Logic ---
+      const tabAlreadyLoaded = CPManager.tabs.loaded[tabId];
+
+      if (!tabAlreadyLoaded) {
+        switch (tabId) {
+          case "dashboard":
+            await import("./dashboard.js");
+            CPManager.dashboard.initializeDashboardEventListeners();
+            CPManager.tabs.loaded[tabId] = true;
+            break;
+          case "sessions":
+            await import("./sessions.js");
+            CPManager.sessions.initializeSessionEventListeners();
+            CPManager.tabs.loaded[tabId] = true;
+            break;
+          case "vouchers":
+            await import("./vouchers.js");
+            CPManager.vouchers.initializeVoucherEventListeners();
+            CPManager.tabs.loaded[tabId] = true;
+            break;
+          case "info": // Zones tab
+            await import("./zones.js");
+            CPManager.zones.initializeZoneEventListeners();
+            CPManager.tabs.loaded[tabId] = true;
+            break;
+        }
+      }
+
+      // --- Data Loading and Icon Rendering ---
       switch (tabId) {
         case "dashboard":
-          CPManager.dashboard.loadDashboardData(forceRefreshData);
+          await CPManager.dashboard.loadDashboardData(forceRefreshData);
           break;
         case "sessions":
-          CPManager.sessions.loadSessions(forceRefreshData);
+          await CPManager.sessions.loadSessions(forceRefreshData);
           break;
         case "vouchers":
-          CPManager.vouchers.loadVoucherProviders(forceRefreshData);
+          await CPManager.vouchers.loadVoucherProviders(forceRefreshData);
           break;
         case "info": // Assuming 'info' is the Zones tab
-          CPManager.zones.loadZoneInfo(forceRefreshData);
+          await CPManager.zones.loadZoneInfo(forceRefreshData);
           break;
         default:
           console.warn(`No specific load function for tab: ${tabId}`);
       }
+
+      // After the content for the tab has been rendered, re-run dom.watch()
+      // to transform any new <i> tags into <svg> icons.
+      dom.watch();
 
       // Save the active tab to localStorage for persistence
       try {
