@@ -1,7 +1,7 @@
 // sw.js - Service Worker for Caching App Shell with Automatic Updates and Notification Handling
 
 // Increment the version when you change urlsToCache or the SW logic itself.
-const CACHE_NAME = "cpm-cache-v0.1.1";
+const CACHE_NAME = "cpm-cache-v0.2.0";
 const urlsToCache = [
   "index.html",
   "icons/icon-192x192.png",
